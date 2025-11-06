@@ -38,13 +38,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const getRedirectPath = (role?: string) => {
+    // switch (role) {
+    //   case "admin":
+    //     return "/admin/dashboard";
+    //   case "manager":
+    //     return "/manager/dashboard";
+    //   case "agent":
+    //     return "/agent/dashboard";
+    //   default:
+    //     return "/";
+    // }
     switch (role) {
       case "admin":
-        return "/admin/dashboard";
+        return "/dashboard/admin";
       case "manager":
-        return "/manager/dashboard";
+        return "/dashboard/manager";
       case "agent":
-        return "/agent/dashboard";
+        return "/dashboard/agent";
       default:
         return "/";
     }
