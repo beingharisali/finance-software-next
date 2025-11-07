@@ -103,7 +103,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   const loginUser = async (email: string, password: string, role: UserRole) => {
     const res = await loginApi(email, password, role as string);
+      if (!res || !res.user) {
+    alert("Invalid credentials!");
+    return;
+  }
 
+//   // //sir ye mein ne additional role add kiya ha. Check if the selected role matches the user's real role
+//   if (res.user.role !== role) {
+//     alert(`This is not your role! Please select your correct role (${res.user.role}).`);
+//     return; // Stop here (don’t login or redirect)
+//   }
+// // //
     if (res.token) {
       localStorage.setItem("token", res.token);
     }

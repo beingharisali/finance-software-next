@@ -19,9 +19,9 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await loginUser(formData.email, formData.password);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Invalid credentials!");
+      alert(error.response?.data?.msg || "Invalid credentials!");
     } finally {
       setLoading(false);
     }
