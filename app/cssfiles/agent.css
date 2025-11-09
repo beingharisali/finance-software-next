@@ -14,6 +14,7 @@
   font-family: 'Inter', sans-serif;
   background: #f3f5f9;
   color: #333;
+  width: 100%;
 }
 
 
@@ -24,6 +25,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .profile-container {
@@ -86,16 +88,20 @@
 }
 
 /* Transactions */
+
 .transactions {
+  width: 100%;
   overflow-x: auto;
-  max-width: 900px;
+  max-width: 100%;
 }
 
-table {
+.transactions table {
   width: 100%;
+  min-width: 800px; 
   border-collapse: collapse;
-  font-size: 0.9rem;
+  white-space: nowrap;
 }
+
 
 thead tr {
   background: #f3f4f6;
@@ -207,7 +213,7 @@ tbody tr td {
 /* Add Sale Button */
 .add-sale-btn {
   background-color: #022d58d0;
-  width: 50%;
+  width: 30%;
   color: white;
   padding: 0.75rem 1.5rem;
   border: none;
@@ -219,6 +225,7 @@ tbody tr td {
 .add-sale-btn:hover {
   background-color: #033055;
 }
+
 
 /* Responsive */
 @media (max-width: 900px) {

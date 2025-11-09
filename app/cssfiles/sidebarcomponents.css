@@ -48,14 +48,35 @@
   margin-left: auto;
 }
 
-.logout {
-  margin-top: 3rem;
-  font-weight: 500;
-  font-size: 0.9rem;
-  cursor: pointer;
-  color: #a3aec8;
+/* logout */
+.main-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
 }
 
-.logout:hover {
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-name {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.logout-btn {
+  background-color: #022d58d0;
   color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.logout-btn:hover {
+  background-color: #033055;
 }
