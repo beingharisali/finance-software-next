@@ -99,19 +99,18 @@ export default function AdminDashboard() {
           <Link href="/dashboard/sidebarcomponents/insight" className="nav-item">Insights</Link>
           <Link href="/dashboard/sidebarcomponents/settings" className="nav-item">Settings</Link>
         </div>
-        <div className="logout" tabIndex={0} onClick={logoutUser}>Logout</div>
       </nav>
     
 
       {/* Main Content */}
       <main className="main-content">
-        <header className="main-header">
-          <h1>Dashboard</h1>
-          <div className="header-right">
-            <input type="search" placeholder="Search..." className="search-input"/>
-                 <div className="profile">{user?.fullname || user?.email || "Guest"}</div>
-          </div>
-        </header>
+        <div className="main-top">
+  <h1 className="header">Dashboard</h1>
+  <div className="top-right">
+    <span className="profile-name">{user?.fullname || user?.email || "Guest"}</span>
+    <button className="logout-btn" onClick={logoutUser}>Logout</button>
+  </div>
+</div>
 
         {/* Cards */}
         <section className="cards">

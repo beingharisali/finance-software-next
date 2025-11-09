@@ -57,12 +57,17 @@ export default function DashboardPage() {
           <Link href="/dashboard/sidebarcomponents/insight" className="nav-item">Insights</Link>
           <Link href="/dashboard/sidebarcomponents/settings" className="nav-item">Settings</Link>
         </div>
-        <div className="logout" tabIndex={0} onClick={logoutUser}>Logout</div>
+        
       </nav>
 
       <main className="main">
-        <div className="profile-container">{user?.fullname || user?.email || "Guest"}</div>
-        <div className="header">Dashboard</div>
+<div className="main-top">
+  <h1 className="header">Dashboard</h1>
+  <div className="top-right">
+    <span className="profile-name">{user?.fullname || user?.email || "Guest"}</span>
+    <button className="logout-btn" onClick={logoutUser}>Logout</button>
+  </div>
+</div>
 
         <button className="add-sale-btn" onClick={() => setShowModal(true)}>Add Sale</button>
 
