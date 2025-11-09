@@ -108,12 +108,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    //   // //sir ye mein ne additional role add kiya ha. Check if the selected role matches the user's real role
-    //   if (res.user.role !== role) {
-    //     alert(`This is not your role! Please select your correct role (${res.user.role}).`);
-    //     return; // Stop here (don’t login or redirect)
-    //   }
-    // // //
     if (res.token) {
       localStorage.setItem("token", res.token);
     }
