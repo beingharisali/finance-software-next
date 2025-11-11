@@ -59,6 +59,31 @@
   font-weight: 500;
   color: #333;
 }
+/* Select Dropdown */
+.form-group select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 1rem;
+  color: #333;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group select:hover {
+  border-color: #888;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+
+.form-group select option {
+  padding: 0.5rem;
+}
 
 .form-group input,
 .form-group textarea {

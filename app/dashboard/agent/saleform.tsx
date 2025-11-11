@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from "react";
@@ -15,18 +14,16 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
   const { user } = useAuthContext();
 
   const [form, setForm] = useState({
-    saleName: "",
-    productName: "",
-    description: "",
+    productType: "",         // Gold or Whisky
+    productId: "",           // unique product identifier
+    productDescription: "",  // description
     price: 0,
-    clientName: "",
-    rating: 0,
-    review: "",
-    date: "",
+    broker: "",              // broker name
+    commission: 0,           // commission amount
   });
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
     setForm((prev) => ({
@@ -38,34 +35,37 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!user?.id) return alert("Agent not logged in");
+    if (!user?.id) return alert("User not logged in");
 
     try {
       const res = await http.post("/sales", {
-        ...form,
-        agentId: user.id,
+        productType: form.productType,
+        productId: form.productId,
+        productDescription: form.productDescription,
+        price: Number(form.price),       // ensure number
+        broker: form.broker,
+        commission: Number(form.commission), // ensure number
+        agent: user.id,                  // ObjectId required by backend
       });
 
       if (res.data.success) {
-        alert("Sale recorded successfully!");
+        alert("Product added successfully!");
         setForm({
-          saleName: "",
-          productName: "",
-          description: "",
+          productType: "",
+          productId: "",
+          productDescription: "",
           price: 0,
-          clientName: "",
-          rating: 0,
-          review: "",
-          date: "",
+          broker: "",
+          commission: 0,
         });
         onClose();
         refreshSales();
       } else {
-        alert("Failed to record sale");
+        alert("Failed to add product");
       }
     } catch (err: any) {
       console.error(err);
-      alert(err.response?.data?.message || "Error submitting sale");
+      alert(err.response?.data?.message || "Error submitting product");
     }
   };
 
@@ -86,38 +86,55 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
         <form className="modal-form" onSubmit={handleSubmit}>
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="saleName">Sale Name</label>
-              <input
-                id="saleName"
-                type="text"
-                name="saleName"
-                value={form.saleName}
+              <label htmlFor="productType">Product Type</label>
+              <select
+                id="productType"
+                name="productType"
+                value={form.productType}
                 onChange={handleChange}
                 required
-              />
+              >
+                <option value="">Select Type</option>
+                <option value="Gold">Gold</option>
+                <option value="Whisky">Whisky</option>
+              </select>
             </div>
-            <div className="form-group">
-              <label htmlFor="productName">Product Name</label>
-              <input
-                id="productName"
-                type="text"
-                name="productName"
-                value={form.productName}
-                onChange={handleChange}
-                required
-              />
-            </div>
+
           </div>
+            <div className="form-group">
+              <label htmlFor="productId">Product ID</label>
+              <input
+                id="productId"
+                type="text"
+                name="productId"
+                value={form.productId}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
 
           <div className="form-group">
-            <label htmlFor="description">Description</label>
+            <label htmlFor="productDescription">Product Description</label>
             <textarea
-              id="description"
-              name="description"
-              value={form.description}
+              id="productDescription"
+              name="productDescription"
+              value={form.productDescription}
               onChange={handleChange}
+              required
             />
           </div>
+  <div className="form-group">
+              <label htmlFor="broker">Broker</label>
+              <input
+                id="broker"
+                type="text"
+                name="broker"
+                value={form.broker}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
           <div className="form-row">
             <div className="form-group">
@@ -126,71 +143,33 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
                 id="price"
                 type="number"
                 name="price"
+                min={0}
                 value={form.price}
                 onChange={handleChange}
                 required
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="clientName">Client Name</label>
-              <input
-                id="clientName"
-                type="text"
-                name="clientName"
-                value={form.clientName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="rating">Rating (1-5)</label>
-              <input
-                id="rating"
-                type="number"
-                name="rating"
-                min={1}
-                max={5}
-                value={form.rating}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="date">Date</label>
-              <input
-                id="date"
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
 
           <div className="form-group">
-            <label htmlFor="review">Review</label>
-            <textarea
-              id="review"
-              name="review"
-              value={form.review}
+            <label htmlFor="commission">Commission</label>
+            <input
+              id="commission"
+              type="number"
+              name="commission"
+              min={0}
+              value={form.commission}
               onChange={handleChange}
+              required
             />
           </div>
+          </div>
+          
+
+ 
 
           <div className="modal-buttons">
-            <button type="submit" className="submit-btn">
-              Submit
-            </button>
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
+            <button type="submit" className="submit-btn">Submit</button>
+            <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
           </div>
         </form>
       </div>
