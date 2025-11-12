@@ -9,16 +9,28 @@ import SaleModal from "./saleform";
 import http from "@/services/http";
 import Link from "next/link";
 
+// interface Sale {
+//   _id: string;
+//   saleName: string;
+//   productName: string;
+//   description?: string;
+//   price?: number;
+//   clientName?: string;
+//   rating?: number;
+//   review?: string;
+//   date: string;
+// }
 interface Sale {
   _id: string;
-  saleName: string;
-  productName: string;
-  description?: string;
-  price?: number;
-  clientName?: string;
-  rating?: number;
-  review?: string;
-  date: string;
+  productType: string;
+  productId: string;
+  productDescription: string;
+  price: number;
+  broker: string;
+  commission: number;
+  agent: string;
+  createdAt: string; // for date
+  updatedAt: string;
 }
 
 export default function DashboardPage() {
@@ -86,7 +98,7 @@ export default function DashboardPage() {
             <p>No sales recorded yet.</p>
           ) : (
             <table>
-              <thead>
+              {/* <thead>
                 <tr>
                   <th>Sale Name</th>
                   <th>Product Name</th>
@@ -95,19 +107,44 @@ export default function DashboardPage() {
                   <th>Rating</th>
                   <th>Date</th>
                 </tr>
-              </thead>
-              <tbody>
+              </thead> */}
+              <thead>
+  <tr>
+    <th>Product Type</th>
+    <th>Product ID</th>
+    <th>Description</th>
+    <th>Price</th>
+    <th>Broker</th>
+    <th>Commission</th>
+    <th>Date</th>
+  </tr>
+</thead>
+
+              {/* <tbody>
                 {sales.map((sale) => (
                   <tr key={sale._id}>
                     <td>{sale.saleName}</td>
                     <td>{sale.productName}</td>
                     <td>{sale.clientName}</td>
                     <td>{sale.price}</td>
-                    <td>{sale.rating}</td>
-                    <td>{new Date(sale.date).toLocaleDateString()}</td>
+
                   </tr>
                 ))}
-              </tbody>
+              </tbody> */}
+              <tbody>
+  {sales.map((sale) => (
+    <tr key={sale._id}>
+      <td>{sale.productType}</td>
+      <td>{sale.productId}</td>
+      <td>{sale.productDescription}</td>
+      <td>{sale.price}</td>
+      <td>{sale.broker}</td>
+      <td>{sale.commission}</td>
+      <td>{new Date(sale.createdAt).toLocaleDateString()}</td>
+    </tr>
+  ))}
+</tbody>
+
             </table>
           )}
         </section>
