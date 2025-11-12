@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import "../../cssfiles/sidebarcomponents.css"
 import "../../cssfiles/agent.css";
 import { useAuthContext } from "@/context/AuthContext";
-import SaleModal from "./saleform";
+import SaleModal from "./saleforms";
 import http from "@/services/http";
 import Link from "next/link";
 
@@ -56,12 +56,12 @@ export default function DashboardPage() {
       <nav className="sidebar">
         <h1>Finance</h1>
         <div className="nav-list">
-          <Link href="/dashboard/sidebarcomponents" className="nav-item active">Dashboard</Link>
-          <Link href="/dashboard/sidebarcomponents/transactions" className="nav-item">Transaction</Link>
-          <Link href="/dashboard/sidebarcomponents/payments" className="nav-item">Payment</Link>
-          <Link href="/dashboard/sidebarcomponents/card" className="nav-item">Card</Link>
-          <Link href="/dashboard/sidebarcomponents/insight" className="nav-item">Insights</Link>
-          <Link href="/dashboard/sidebarcomponents/settings" className="nav-item">Settings</Link>
+          <Link href="/dashboard/sidebarcomponent" className="nav-item active">Dashboard</Link>
+          <Link href="/dashboard/sidebarcomponent/transaction" className="nav-item">Transaction</Link>
+          <Link href="/dashboard/sidebarcomponent/payment" className="nav-item">Payment</Link>
+          <Link href="/dashboard/sidebarcomponent/card" className="nav-item">Card</Link>
+          <Link href="/dashboard/sidebarcomponent/insight" className="nav-item">Insights</Link>
+          <Link href="/dashboard/sidebarcomponent/settings" className="nav-item">Settings</Link>
         </div>
         
       </nav>

@@ -104,13 +104,13 @@ export default function BrokerDashboard() {
       <nav className="sidebar">
         <h1>Finance</h1>
         <div className="nav-list">
-          <Link href="/broker/dashboard" className="nav-item active">Dashboard</Link>
-          <Link href="/broker/sales" className="nav-item">My Sales</Link>
-          <Link href="/broker/transactions" className="nav-item">Transactions</Link>
-          <Link href="/broker/payments" className="nav-item">Payment</Link>
-          <Link href="/broker/card" className="nav-item">Card</Link>
-          <Link href="/broker/insight" className="nav-item">Insights</Link>
-          <Link href="/broker/settings" className="nav-item">Settings</Link>
+          <Link href="/brokers/dashboard" className="nav-item active">Dashboard</Link>
+          <Link href="/brokers/sales" className="nav-item">My Sales</Link>
+          <Link href="/brokers/transaction" className="nav-item">Transactions</Link>
+          <Link href="/brokers/payment" className="nav-item">Payment</Link>
+          <Link href="/brokers/card" className="nav-item">Card</Link>
+          <Link href="/brokers/insight" className="nav-item">Insights</Link>
+          <Link href="/brokers/settings" className="nav-item">Settings</Link>
         </div>
       </nav>
 

@@ -4,11 +4,12 @@
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { Chart, registerables } from "chart.js";
-import Link from "next/link";
-import CreateUser from "../createuser/page"; 
-
 import "../../cssfiles/admin.css";
 import "../../cssfiles/sidebarcomponents.css";
+import Link from "next/link";
+import CreateUser from "../createusers/page"; 
+// import "@/cssfiles/admin.css";
+// import "@/cssfiles/sidebarcomponents.css";
 
 Chart.register(...registerables);
 
@@ -99,15 +100,15 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
       <nav className="sidebar">
         <h1>Finance</h1>
         <div className="nav-list">
-          <Link href="/dashboard/sidebarcomponents" className="nav-item active">Dashboard</Link>
-          <Link href="/dashboard/admin/managerrecord" className="nav-item">Manager Record</Link>
-          <Link href="/dashboard/admin/agentrecord" className="nav-item">Agent Record</Link>
-          <Link href="/dashboard/admin/brokerrecord" className="nav-item">Broker Record</Link>
-          <Link href="/dashboard/sidebarcomponents/transactions" className="nav-item">Transaction</Link>
-          <Link href="/dashboard/sidebarcomponents/payments" className="nav-item">Payment</Link>
-          <Link href="/dashboard/sidebarcomponents/card" className="nav-item">Card</Link>
-          <Link href="/dashboard/sidebarcomponents/insight" className="nav-item">Insights</Link>
-          <Link href="/dashboard/sidebarcomponents/settings" className="nav-item">Settings</Link>
+          <Link href="/dashboard/sidebarcomponent" className="nav-item active">Dashboard</Link>
+          <Link href="/dashboard/admin/adminmanagerrecord" className="nav-item">Manager Record</Link>
+          <Link href="/dashboard/admin/adminagentrecord" className="nav-item">Agent Record</Link>
+          <Link href="/dashboard/admin/adminbrokerrecord" className="nav-item">Broker Record</Link>
+          <Link href="/dashboard/sidebarcomponent/transaction" className="nav-item">Transaction</Link>
+          <Link href="/dashboard/sidebarcomponent/payment" className="nav-item">Payment</Link>
+          <Link href="/dashboard/sidebarcomponent/card" className="nav-item">Card</Link>
+          <Link href="/dashboard/sidebarcomponent/insight" className="nav-item">Insights</Link>
+          <Link href="/dashboard/sidebarcomponent/settings" className="nav-item">Settings</Link>
         </div>
       </nav>
 

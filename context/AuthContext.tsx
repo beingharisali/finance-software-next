@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       case "agent":
         return "/dashboard/agent";
       case "broker":
-        return "/dashboard/broker";
+        return "/dashboard/brokers";
       default:
         return "/";
     }

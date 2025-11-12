@@ -7,7 +7,7 @@ import Link from "next/link";
 import "../../cssfiles/admin.css"; 
 import "../../cssfiles/sidebarcomponents.css"
 
-import CreateUser from "../createuser/page"; 
+import CreateUser from "../createusers/page"; 
 
 import "../../cssfiles/admin.css";
 import "../../cssfiles/sidebarcomponents.css";
@@ -91,10 +91,10 @@ useEffect(() => {
         <h1>Finance</h1>
         <div className="nav-list">
           <Link href="/dashboard/manager" className="nav-item active">Dashboard</Link>
-          <Link href="/dashboard/manager/agentmanagerrecord" className="nav-item ">Agent Record</Link>
-          <Link href="/dashboard/manager/brokermanagerrecord" className="nav-item ">Broker Record</Link>
+          <Link href="/dashboard/manager/manageragentrecord" className="nav-item ">Agent Record</Link>
+          <Link href="/dashboard/manager/managerbrokerrecord" className="nav-item ">Broker Record</Link>
           <Link href="/dashboard/manager/team" className="nav-item">Team</Link>
-          <Link href="/dashboard/sidebarcomponents/transactions" className="nav-item">Transactions</Link>
+          <Link href="/dashboard/sidebarcomponent/transaction" className="nav-item">Transactions</Link>
           <Link href="/dashboard/manager/reports" className="nav-item">Reports</Link>
           <Link href="/dashboard/sidebarcomponents/settings" className="nav-item">Settings</Link>
         </div>
