@@ -1,6 +1,6 @@
 // typscript code
 
-export type UserRole = "admin" | "manager" | "agent";
+export type UserRole = "admin" | "manager" | "agent" | "broker";
 export interface User {
   id: string;
   fullname: string;

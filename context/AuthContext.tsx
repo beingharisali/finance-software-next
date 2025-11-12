@@ -17,7 +17,8 @@ interface AuthContextType {
     fullname: string,
     email: string,
     password: string,
-    role: UserRole
+    role: UserRole,
+isSelfRegister?: boolean
   ) => Promise<void>;
   loginUser: (email: string, password: string) => Promise<void>;
   logoutUser: () => Promise<void>;
@@ -38,16 +39,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const getRedirectPath = (role?: string) => {
-    // switch (role) {
-    //   case "admin":
-    //     return "/admin/dashboard";
-    //   case "manager":
-    //     return "/manager/dashboard";
-    //   case "agent":
-    //     return "/agent/dashboard";
-    //   default:
-    //     return "/";
-    // }
     switch (role) {
       case "admin":
         return "/dashboard/admin";
@@ -55,6 +46,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return "/dashboard/manager";
       case "agent":
         return "/dashboard/agent";
+      case "broker":
+        return "/dashboard/broker";
       default:
         return "/";
     }
@@ -89,17 +82,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fullname: string,
     email: string,
     password: string,
-    role: UserRole
+    role: UserRole,
+isSelfRegister = true
   ) => {
     const res = await registerApi(fullname, email, password, role as string);
 
-    if (res.token) {
+    if (isSelfRegister && res.token) {
       localStorage.setItem("token", res.token);
     }
-
     setUser(res.user);
 
     router.replace(getRedirectPath(res.user.role));
+
   };
   const loginUser = async (email: string, password: string) => {
     const res = await loginApi(email, password);
@@ -110,12 +104,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (res.token) {
       localStorage.setItem("token", res.token);
+      setUser(res.user);
+  
+      router.replace(getRedirectPath(res.user.role));
+    };
     }
 
-    setUser(res.user);
-
-    router.replace(getRedirectPath(res.user.role));
-  };
 
   const logoutUser = async () => {
     await logoutApi();
