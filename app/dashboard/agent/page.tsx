@@ -9,17 +9,7 @@ import SaleModal from "./saleform";
 import http from "@/services/http";
 import Link from "next/link";
 
-// interface Sale {
-//   _id: string;
-//   saleName: string;
-//   productName: string;
-//   description?: string;
-//   price?: number;
-//   clientName?: string;
-//   rating?: number;
-//   review?: string;
-//   date: string;
-// }
+
 interface Sale {
   _id: string;
   productType: string;
@@ -53,9 +43,13 @@ export default function DashboardPage() {
     }
   };
 
+ 
   useEffect(() => {
+  if (user) {
     fetchSales();
-  }, []);
+  }
+}, [user]);  
+
 
   return (
     <div className="dashboard">
@@ -98,16 +92,7 @@ export default function DashboardPage() {
             <p>No sales recorded yet.</p>
           ) : (
             <table>
-              {/* <thead>
-                <tr>
-                  <th>Sale Name</th>
-                  <th>Product Name</th>
-                  <th>Client</th>
-                  <th>Amount</th>
-                  <th>Rating</th>
-                  <th>Date</th>
-                </tr>
-              </thead> */}
+          
               <thead>
   <tr>
     <th>Product Type</th>
@@ -120,17 +105,7 @@ export default function DashboardPage() {
   </tr>
 </thead>
 
-              {/* <tbody>
-                {sales.map((sale) => (
-                  <tr key={sale._id}>
-                    <td>{sale.saleName}</td>
-                    <td>{sale.productName}</td>
-                    <td>{sale.clientName}</td>
-                    <td>{sale.price}</td>
-
-                  </tr>
-                ))}
-              </tbody> */}
+             
               <tbody>
   {sales.map((sale) => (
     <tr key={sale._id}>

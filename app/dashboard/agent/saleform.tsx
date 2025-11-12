@@ -14,12 +14,12 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
   const { user } = useAuthContext();
 
   const [form, setForm] = useState({
-    productType: "",         // Gold or Whisky
-    productId: "",           // unique product identifier
-    productDescription: "",  // description
+    productType: "",         
+    productId: "",           
+    productDescription: "",  
     price: 0,
-    broker: "",              // broker name
-    commission: 0,           // commission amount
+    broker: "",              
+    commission: 0,          
   });
 
   const handleChange = (
@@ -42,10 +42,10 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
         productType: form.productType,
         productId: form.productId,
         productDescription: form.productDescription,
-        price: Number(form.price),       // ensure number
+        price: Number(form.price),      
         broker: form.broker,
-        commission: Number(form.commission), // ensure number
-        agent: user.id,                  // ObjectId required by backend
+        commission: Number(form.commission), 
+        agent: user.id,                  
       });
 
       if (res.data.success) {

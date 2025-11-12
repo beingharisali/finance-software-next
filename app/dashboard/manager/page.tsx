@@ -2,16 +2,29 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
-
 import { Chart, registerables } from "chart.js";
-import "../../cssfiles/admin.css"; 
 import Link from "next/link";
+import "../../cssfiles/admin.css"; 
 import "../../cssfiles/sidebarcomponents.css"
 
+import CreateUser from "../createuser/page"; 
+
+import "../../cssfiles/admin.css";
+import "../../cssfiles/sidebarcomponents.css";
 Chart.register(...registerables);
 
 export default function ManagerDashboard() {
+  const [showModal, setShowModal] = useState(false);
+    
     const { user, logoutUser } = useAuthContext();
+    
+  
+    const [selectedRole, setSelectedRole] = useState<"agent" | "manager" | "broker" | "">("");
+  const handleOpenModal = (role: "agent" | "manager" | "broker") => {
+    setSelectedRole(role);
+    setShowModal(true);
+  };
+
 
 useEffect(() => {
   let teamPerfChartInstance: Chart | null = null;
@@ -78,6 +91,8 @@ useEffect(() => {
         <h1>Finance</h1>
         <div className="nav-list">
           <Link href="/dashboard/manager" className="nav-item active">Dashboard</Link>
+          <Link href="/dashboard/manager/agentmanagerrecord" className="nav-item ">Agent Record</Link>
+          <Link href="/dashboard/manager/brokermanagerrecord" className="nav-item ">Broker Record</Link>
           <Link href="/dashboard/manager/team" className="nav-item">Team</Link>
           <Link href="/dashboard/sidebarcomponents/transactions" className="nav-item">Transactions</Link>
           <Link href="/dashboard/manager/reports" className="nav-item">Reports</Link>
@@ -95,6 +110,15 @@ useEffect(() => {
     <button className="logout-btn" onClick={logoutUser}>Logout</button>
   </div>
 </div>
+  <div className="register-buttons">
+          <button className="create-user" onClick={() => handleOpenModal("broker")}>Broker Create</button>
+          <button className="create-user" onClick={() => handleOpenModal("agent")}>Agent Create</button>
+        </div>
+
+        {showModal && selectedRole && (
+          <CreateUser role={selectedRole} onClose={() => setShowModal(false)} />
+        )}
+
 
         {/* Summary Cards */}
         <section className="cards">
