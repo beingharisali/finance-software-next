@@ -60,6 +60,7 @@ export default function CreateUser({ role, onClose }: CreateUserProps) {
       alert(`${role} created successfully!`);
       setFormData({ fullname: "", email: "", password: "" });
       onClose();
+      console.log("testing");
     } catch (error: any) {
       console.error("Error creating user:", error);
       alert(error.response?.data?.msg || "Something went wrong!");
