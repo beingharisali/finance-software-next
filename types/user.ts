@@ -9,6 +9,7 @@ export interface User {
   role: UserRole;
   createdAt?: string;
   updatedAt?: string;
+  
 }
 export interface AuthResponse {
   user: User;

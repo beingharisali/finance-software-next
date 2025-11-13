@@ -98,7 +98,7 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
       <nav className="sidebar">
         <h1>Finance</h1>
         <div className="nav-list">
-          <Link href="/dashboard/sidebarcomponent" className="nav-item active">Dashboard</Link>
+          <Link href="app/dashboard/admin" className="nav-item active">Dashboard</Link>
           <Link href="/dashboard/admin/adminmanagerrecord" className="nav-item">Manager Record</Link>
           <Link href="/dashboard/admin/adminagentrecord" className="nav-item">Agent Record</Link>
           <Link href="/dashboard/admin/adminbrokerrecord" className="nav-item">Broker Record</Link>

@@ -1,26 +1,47 @@
-/* Container styling */
-.record-container {
-  padding: 2rem;
+
+
+
+/* MAIN CONTENT  */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   background-color: #f9f9f9;
-  min-height: 80vh;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  padding: 2rem;
+  overflow-y: auto;
 }
 
-/* Header */
-.record-header {
+/*TOP BAR */
+.main-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header {
   font-size: 2rem;
-  margin-bottom: 1.5rem;
-  color: #146985;
+  color: black;
+  font-weight: bold;
 }
 
-/* Table Styling */
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-name {
+  color: #333;
+  font-weight: 600;
+}
+
+
+/*RECORDS TABLE */
+
 .record-table {
   width: 100%;
   border-collapse: collapse;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  background-color: #fff;
-  border-radius: 8px;
-  overflow: hidden;
 }
 
 .record-table th,
@@ -30,8 +51,8 @@
 }
 
 .record-table th {
-  background-color: #146985;
-  color: #fff;
+  background-color: #0e4a5f;
+  color: white;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
@@ -49,10 +70,23 @@
   color: #333;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .record-table th,
-  .record-table td {
-    padding: 8px 12px;
+/*  RESPONSIVE */
+@media (max-width: 1024px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+  }
+
+  .nav-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 }
+
