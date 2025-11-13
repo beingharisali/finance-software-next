@@ -8,8 +8,6 @@ import "../../cssfiles/admin.css";
 import "../../cssfiles/sidebarcomponents.css";
 import Link from "next/link";
 import CreateUser from "../createusers/page"; 
-// import "@/cssfiles/admin.css";
-// import "@/cssfiles/sidebarcomponents.css";
 
 Chart.register(...registerables);
 
