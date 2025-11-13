@@ -1,38 +1,41 @@
+
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { fetchUsers } from "@/services/user.api";
 import type { User } from "@/types/user";
-import "../../../cssfiles/record.css"; 
+import "../../../cssfiles/record.css";
 
-export default function AgentManagerRecord() {
+export default function ManagerRecord() {
   const { user } = useAuthContext();
-  const [agents, setAgents] = useState<User[]>([]);
+  const [managers, setManagers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadAgents = async () => {
+    const loadManagers = async () => {
       try {
         if (user) {
-          const users = await fetchUsers("agent"); // role filter
-          setAgents(users);
+          const users = await fetchUsers("manager");
+          setManagers(users);
         }
       } catch (error) {
-        console.error("Error fetching agents:", error);
+        console.error("Error fetching managers:", error);
       } finally {
         setLoading(false);
       }
     };
-    loadAgents();
+    loadManagers();
   }, [user]);
 
   if (!user) return <p>Loading...</p>;
 
   return (
     <div className="record-container">
-      <h1 className="record-header">Agent Records</h1>
+      <h1 className="record-header">Manager Records</h1>
       {loading ? (
         <p>Loading...</p>
+      ) : managers.length === 0 ? (
+        <p>No managers found.</p>
       ) : (
         <table className="record-table">
           <thead>
@@ -44,12 +47,12 @@ export default function AgentManagerRecord() {
             </tr>
           </thead>
           <tbody>
-            {agents.map(agent => (
-              <tr key={agent.id}>
-                <td>{agent.fullname}</td>
-                <td>{agent.email}</td>
-                <td>{agent.role}</td>
-                <td>{new Date(agent.createdAt || "").toLocaleDateString()}</td>
+            {managers.map((manager) => (
+              <tr key={manager.id}>
+                <td>{manager.fullname}</td>
+                <td>{manager.email}</td>
+                <td>{manager.role}</td>
+                <td>{new Date(manager.createdAt || "").toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>

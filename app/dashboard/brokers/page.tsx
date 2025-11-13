@@ -103,14 +103,13 @@ export default function BrokerDashboard() {
       {/* Sidebar */}
       <nav className="sidebar">
         <h1>Finance</h1>
-        <div className="nav-list">
-          <Link href="/broker/dashboard" className="nav-item active">Dashboard</Link>
-          <Link href="/broker/sales" className="nav-item">My Sales</Link>
-          <Link href="/broker/transactions" className="nav-item">Transactions</Link>
-          <Link href="/broker/payments" className="nav-item">Payment</Link>
-          <Link href="/broker/card" className="nav-item">Card</Link>
-          <Link href="/broker/insight" className="nav-item">Insights</Link>
-          <Link href="/broker/settings" className="nav-item">Settings</Link>
+          <div className="nav-list">
+          <Link href="/dashboard/sidebarcomponent" className="nav-item active">Dashboard</Link>
+          <Link href="/dashboard/sidebarcomponent/transaction" className="nav-item">Transaction</Link>
+          <Link href="/dashboard/sidebarcomponent/payment" className="nav-item">Payment</Link>
+          <Link href="/dashboard/sidebarcomponent/card" className="nav-item">Card</Link>
+          <Link href="/dashboard/sidebarcomponent/insight" className="nav-item">Insights</Link>
+          <Link href="/dashboard/sidebarcomponent/settings" className="nav-item">Settings</Link>
         </div>
       </nav>
 
@@ -161,40 +160,7 @@ export default function BrokerDashboard() {
           </div>
         </section>
 
-        {/* Broker's Sales Table */}
-        <section className="transactions">
-          <h2>My Sales</h2>
-          {sales.length === 0 ? (
-            <p>No sales recorded yet.</p>
-          ) : (
-            <table className="record-table">
-              <thead>
-                <tr>
-                  <th>Product Type</th>
-                  <th>Product ID</th>
-                  <th>Description</th>
-                  <th>Price</th>
-                  <th>Commission</th>
-                  <th>Agent</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sales.map(sale => (
-                  <tr key={sale._id}>
-                    <td>{sale.productType}</td>
-                    <td>{sale.productId}</td>
-                    <td>{sale.productDescription}</td>
-                    <td>{sale.price}</td>
-                    <td>{sale.commission}</td>
-                    <td>{sale.agent}</td>
-                    <td>{new Date(sale.createdAt).toLocaleDateString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
+       
       </main>
     </div>
   );

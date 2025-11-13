@@ -6,11 +6,8 @@ import { Chart, registerables } from "chart.js";
 import Link from "next/link";
 import "../../cssfiles/admin.css"; 
 import "../../cssfiles/sidebarcomponents.css"
+import CreateUser from "../createusers/page"; 
 
-import CreateUser from "../createuser/page"; 
-
-import "../../cssfiles/admin.css";
-import "../../cssfiles/sidebarcomponents.css";
 Chart.register(...registerables);
 
 export default function ManagerDashboard() {
@@ -90,12 +87,12 @@ useEffect(() => {
       <nav className="sidebar">
         <h1>Finance</h1>
         <div className="nav-list">
-          <Link href="/dashboard/manager" className="nav-item active">Dashboard</Link>
-          <Link href="/dashboard/manager/agentmanagerrecord" className="nav-item ">Agent Record</Link>
-          <Link href="/dashboard/manager/brokermanagerrecord" className="nav-item ">Broker Record</Link>
-          <Link href="/dashboard/manager/team" className="nav-item">Team</Link>
-          <Link href="/dashboard/sidebarcomponents/transactions" className="nav-item">Transactions</Link>
-          <Link href="/dashboard/manager/reports" className="nav-item">Reports</Link>
+          <Link href="/dashboard/managers" className="nav-item active">Dashboard</Link>
+          <Link href="/dashboard/managers/manageragentrecord" className="nav-item ">Agent Record</Link>
+          <Link href="/dashboard/managers/managerbrokerrecord" className="nav-item ">Broker Record</Link>
+          <Link href="/dashboard/managers/team" className="nav-item">Team</Link>
+          <Link href="/dashboard/sidebarcomponent/transaction" className="nav-item">Transactions</Link>
+          <Link href="/dashboard/managers/reports" className="nav-item">Reports</Link>
           <Link href="/dashboard/sidebarcomponents/settings" className="nav-item">Settings</Link>
         </div>
          

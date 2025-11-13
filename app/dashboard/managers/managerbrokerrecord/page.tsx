@@ -5,7 +5,7 @@ import { fetchUsers } from "@/services/user.api";
 import type { User } from "@/types/user";
 import "../../../cssfiles/record.css";
 
-export default function BrokerRecord() {
+export default function ManagerBrokerRecord() {
   const { user } = useAuthContext();
   const [brokers, setBrokers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +14,7 @@ export default function BrokerRecord() {
     const loadBrokers = async () => {
       try {
         if (user) {
-          const users = await fetchUsers("broker"); // role filter
+          const users = await fetchUsers("broker");
           setBrokers(users);
         }
       } catch (error) {

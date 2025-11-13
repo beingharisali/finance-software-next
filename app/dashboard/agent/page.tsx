@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import "../../cssfiles/sidebarcomponents.css"
 import "../../cssfiles/agent.css";
 import { useAuthContext } from "@/context/AuthContext";
-import SaleModal from "./saleform";
+import SaleModal from "./saleforms";
 import http from "@/services/http";
 import Link from "next/link";
 
@@ -19,7 +19,7 @@ interface Sale {
   broker: string;
   commission: number;
   agent: string;
-  createdAt: string; // for date
+  createdAt: string; 
   updatedAt: string;
 }
 
@@ -43,12 +43,12 @@ export default function DashboardPage() {
     }
   };
 
- 
-  useEffect(() => {
-  if (user) {
+
+useEffect(() => {
+  if (user?.id) {
     fetchSales();
   }
-}, [user]);  
+}, [user?.id]);
 
 
   return (
@@ -56,12 +56,12 @@ export default function DashboardPage() {
       <nav className="sidebar">
         <h1>Finance</h1>
         <div className="nav-list">
-          <Link href="/dashboard/sidebarcomponents" className="nav-item active">Dashboard</Link>
-          <Link href="/dashboard/sidebarcomponents/transactions" className="nav-item">Transaction</Link>
-          <Link href="/dashboard/sidebarcomponents/payments" className="nav-item">Payment</Link>
-          <Link href="/dashboard/sidebarcomponents/card" className="nav-item">Card</Link>
-          <Link href="/dashboard/sidebarcomponents/insight" className="nav-item">Insights</Link>
-          <Link href="/dashboard/sidebarcomponents/settings" className="nav-item">Settings</Link>
+          <Link href="/dashboard/sidebarcomponent" className="nav-item active">Dashboard</Link>
+          <Link href="/dashboard/sidebarcomponent/transaction" className="nav-item">Transaction</Link>
+          <Link href="/dashboard/sidebarcomponent/payment" className="nav-item">Payment</Link>
+          <Link href="/dashboard/sidebarcomponent/card" className="nav-item">Card</Link>
+          <Link href="/dashboard/sidebarcomponent/insight" className="nav-item">Insights</Link>
+          <Link href="/dashboard/sidebarcomponent/settings" className="nav-item">Settings</Link>
         </div>
         
       </nav>
@@ -80,46 +80,41 @@ export default function DashboardPage() {
         {showModal && (
           <SaleModal
             onClose={() => setShowModal(false)}
-            refreshSales={fetchSales} // refresh sales after adding
+            refreshSales={fetchSales}
           />
         )}
 
+       
         <section className="transactions">
-          <h3>My Sales</h3>
-          {loading ? (
-            <p>Loading...</p>
-          ) : sales.length === 0 ? (
+          <h2>My Sales</h2>
+          {sales.length === 0 ? (
             <p>No sales recorded yet.</p>
           ) : (
-            <table>
-          
+            <table className="record-table">
               <thead>
-  <tr>
-    <th>Product Type</th>
-    <th>Product ID</th>
-    <th>Description</th>
-    <th>Price</th>
-    <th>Broker</th>
-    <th>Commission</th>
-    <th>Date</th>
-  </tr>
-</thead>
-
-             
+                <tr>
+                  <th>Product Type</th>
+                  <th>Product ID</th>
+                  <th>Description</th>
+                  <th>Price</th>
+                  <th>Commission</th>
+                  <th>Broker</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
               <tbody>
-  {sales.map((sale) => (
-    <tr key={sale._id}>
-      <td>{sale.productType}</td>
-      <td>{sale.productId}</td>
-      <td>{sale.productDescription}</td>
-      <td>{sale.price}</td>
-      <td>{sale.broker}</td>
-      <td>{sale.commission}</td>
-      <td>{new Date(sale.createdAt).toLocaleDateString()}</td>
-    </tr>
-  ))}
-</tbody>
-
+                {sales.map(sale => (
+                  <tr key={sale._id}>
+                    <td>{sale.productType}</td>
+                    <td>{sale.productId}</td>
+                    <td>{sale.productDescription}</td>
+                    <td>{sale.price}</td>
+                    <td>{sale.commission}</td>
+                    <td>{sale.broker}</td>
+                    <td>{new Date(sale.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           )}
         </section>
