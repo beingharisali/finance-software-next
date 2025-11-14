@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../cssfiles/saleform.css";
 import { useAuthContext } from "@/context/AuthContext";
 import http from "@/services/http";
@@ -11,7 +10,8 @@ interface SaleModalProps {
 }
 
 export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
-  const { user } = useAuthContext();
+
+  const { user, loading} = useAuthContext();
 
   const [form, setForm] = useState({
     productType: "",         
@@ -22,6 +22,10 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
     commission: 0,          
   });
 
+    useEffect(() => {
+    console.log("USER INSIDE SALEMODAL (effect) ===> ", user);
+  }, [user]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -31,21 +35,18 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
       [name]: type === "number" ? Number(value) : value,
     }));
   };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!user?.id) return alert("User not logged in");
+    if (!user) {
+      alert("User not logged in yet, please wait a moment...");
+      return;
+    }
 
     try {
       const res = await http.post("/sales", {
-        productType: form.productType,
-        productId: form.productId,
-        productDescription: form.productDescription,
-        price: Number(form.price),      
-        broker: form.broker,
-        commission: Number(form.commission), 
-        agent: user.id,                  
+        ...form,
+        agent: user.id, 
       });
 
       if (res.data.success) {
@@ -68,6 +69,19 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
       alert(err.response?.data?.message || "Error submitting product");
     }
   };
+
+if (loading || !user) {
+    return (
+      <div className="modal-backdrop">
+        <div className="modal">
+          <div className="modal-header">
+            <h2>Loading user...</h2>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="modal-backdrop">
