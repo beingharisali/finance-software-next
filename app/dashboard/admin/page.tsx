@@ -8,6 +8,8 @@ import "../../cssfiles/admin.css";
 import "../../cssfiles/sidebarcomponents.css";
 import Link from "next/link";
 import CreateUser from "../createusers/page"; 
+import UploadCSV from "./uploadcsv/page"; 
+import "../../cssfiles/uploadCSV.css"
 
 Chart.register(...registerables);
 
@@ -102,7 +104,7 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
           <Link href="/dashboard/admin/adminmanagerrecord" className="nav-item">Manager Record</Link>
           <Link href="/dashboard/admin/adminagentrecord" className="nav-item">Agent Record</Link>
           <Link href="/dashboard/admin/adminbrokerrecord" className="nav-item">Broker Record</Link>
-          <Link href="/dashboard/sidebarcomponent/transaction" className="nav-item">Transaction</Link>
+          <Link href="/dashboard/admin/transaction" className="nav-item">Transaction</Link>
           <Link href="/dashboard/sidebarcomponent/payment" className="nav-item">Payment</Link>
           <Link href="/dashboard/sidebarcomponent/card" className="nav-item">Card</Link>
           <Link href="/dashboard/sidebarcomponent/insight" className="nav-item">Insights</Link>
@@ -118,6 +120,24 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
             <button className="logout-btn" onClick={logoutUser}>Logout</button>
           </div>
         </div>
+
+{/* <div className="upload-csv-section">
+  <UploadCSV
+    onUploadSuccess={() => {
+      console.log("CSV uploaded successfully, refresh data if needed");
+    }}
+  />
+</div> */}
+<div className="upload-csv-section">
+  <UploadCSV
+    onUploadSuccess={() => {
+      console.log("CSV uploaded successfully, refresh data if needed");
+    }}
+  />
+</div>
+
+
+
 
         <div className="register-buttons">
           <button className="create-user" onClick={() => handleOpenModal("manager")}>Manager Create</button>
