@@ -86,7 +86,7 @@ export default function ManagerDashboardTransaction() {
         <div className="search-container" >
           <input
             type="text"
-            placeholder="Search by category (e.g., Office)"
+            placeholder="Search by category "
             className="search-input"
             value={searchCategory}
             onChange={(e) => setSearchCategory(e.target.value)}/>
@@ -130,16 +130,20 @@ export default function ManagerDashboardTransaction() {
         </div>
         {/* start pagination */}
    <div className="pagination">
+    <div className=" pagination-btns">
   <button
+  className="prev-btn"
     disabled={page <= 1}
     onClick={() => fetchTransactions(searchCategory, page - 1)} >
     Previous 
     </button>
   <span>Page {page} of {totalPages}</span>
   <button
+  className="next-btn"
     disabled={page >= totalPages}
     onClick={() => fetchTransactions(searchCategory, page + 1)}>Next
     </button>
+    </div>
 </div>
 
 {/* end */}
