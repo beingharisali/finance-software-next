@@ -121,13 +121,7 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
           </div>
         </div>
 
-{/* <div className="upload-csv-section">
-  <UploadCSV
-    onUploadSuccess={() => {
-      console.log("CSV uploaded successfully, refresh data if needed");
-    }}
-  />
-</div> */}
+
 <div className="upload-csv-section">
   <UploadCSV
     onUploadSuccess={() => {

@@ -18,22 +18,29 @@ export default function ManagerDashboardTransaction() {
   const { user, logoutUser } = useAuthContext();
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchCategory, setSearchCategory] = useState("");
+
+  const fetchTransactions = async (category = "") => {
+    try {
+      setLoading(true);
+      const url = category
+        ? `/transactions?category=${category}`
+        : "/transactions";
+
+      const res = await http.get(url);
+      setTransactions(res.data.transactions || []);
+    } catch (error) {
+      console.error("Failed to fetch transactions", error);
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const res = await http.get("/transactions"); // backend endpoint
-        setTransactions(res.data.transactions || []);
-      } catch (error) {
-        console.error("Failed to fetch transactions", error);
-        setTransactions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (user) fetchTransactions();
   }, [user]);
+
 
   if (!user) return <p>Loading user...</p>;
 
@@ -67,7 +74,24 @@ export default function ManagerDashboardTransaction() {
             </button>
           </div>
         </div>
-
+ {/* start Search bar  */}
+        <div className="search-container" >
+          <input
+            type="text"
+            placeholder="Search by category (e.g., Office)"
+            className="search-input"
+            value={searchCategory}
+            onChange={(e) => setSearchCategory(e.target.value)}/>
+          <button className="search-btn"
+            onClick={() => fetchTransactions(searchCategory)}>Search</button>
+             <button
+              className="reset-btn"
+             onClick={() => {
+              setSearchCategory("");
+              fetchTransactions();
+            }}  > Reset </button>
+        </div>
+        {/* end searchbutton */}
         <div className="record-wrapper">
           {loading ? (
             <p className="loading-text">Loading transactions...</p>

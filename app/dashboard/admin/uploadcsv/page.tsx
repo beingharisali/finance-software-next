@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import http from "../../../../services/http"; // aapke existing axios instance ka use
-import "../../../cssfiles/uploadCSV.css"; // custom CSS file
+import http from "../../../../services/http"; 
+import "../../../cssfiles/uploadCSV.css"; 
 
 interface UploadCSVProps {
   onUploadSuccess?: () => void;
