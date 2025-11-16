@@ -19,16 +19,24 @@ export default function ManagerDashboardTransaction() {
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchCategory, setSearchCategory] = useState("");
-
-  const fetchTransactions = async (category = "") => {
+  // pagination ke liye
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(20);
+  // end
+    const fetchTransactions = async (category = "", pageNum = 1) => {
     try {
       setLoading(true);
       const url = category
-        ? `/transactions?category=${category}`
-        : "/transactions";
+        ? `/transactions?category=${category}&page=${pageNum}&limit=${limit}`
+          : `/transactions?page=${pageNum}&limit=${limit}`;
 
       const res = await http.get(url);
       setTransactions(res.data.transactions || []);
+      setPage(res.data.page || 1);
+      setTotalPages(res.data.totalPages || 1);
+
+
     } catch (error) {
       console.error("Failed to fetch transactions", error);
       setTransactions([]);
@@ -88,7 +96,7 @@ export default function ManagerDashboardTransaction() {
               className="reset-btn"
              onClick={() => {
               setSearchCategory("");
-              fetchTransactions();
+              fetchTransactions("", 1);
             }}  > Reset </button>
         </div>
         {/* end searchbutton */}
@@ -120,6 +128,21 @@ export default function ManagerDashboardTransaction() {
             </table>
           )}
         </div>
+        {/* start pagination */}
+   <div className="pagination">
+  <button
+    disabled={page <= 1}
+    onClick={() => fetchTransactions(searchCategory, page - 1)} >
+    Previous 
+    </button>
+  <span>Page {page} of {totalPages}</span>
+  <button
+    disabled={page >= totalPages}
+    onClick={() => fetchTransactions(searchCategory, page + 1)}>Next
+    </button>
+</div>
+
+{/* end */}
       </main>
     </div>
   );
