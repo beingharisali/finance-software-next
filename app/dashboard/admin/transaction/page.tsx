@@ -18,22 +18,37 @@ export default function ManagerDashboardTransaction() {
   const { user, logoutUser } = useAuthContext();
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchCategory, setSearchCategory] = useState("");
+  // pagination ke liye
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(20);
+  // end
+    const fetchTransactions = async (category = "", pageNum = 1) => {
+    try {
+      setLoading(true);
+      const url = category
+        ? `/transactions?category=${category}&page=${pageNum}&limit=${limit}`
+          : `/transactions?page=${pageNum}&limit=${limit}`;
+
+      const res = await http.get(url);
+      setTransactions(res.data.transactions || []);
+      setPage(res.data.page || 1);
+      setTotalPages(res.data.totalPages || 1);
+
+
+    } catch (error) {
+      console.error("Failed to fetch transactions", error);
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        const res = await http.get("/transactions"); // backend endpoint
-        setTransactions(res.data.transactions || []);
-      } catch (error) {
-        console.error("Failed to fetch transactions", error);
-        setTransactions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (user) fetchTransactions();
   }, [user]);
+
 
   if (!user) return <p>Loading user...</p>;
 
@@ -67,7 +82,24 @@ export default function ManagerDashboardTransaction() {
             </button>
           </div>
         </div>
-
+ {/* start Search bar  */}
+        <div className="search-container" >
+          <input
+            type="text"
+            placeholder="Search by category (e.g., Office)"
+            className="search-input"
+            value={searchCategory}
+            onChange={(e) => setSearchCategory(e.target.value)}/>
+          <button className="search-btn"
+            onClick={() => fetchTransactions(searchCategory)}>Search</button>
+             <button
+              className="reset-btn"
+             onClick={() => {
+              setSearchCategory("");
+              fetchTransactions("", 1);
+            }}  > Reset </button>
+        </div>
+        {/* end searchbutton */}
         <div className="record-wrapper">
           {loading ? (
             <p className="loading-text">Loading transactions...</p>
@@ -96,6 +128,21 @@ export default function ManagerDashboardTransaction() {
             </table>
           )}
         </div>
+        {/* start pagination */}
+   <div className="pagination">
+  <button
+    disabled={page <= 1}
+    onClick={() => fetchTransactions(searchCategory, page - 1)} >
+    Previous 
+    </button>
+  <span>Page {page} of {totalPages}</span>
+  <button
+    disabled={page >= totalPages}
+    onClick={() => fetchTransactions(searchCategory, page + 1)}>Next
+    </button>
+</div>
+
+{/* end */}
       </main>
     </div>
   );
