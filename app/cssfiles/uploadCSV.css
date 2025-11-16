@@ -1,29 +1,4 @@
-/* .upload-csv-container {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-top: 10px;
-}
 
-.upload-csv-input {
-  padding: 6px 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-.upload-csv-button {
-  padding: 6px 12px;
-  cursor: pointer;
-  background-color: #146985;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-}
-
-.upload-csv-button:hover {
-  background-color: #0f4f63;
-} */
 .upload-csv-container {
   display: flex;
   flex-direction: column;
@@ -73,7 +48,7 @@
   padding: 6px 14px;
   font-size: 14px;
   font-weight: 500;
-  background-color: #3b82f6; /* blue button */
+  background-color: #3b82f6; 
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -89,4 +64,59 @@
 .upload-csv-btn:disabled {
   background-color: #9ca3af;
   cursor: not-allowed;
+}
+
+/* searchbar */
+.search-container {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Input field */
+.search-input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 250px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  border-color: #4CAF50;
+}
+
+/* Search button */
+.search-btn {
+  padding: 10px 18px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s ease;
+}
+
+.search-btn:hover {
+  opacity: 0.8;
+}
+
+/* Reset button */
+.reset-btn {
+  padding: 10px 18px;
+  background-color: #777;
+  color: white;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s ease;
+}
+
+.reset-btn:hover {
+  opacity: 0.8;
 }
