@@ -1,20 +1,20 @@
 
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useAuthContext } from "@/context/AuthContext";
-import http from "@/services/http";
 import Link from "next/link";
 import moment from "moment";
 import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
 import "../../../cssfiles/transactionfilters.css";
 
-interface TransactionType {
-  date: string;
-  description: string;
-  category: string;
-  amount: number;
-}
+
+import {
+  fetchTransactions as getTransactions,
+  addCategory,
+  deleteCategory,
+  TransactionType,
+} from "@/services/transactionService";
 
 export default function ManagerDashboardTransaction() {
   const { user, logoutUser } = useAuthContext();
@@ -23,6 +23,7 @@ export default function ManagerDashboardTransaction() {
 
   const [category, setCategory] = useState("");
   const [allCategories, setAllCategories] = useState<string[]>([]);
+  const [searchCategory, setSearchCategory] = useState("");
 
   const [isAddingCustom, setIsAddingCustom] = useState(false);
   const [newCustomCategory, setNewCustomCategory] = useState("");
@@ -34,6 +35,10 @@ export default function ManagerDashboardTransaction() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch transactions
   const fetchTransactions = async (
     selectedCategory = "",
     start = "",
@@ -42,21 +47,18 @@ export default function ManagerDashboardTransaction() {
   ) => {
     try {
       setLoading(true);
-
-      let url = `/transactions?page=${pageNum}&limit=${limit}`;
-      if (selectedCategory) url += `&category=${selectedCategory}`;
-      if (start) url += `&startDate=${start}`;
-      if (end) url += `&endDate=${end}`;
-
-      const res = await http.get(url);
-      const fetchedTransactions = (res.data.transactions as TransactionType[]) || [];
+      const res = await getTransactions(pageNum, limit, selectedCategory, start, end);
+      const fetchedTransactions: TransactionType[] = res.transactions || [];
 
       setTransactions(fetchedTransactions);
-      setPage(res.data.page || 1);
-      setTotalPages(res.data.totalPages || 1);
+      setPage(res.page || 1);
+      setTotalPages(res.totalPages || 1);
 
+      // FIX: safely extract categories
       if (!selectedCategory && !start && !end) {
-        const cats = fetchedTransactions.map((t) => t.category);
+        const cats = fetchedTransactions
+          .map((t) => t.category)
+          .filter((c): c is string => Boolean(c)); // only valid strings
         setAllCategories([...new Set(cats)]);
       }
     } catch (error) {
@@ -69,9 +71,64 @@ export default function ManagerDashboardTransaction() {
 
   useEffect(() => {
     if (user) fetchTransactions();
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+        setIsAddingCustom(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [user]);
 
   if (!user) return <p>Loading user...</p>;
+
+  const resetFilters = () => {
+    setSearchCategory("");
+    setCategory("");
+    setStartDate("");
+    setEndDate("");
+    setIsAddingCustom(false);
+    setNewCustomCategory("");
+    fetchTransactions("", "", "", 1);
+  };
+
+  const handleDeleteCategory = async (cat: string) => {
+    try {
+      const res = await deleteCategory(cat);
+      if (res.success) {
+        setAllCategories((prev) => prev.filter((c) => c !== cat));
+        if (category === cat) setCategory("");
+        setTransactions((prev) => prev.filter((txn) => txn.category !== cat));
+        alert(res.msg);
+      } else {
+        alert("Failed to delete category");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error deleting category");
+    }
+  };
+
+  const handleAddCustomCategory = async () => {
+    if (!newCustomCategory.trim()) return;
+    try {
+      const res = await addCategory(newCustomCategory);
+      if (res.success) {
+        setAllCategories((prev) => [...prev, newCustomCategory]);
+        setCategory(newCustomCategory);
+        fetchTransactions(newCustomCategory, startDate, endDate, 1);
+        setNewCustomCategory("");
+        setIsAddingCustom(false);
+        setDropdownOpen(false);
+        alert(res.msg);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to add category");
+    }
+  };
 
   return (
     <div className="dashboard-container">
@@ -99,90 +156,93 @@ export default function ManagerDashboardTransaction() {
           </div>
         </div>
 
-        {/* FILTER ROW */}
+        {/* SEARCH FILTER */}
         <div className="filter-row">
-          <div className="category-section">
-            <select
-              title="filter"
-              className="filter-select"
-              value={category}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === "__add_custom__") {
-                  setIsAddingCustom(true);
-                  setCategory("");
-                  return;
-                }
-                setCategory(value);
-                fetchTransactions(value, startDate, endDate, 1);
-              }}
-            >
-              <option disabled value="">Select Category</option>
-              {allCategories.map((cat, i) => (
-                <option key={i} value={cat}>{cat}</option>
-              ))}
-              <option value="__add_custom__">Add Custom Category</option>
-            </select>
+          <div className="search-container search-center">
+            <input
+              type="text"
+              placeholder="Search by category"
+              className="search-input"
+              value={searchCategory}
+              onChange={(e) => setSearchCategory(e.target.value)}
+            />
+            <button className="search-btn" onClick={() => fetchTransactions(searchCategory, startDate, endDate, 1)}>Search</button>
+            <button className="reset-btn" onClick={resetFilters}>Reset</button>
+          </div>
+        </div>
 
-            {isAddingCustom && (
-              <div className="custom-box">
-                <input
-                  type="text"
-                  placeholder="Enter custom category..."
-                  value={newCustomCategory}
-                  onChange={(e) => setNewCustomCategory(e.target.value)}
-                  className="custom-input"
-                />
-                <button
-                  className="custom-add-btn"
-                  onClick={() => {
-                    if (!newCustomCategory.trim()) return;
-                    setAllCategories((prev) => [...prev, newCustomCategory]);
-                    setCategory(newCustomCategory);
-                    fetchTransactions(newCustomCategory, startDate, endDate, 1);
-                    setNewCustomCategory("");
-                    setIsAddingCustom(false);
-                  }}
-                >
-                  Add
-                </button>
-                <button
-                  className="custom-cancel-btn"
-                  onClick={() => {
-                    setIsAddingCustom(false);
-                    setNewCustomCategory("");
-                  }}
-                >
-                  Cancel
-                </button>
+        {/* CATEGORY + DATE FILTER */}
+        <div className="filter-row">
+          <div className="category-section" ref={dropdownRef}>
+            <div className="custom-dropdown">
+              <div className="dropdown-header" onClick={() => setDropdownOpen(!dropdownOpen)}>
+                {category || "Select Category"}
+                <span className="dropdown-arrow">{dropdownOpen ? "▲" : "▼"}</span>
               </div>
-            )}
+
+              {dropdownOpen && (
+                <div className="dropdown-list">
+                  {allCategories.map((cat, idx) => (
+                    <div className="dropdown-item" key={idx}>
+                      <span
+                        className="dropdown-text"
+                        onClick={() => {
+                          setCategory(cat);
+                          fetchTransactions(cat, startDate, endDate, 1);
+                          setDropdownOpen(false);
+                        }}
+                      >
+                        {cat}
+                      </span>
+                      <span className="delete-btn" onClick={() => handleDeleteCategory(cat)}>×</span>
+                    </div>
+                  ))}
+
+                  {/* ADD CUSTOM CATEGORY INLINE */}
+                  <div className="dropdown-item">
+                    {isAddingCustom ? (
+                      <div className="custom-box">
+                        <input
+                          type="text"
+                          value={newCustomCategory}
+                          placeholder="New category..."
+                          className="custom-input"
+                          onChange={(e) => setNewCustomCategory(e.target.value)}
+                        />
+                        <button className="custom-add-btn" onClick={handleAddCustomCategory}>Add</button>
+                        <button className="custom-cancel-btn" onClick={() => setIsAddingCustom(false)}>Cancel</button>
+                      </div>
+                    ) : (
+                      <span className="add-custom" onClick={() => setIsAddingCustom(true)}>
+                        + Add Custom Category
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="date-section">
             <input
-              title="start-date"
+              title="date"
               type="date"
               className="date-input"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
             <input
-              title="end-date"
+              title="date"
               type="date"
               className="date-input"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
-            <button
-              className="apply-btn"
-              onClick={() => fetchTransactions(category, startDate, endDate, 1)}
-            >
-              Apply
-            </button>
+            <button className="apply-btn" onClick={() => fetchTransactions(category || searchCategory, startDate, endDate, 1)}>Apply</button>
           </div>
         </div>
 
+        {/* TRANSACTION TABLE */}
         <div className="record-wrapper">
           {loading ? (
             <p className="loading-text">Loading transactions...</p>
@@ -199,8 +259,8 @@ export default function ManagerDashboardTransaction() {
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((txn, index) => (
-                  <tr key={index}>
+                {transactions.map((txn, idx) => (
+                  <tr key={idx}>
                     <td>{moment(txn.date).format("DD/MM/YYYY")}</td>
                     <td>{txn.description}</td>
                     <td>{txn.category}</td>
@@ -212,23 +272,12 @@ export default function ManagerDashboardTransaction() {
           )}
         </div>
 
+        {/* PAGINATION */}
         <div className="pagination">
           <div className="pagination-btns">
-            <button
-              className="prev-btn"
-              disabled={page <= 1}
-              onClick={() => fetchTransactions(category, startDate, endDate, page - 1)}
-            >
-              Previous
-            </button>
+            <button className="prev-btn" disabled={page <= 1} onClick={() => fetchTransactions(category || searchCategory, startDate, endDate, page - 1)}>Previous</button>
             <span>Page {page} of {totalPages}</span>
-            <button
-              className="next-btn"
-              disabled={page >= totalPages}
-              onClick={() => fetchTransactions(category, startDate, endDate, page + 1)}
-            >
-              Next
-            </button>
+            <button className="next-btn" disabled={page >= totalPages} onClick={() => fetchTransactions(category || searchCategory, startDate, endDate, page + 1)}>Next</button>
           </div>
         </div>
       </main>
