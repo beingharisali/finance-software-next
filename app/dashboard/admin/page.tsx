@@ -1,4 +1,272 @@
 
+
+// "use client";
+
+// import React, { useEffect, useState } from "react";
+// import { useAuthContext } from "@/context/AuthContext";
+// import { Chart, registerables } from "chart.js";
+// import "../../cssfiles/admin.css";
+// import "../../cssfiles/sidebarcomponents.css";
+// import Link from "next/link";
+// import CreateUser from "../createusers/page"; 
+// import UploadCSV from "./uploadcsv/page"; 
+// import "../../cssfiles/uploadCSV.css"
+// import http from "@/services/http";
+
+// Chart.register(...registerables);
+
+// interface TransactionType {
+//   date: string;
+//   description: string;
+//   category: string;
+//   amount: number;
+// }
+
+// export default function AdminDashboard() {
+//   const [showModal, setShowModal] = useState(false);
+//   const [transactions, setTransactions] = useState<TransactionType[]>([]);
+//   const [categoryTotals, setCategoryTotals] = useState<Record<string, number>>({});
+//   const [graphFilter, setGraphFilter] = useState<"thisYear" | "lastYear" | "month" | "week">("thisYear");
+//   const { user, logoutUser } = useAuthContext();
+//   const [selectedRole, setSelectedRole] = useState<"agent" | "manager" | "broker" | "">("");
+
+//   const handleOpenModal = (role: "agent" | "manager" | "broker") => {
+//     setSelectedRole(role);
+//     setShowModal(true);
+//   };
+
+//   // Fetch transactions
+//   const fetchTransactions = async () => {
+//     try {
+//       const res = await http.get("/transactions"); 
+//       const data = res.data.transactions || [];
+//       // Sort by most recent date first
+//       data.sort((a: TransactionType, b: TransactionType) => new Date(b.date).getTime() - new Date(a.date).getTime());
+//       setTransactions(data);
+//     } catch (err) {
+//       console.error("Failed to fetch transactions", err);
+//       setTransactions([]);
+//     }
+//   };
+
+//   // Calculate totals per category
+//   const calculateCategoryTotals = () => {
+//     const totals: Record<string, number> = {};
+//     transactions.forEach(txn => {
+//       const val = Math.abs(txn.amount);
+//       const category = txn.category.trim();
+//       totals[category] = (totals[category] || 0) + val;
+//     });
+//     setCategoryTotals(totals);
+//   };
+
+//   useEffect(() => { fetchTransactions(); }, []);
+//   useEffect(() => { if (transactions.length) calculateCategoryTotals(); }, [transactions]);
+
+//   // Dynamic chart
+//   useEffect(() => {
+//     let cashflowChart: Chart | null = null;
+
+//     const filteredTransactions = transactions.filter(txn => {
+//       const txnDate = new Date(txn.date);
+//       const currentYear = new Date().getFullYear();
+//       switch(graphFilter) {
+//         case "thisYear": return txnDate.getFullYear() === currentYear;
+//         case "lastYear": return txnDate.getFullYear() === currentYear - 1;
+//         case "month": return txnDate.getFullYear() === currentYear;
+//         case "week": return txnDate.getFullYear() === currentYear;
+//         default: return true;
+//       }
+//     });
+
+//     const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+//     const incomePerMonth = Array(12).fill(0);
+//     const expensePerMonth = Array(12).fill(0);
+//     const incomePerWeek = Array(52).fill(0);
+//     const expensePerWeek = Array(52).fill(0);
+
+//     filteredTransactions.forEach(txn => {
+//       const txnDate = new Date(txn.date);
+//       const monthIdx = txnDate.getMonth();
+//       const weekIdx = Math.floor((txnDate.getTime() - new Date(txnDate.getFullYear(),0,1).getTime())/(7*24*60*60*1000));
+//       if (txn.amount >= 0) {
+//         incomePerMonth[monthIdx] += txn.amount;
+//         incomePerWeek[weekIdx] += txn.amount;
+//       } else {
+//         expensePerMonth[monthIdx] += Math.abs(txn.amount);
+//         expensePerWeek[weekIdx] += Math.abs(txn.amount);
+//       }
+//     });
+
+//     const cashflowCtx = document.getElementById("cashflowChart") as HTMLCanvasElement;
+//     if (cashflowCtx) {
+//       const labels = graphFilter === "week" ? Array.from({length: 52}, (_, i) => `W${i+1}`) :
+//                      graphFilter === "month" ? months :
+//                      months;
+
+//       const incomeData = graphFilter === "week" ? incomePerWeek : incomePerMonth;
+//       const expenseData = graphFilter === "week" ? expensePerWeek : expensePerMonth;
+
+//       cashflowChart = new Chart(cashflowCtx.getContext("2d")!, {
+//         type: "bar",
+//         data: {
+//           labels,
+//           datasets: [
+//             {
+//               label: "Income",
+//               data: incomeData,
+//               backgroundColor: '#146985',
+//               stack: 'stack1',
+//               borderRadius: 8,
+//               barPercentage: 0.7
+//             },
+//             {
+//               label: "Expense",
+//               data: expenseData,
+//               backgroundColor: '#ff4d4f',
+//               stack: 'stack1',
+//               borderRadius: 8,
+//               barPercentage: 0.7
+//             }
+//           ]
+//         },
+//         options: {
+//           responsive: true,
+//           scales: {
+//             y: {
+//               stacked: true,
+//               beginAtZero: true,
+//               ticks: {
+//                 callback: (value) => Number(value).toLocaleString(),
+//                 color: "#000",
+//                 font: { weight: "bold" }
+//               },
+//               grid: { color: '#eee' }
+//             },
+//             x: {
+//               stacked: true,
+//               ticks: { color: '#146985', font: { weight: "bold" } },
+//               grid: { display: false }
+//             }
+//           },
+//           plugins: {
+//             legend: {
+//               labels: { color: '#146985', boxWidth: 18, padding: 24, font: { weight: "bold", size: 16 } }
+//             },
+//             tooltip: {
+//               callbacks: {
+//                 label: (ctx) => {
+//                   const val = ctx.parsed.y as number;
+//                   return ctx.dataset.label + ': ' + val.toLocaleString();
+//                 }
+//               }
+//             }
+//           }
+//         }
+//       });
+//     }
+
+//     return () => { cashflowChart?.destroy(); };
+//   }, [transactions, graphFilter]);
+
+//   return (
+//     <div className="dashboard-container">
+//       <nav className="sidebar">
+//         <h1>Finance</h1>
+//         <div className="nav-list">
+//           <Link href="app/dashboard/admin" className="nav-item active">Dashboard</Link>
+//           <Link href="/dashboard/admin/adminmanagerrecord" className="nav-item">Manager Record</Link>
+//           <Link href="/dashboard/admin/adminagentrecord" className="nav-item">Agent Record</Link>
+//           <Link href="/dashboard/admin/adminbrokerrecord" className="nav-item">Broker Record</Link>
+//           <Link href="/dashboard/admin/transaction" className="nav-item">Transaction</Link>
+//           <Link href="/dashboard/sidebarcomponent/payment" className="nav-item">Payment</Link>
+//           <Link href="/dashboard/sidebarcomponent/card" className="nav-item">Card</Link>
+//           <Link href="/dashboard/sidebarcomponent/insight" className="nav-item">Insights</Link>
+//           <Link href="/dashboard/sidebarcomponent/settings" className="nav-item">Settings</Link>
+//         </div>
+//       </nav>
+
+//       <main className="main-content">
+//         <div className="main-top">
+//           <h1 className="header">Dashboard</h1>
+//           <div className="top-right">
+//             <span className="profile-name">{user?.fullname || user?.email || "Guest"}</span>
+//             <button className="logout-btn" onClick={logoutUser}>Logout</button>
+//           </div>
+//         </div>
+
+//         <div className="upload-csv-section">
+//           <UploadCSV onUploadSuccess={fetchTransactions} />
+//         </div>
+
+//         <div className="register-buttons">
+//           <button className="create-user" onClick={() => handleOpenModal("manager")}>Manager Create</button>
+//           <button className="create-user" onClick={() => handleOpenModal("broker")}>Broker Create</button>
+//           <button className="create-user" onClick={() => handleOpenModal("agent")}>Agent Create</button>
+//         </div>
+
+//         {showModal && selectedRole && (
+//           <CreateUser role={selectedRole} onClose={() => setShowModal(false)} />
+//         )}
+
+//         {/* Cards Section */}
+//         <section className="cards">
+//           {Object.entries(categoryTotals).map(([cat, total], idx) => (
+//             <div className="card" key={idx}>
+//               <div className="card-title">{cat}</div>
+//               <div className="card-value">{total.toLocaleString()}</div>
+//             </div>
+//           ))}
+//         </section>
+
+//         {/* Charts Section */}
+//         <section className="charts">
+//           <div className="chart-card">
+//             <div className="chart-header">
+//               <h2>Cashflow</h2>
+//               <select 
+//               title="graph"
+//                 value={graphFilter} 
+//                 onChange={(e) => setGraphFilter(e.target.value as any)}
+//               >
+//                 <option value="thisYear">This Year</option>
+//                 <option value="lastYear">Last Year</option>
+//                 <option value="month">Month-wise</option>
+//                 <option value="week">Week-wise</option>
+//               </select>
+//             </div>
+//             <canvas id="cashflowChart"></canvas>
+//           </div>
+//         </section>
+        
+//         {/* Recent Transactions */}
+//         <section className="transactions">
+//           <h2>Recent Transactions</h2>
+//           <table>
+//             <thead>
+//               <tr>
+//                 <th>Date</th><th>Description</th><th>Amount</th><th>Category</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {transactions.slice(0, 5).map((txn, idx) => (
+//                 <tr key={idx}>
+//                   <td>{new Date(txn.date).toLocaleDateString()}</td>
+//                   <td>{txn.description}</td>
+//                   <td className={txn.amount >= 0 ? "positive" : "negative"}>
+//                     {Math.abs(txn.amount).toLocaleString()}
+//                   </td>
+//                   <td>{txn.category}</td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </section>
+        
+//       </main>
+//     </div>
+//   );
+// }
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -10,35 +278,116 @@ import Link from "next/link";
 import CreateUser from "../createusers/page"; 
 import UploadCSV from "./uploadcsv/page"; 
 import "../../cssfiles/uploadCSV.css"
+import http from "@/services/http";
 
 Chart.register(...registerables);
 
+interface TransactionType {
+  date: string;
+  description: string;
+  category: string;
+  amount: number;
+}
+
 export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
-  
+  const [transactions, setTransactions] = useState<TransactionType[]>([]);
+  const [categoryTotals, setCategoryTotals] = useState<Record<string, number>>({});
+  const [graphFilter, setGraphFilter] = useState<"thisYear" | "lastYear" | "month" | "week">("thisYear");
   const { user, logoutUser } = useAuthContext();
-  
-
   const [selectedRole, setSelectedRole] = useState<"agent" | "manager" | "broker" | "">("");
-const handleOpenModal = (role: "agent" | "manager" | "broker") => {
-  setSelectedRole(role);
-  setShowModal(true);
-};
 
+  const handleOpenModal = (role: "agent" | "manager" | "broker") => {
+    setSelectedRole(role);
+    setShowModal(true);
+  };
 
+  // Fetch transactions
+  const fetchTransactions = async () => {
+    try {
+      const res = await http.get("/transactions"); 
+      const data = res.data.transactions || [];
+      // Sort by date descending for recent transactions
+      data.sort((a: TransactionType, b: TransactionType) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setTransactions(data);
+    } catch (err) {
+      console.error("Failed to fetch transactions", err);
+      setTransactions([]);
+    }
+  };
+
+  // Calculate totals per category
+  const calculateCategoryTotals = () => {
+    const totals: Record<string, number> = {};
+    transactions.forEach(txn => {
+      const val = Math.abs(txn.amount);
+      const category = txn.category.trim();
+      totals[category] = (totals[category] || 0) + val;
+    });
+    setCategoryTotals(totals);
+  };
+
+  useEffect(() => { 
+    fetchTransactions(); 
+
+    // Polling every 10 seconds for real-time updates
+    const interval = setInterval(fetchTransactions, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => { if (transactions.length) calculateCategoryTotals(); }, [transactions]);
+
+  // Dynamic chart
   useEffect(() => {
     let cashflowChart: Chart | null = null;
 
+    const filteredTransactions = transactions.filter(txn => {
+      const txnDate = new Date(txn.date);
+      const currentYear = new Date().getFullYear();
+      switch(graphFilter) {
+        case "thisYear": return txnDate.getFullYear() === currentYear;
+        case "lastYear": return txnDate.getFullYear() === currentYear - 1;
+        case "month": return txnDate.getFullYear() === currentYear;
+        case "week": return txnDate.getFullYear() === currentYear;
+        default: return true;
+      }
+    });
+
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const incomePerMonth = Array(12).fill(0);
+    const expensePerMonth = Array(12).fill(0);
+    const incomePerWeek = Array(52).fill(0);
+    const expensePerWeek = Array(52).fill(0);
+
+    filteredTransactions.forEach(txn => {
+      const txnDate = new Date(txn.date);
+      const monthIdx = txnDate.getMonth();
+      const weekIdx = Math.floor((txnDate.getTime() - new Date(txnDate.getFullYear(),0,1).getTime())/(7*24*60*60*1000));
+      if (txn.amount >= 0) {
+        incomePerMonth[monthIdx] += txn.amount;
+        incomePerWeek[weekIdx] += txn.amount;
+      } else {
+        expensePerMonth[monthIdx] += Math.abs(txn.amount);
+        expensePerWeek[weekIdx] += Math.abs(txn.amount);
+      }
+    });
+
     const cashflowCtx = document.getElementById("cashflowChart") as HTMLCanvasElement;
     if (cashflowCtx) {
+      const labels = graphFilter === "week" ? Array.from({length: 52}, (_, i) => `W${i+1}`) :
+                     graphFilter === "month" ? months : months;
+
+      const incomeData = graphFilter === "week" ? incomePerWeek : incomePerMonth;
+      const expenseData = graphFilter === "week" ? expensePerWeek : expensePerMonth;
+
       cashflowChart = new Chart(cashflowCtx.getContext("2d")!, {
         type: "bar",
         data: {
-          labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+          labels,
           datasets: [
             {
               label: "Income",
-              data: [3000,4000,6000,7000,6500,6300,7000,6000,8000,7200,7500,7800],
+              data: incomeData,
               backgroundColor: '#146985',
               stack: 'stack1',
               borderRadius: 8,
@@ -46,8 +395,8 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
             },
             {
               label: "Expense",
-              data: [-2500,-3000,-4000,-3500,-3200,-3000,-4000,-3500,-3800,-3700,-3600,-4000],
-              backgroundColor: '#000000',
+              data: expenseData,
+              backgroundColor: '#ff4d4f',
               stack: 'stack1',
               borderRadius: 8,
               barPercentage: 0.7
@@ -61,7 +410,7 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
               stacked: true,
               beginAtZero: true,
               ticks: {
-                callback: (value) => '$' + Math.abs(Number(value)).toLocaleString(),
+                callback: (value) => Number(value).toLocaleString(),
                 color: "#000",
                 font: { weight: "bold" }
               },
@@ -80,8 +429,8 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
             tooltip: {
               callbacks: {
                 label: (ctx) => {
-                  const val = Math.abs(ctx.parsed.y as number);
-                  return ctx.dataset.label + ': $' + val.toLocaleString();
+                  const val = ctx.parsed.y as number;
+                  return ctx.dataset.label + ': ' + val.toLocaleString();
                 }
               }
             }
@@ -90,10 +439,8 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
       });
     }
 
-    return () => {
-      cashflowChart?.destroy();
-    };
-  }, []);
+    return () => { cashflowChart?.destroy(); };
+  }, [transactions, graphFilter]);
 
   return (
     <div className="dashboard-container">
@@ -121,17 +468,9 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
           </div>
         </div>
 
-
-<div className="upload-csv-section">
-  <UploadCSV
-    onUploadSuccess={() => {
-      console.log("CSV uploaded successfully, refresh data if needed");
-    }}
-  />
-</div>
-
-
-
+        <div className="upload-csv-section">
+          <UploadCSV onUploadSuccess={fetchTransactions} />
+        </div>
 
         <div className="register-buttons">
           <button className="create-user" onClick={() => handleOpenModal("manager")}>Manager Create</button>
@@ -145,26 +484,12 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
 
         {/* Cards Section */}
         <section className="cards">
-          <div className="card">
-            <div className="card-title">Andrew Forbist</div>
-            <div className="card-value">562,000</div>
-            <div className="card-sub">EXP 11/29 | CVV 323</div>
-          </div>
-          <div className="card">
-            <div className="card-title">Total Income</div>
-            <div className="card-value">78,000</div>
-            <div className="card-change positive">+17.8%</div>
-          </div>
-          <div className="card">
-            <div className="card-title">Total Expense</div>
-            <div className="card-value">43,000</div>
-            <div className="card-change negative">-17.8%</div>
-          </div>
-          <div className="card">
-            <div className="card-title">Total Savings</div>
-            <div className="card-value">56,000</div>
-            <div className="card-change positive">+12.4%</div>
-          </div>
+          {Object.entries(categoryTotals).map(([cat, total], idx) => (
+            <div className="card" key={idx}>
+              <div className="card-title">{cat}</div>
+              <div className="card-value">{total.toLocaleString()}</div>
+            </div>
+          ))}
         </section>
 
         {/* Charts Section */}
@@ -172,68 +497,43 @@ const handleOpenModal = (role: "agent" | "manager" | "broker") => {
           <div className="chart-card">
             <div className="chart-header">
               <h2>Cashflow</h2>
-              <select title="year">
-                <option>This Year</option>
-                <option>Last Year</option>
+              <select 
+              title="graph"
+                value={graphFilter} 
+                onChange={(e) => setGraphFilter(e.target.value as any)}
+              >
+                <option value="thisYear">This Year</option>
+                <option value="lastYear">Last Year</option>
+                <option value="month">Month-wise</option>
+                <option value="week">Week-wise</option>
               </select>
             </div>
             <canvas id="cashflowChart"></canvas>
           </div>
         </section>
-
-        {/* Recent Transactions */}
+        
+        {/* Recent Transactions - show latest 5 transactions */}
         <section className="transactions">
           <h2>Recent Transactions</h2>
           <table>
             <thead>
               <tr>
-                <th>Date</th><th>Description</th><th>Amount</th><th>Status</th>
+                <th>Date</th><th>Description</th><th>Amount</th><th>Category</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>Nov 1</td><td>Salary</td><td className="positive">5,000</td><td>Completed</td></tr>
-              <tr><td>Nov 3</td><td>Groceries</td><td className="negative">320</td><td>Completed</td></tr>
-              <tr><td>Nov 5</td><td>Investment</td><td className="positive">1,200</td><td>Pending</td></tr>
+              {transactions.slice(0, 5).map((txn, idx) => (
+                <tr key={idx}>
+                  <td>{new Date(txn.date).toLocaleDateString()}</td>
+                  <td>{txn.description}</td>
+                  <td className={txn.amount >= 0 ? "positive" : "negative"}>
+                    {Math.abs(txn.amount).toLocaleString()}
+                  </td>
+                  <td>{txn.category}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
-        </section>
-
-        {/* Saving Plans */}
-        <section className="saving-plans">
-          <div className="plan-card">
-            <h3>Retirement Plan</h3>
-            <p>Invest regularly to save for retirement.</p>
-            <div className="plan-value">12,000</div>
-          </div>
-          <div className="plan-card">
-            <h3>Emergency Fund</h3>
-            <p>Keep a fund for unexpected expenses.</p>
-            <div className="plan-value">5,500</div>
-          </div>
-          <div className="plan-card">
-            <h3>Vacation Fund</h3>
-            <p>Save for your dream vacation.</p>
-            <div className="plan-value">3,200</div>
-          </div>
-        </section>
-
-        {/* Account Activity */}
-        <section className="activity">
-          <h2>Account Activity</h2>
-          <div className="activity-grid">
-            <div className="activity-card">
-              <div>Transactions Today</div>
-              <div className="activity-value">12</div>
-            </div>
-            <div className="activity-card">
-              <div>New Messages</div>
-              <div className="activity-value">5</div>
-            </div>
-            <div className="activity-card">
-              <div>Pending Approvals</div>
-              <div className="activity-value">2</div>
-            </div>
-          </div>
         </section>
       </main>
     </div>
