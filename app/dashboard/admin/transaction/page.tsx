@@ -4,8 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import http from "@/services/http";
 import Link from "next/link";
+import moment from "moment";
 import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
+import "../../../cssfiles/transactionfilters.css";
 
 interface TransactionType {
   date: string;
@@ -22,35 +24,41 @@ export default function ManagerDashboardTransaction() {
   const [category, setCategory] = useState("");
   const [allCategories, setAllCategories] = useState<string[]>([]);
 
-  // NEW STATES FOR CUSTOM CATEGORY INPUT
   const [isAddingCustom, setIsAddingCustom] = useState(false);
   const [newCustomCategory, setNewCustomCategory] = useState("");
 
-  // pagination
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(20);
 
-  const fetchTransactions = async (selectedCategory = "", pageNum = 1) => {
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  const fetchTransactions = async (
+    selectedCategory = "",
+    start = "",
+    end = "",
+    pageNum = 1
+  ) => {
     try {
       setLoading(true);
 
-      const url = selectedCategory
-        ? `/transactions?category=${selectedCategory}&page=${pageNum}&limit=${limit}`
-        : `/transactions?page=${pageNum}&limit=${limit}`;
+      let url = `/transactions?page=${pageNum}&limit=${limit}`;
+      if (selectedCategory) url += `&category=${selectedCategory}`;
+      if (start) url += `&startDate=${start}`;
+      if (end) url += `&endDate=${end}`;
 
       const res = await http.get(url);
+      const fetchedTransactions = (res.data.transactions as TransactionType[]) || [];
 
-      setTransactions(res.data.transactions || []);
+      setTransactions(fetchedTransactions);
       setPage(res.data.page || 1);
       setTotalPages(res.data.totalPages || 1);
 
-      // extract all categories ONLY on initial load
-      if (!selectedCategory) {
-        const cats = res.data.transactions?.map((t: any) => t.category) || [];
+      if (!selectedCategory && !start && !end) {
+        const cats = fetchedTransactions.map((t) => t.category);
         setAllCategories([...new Set(cats)]);
       }
-
     } catch (error) {
       console.error("Failed to fetch transactions", error);
       setTransactions([]);
@@ -60,7 +68,7 @@ export default function ManagerDashboardTransaction() {
   };
 
   useEffect(() => {
-    if (user) fetchTransactions(); // load all
+    if (user) fetchTransactions();
   }, [user]);
 
   if (!user) return <p>Loading user...</p>;
@@ -70,7 +78,7 @@ export default function ManagerDashboardTransaction() {
       <nav className="sidebar">
         <h1>Finance</h1>
         <div className="nav-list">
-          <Link href="/dashboard/admin" className="nav-item"> Dashboard</Link>
+          <Link href="/dashboard/admin" className="nav-item">Dashboard</Link>
           <Link href="/dashboard/admin/adminmanagerrecord" className="nav-item">Manager Record</Link>
           <Link href="/dashboard/admin/adminagentrecord" className="nav-item">Agent Record</Link>
           <Link href="/dashboard/admin/adminbrokerrecord" className="nav-item">Broker Record</Link>
@@ -82,7 +90,6 @@ export default function ManagerDashboardTransaction() {
         </div>
       </nav>
 
-      {/* Main Content */}
       <main className="main-content">
         <div className="main-top">
           <h1 className="header">Transactions</h1>
@@ -92,81 +99,90 @@ export default function ManagerDashboardTransaction() {
           </div>
         </div>
 
-        {/* CATEGORY DROPDOWN + CUSTOM INPUT */}
-        <div className="search-container">
-          <select
-            title="category-dropdown"
-            className="search-input"
-            value={category}
-            onChange={(e) => {
-              const value = e.target.value;
+        {/* FILTER ROW */}
+        <div className="filter-row">
+          <div className="category-section">
+            <select
+              title="filter"
+              className="filter-select"
+              value={category}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "__add_custom__") {
+                  setIsAddingCustom(true);
+                  setCategory("");
+                  return;
+                }
+                setCategory(value);
+                fetchTransactions(value, startDate, endDate, 1);
+              }}
+            >
+              <option disabled value="">Select Category</option>
+              {allCategories.map((cat, i) => (
+                <option key={i} value={cat}>{cat}</option>
+              ))}
+              <option value="__add_custom__">Add Custom Category</option>
+            </select>
 
-              if (value === "__add_custom__") {
-                setIsAddingCustom(true);
-                setCategory("");
-                return;
-              }
+            {isAddingCustom && (
+              <div className="custom-box">
+                <input
+                  type="text"
+                  placeholder="Enter custom category..."
+                  value={newCustomCategory}
+                  onChange={(e) => setNewCustomCategory(e.target.value)}
+                  className="custom-input"
+                />
+                <button
+                  className="custom-add-btn"
+                  onClick={() => {
+                    if (!newCustomCategory.trim()) return;
+                    setAllCategories((prev) => [...prev, newCustomCategory]);
+                    setCategory(newCustomCategory);
+                    fetchTransactions(newCustomCategory, startDate, endDate, 1);
+                    setNewCustomCategory("");
+                    setIsAddingCustom(false);
+                  }}
+                >
+                  Add
+                </button>
+                <button
+                  className="custom-cancel-btn"
+                  onClick={() => {
+                    setIsAddingCustom(false);
+                    setNewCustomCategory("");
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
 
-              setCategory(value);
-              fetchTransactions(value, 1);
-            }}
-          >
-            <option disabled value="">
-              Select Category
-            </option>
-
-            {allCategories.map((cat, i) => (
-              <option key={i} value={cat}>
-                {cat}
-              </option>
-            ))}
-
-            <option value="__add_custom__" >
-               Add Custom Category
-            </option>
-          </select>
-
-          {/* Custom Category Input Field */}
-          {isAddingCustom && (
-            <div className="custom-input-wrapper">
-              <input
-                type="text"
-                placeholder="Enter custom category..."
-                value={newCustomCategory}
-                onChange={(e) => setNewCustomCategory(e.target.value)}
-                className="custom-input"
-              />
-
-              <button
-                className="custom-add-btn"
-                onClick={() => {
-                  if (!newCustomCategory.trim()) return;
-
-                  setAllCategories((prev) => [...prev, newCustomCategory]);
-                  setCategory(newCustomCategory);
-                  fetchTransactions(newCustomCategory, 1);
-
-                  setNewCustomCategory("");
-                  setIsAddingCustom(false);
-                }}
-              >
-                Add
-              </button>
-
-              <button
-                className="custom-cancel-btn"
-                onClick={() => {
-                  setIsAddingCustom(false);
-                  setNewCustomCategory("");
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          )}
+          <div className="date-section">
+            <input
+              title="start-date"
+              type="date"
+              className="date-input"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <input
+              title="end-date"
+              type="date"
+              className="date-input"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+            <button
+              className="apply-btn"
+              onClick={() => fetchTransactions(category, startDate, endDate, 1)}
+            >
+              Apply
+            </button>
+          </div>
         </div>
 
-        {/* RECORD TABLE */}
         <div className="record-wrapper">
           {loading ? (
             <p className="loading-text">Loading transactions...</p>
@@ -185,7 +201,7 @@ export default function ManagerDashboardTransaction() {
               <tbody>
                 {transactions.map((txn, index) => (
                   <tr key={index}>
-                    <td>{txn.date}</td>
+                    <td>{moment(txn.date).format("DD/MM/YYYY")}</td>
                     <td>{txn.description}</td>
                     <td>{txn.category}</td>
                     <td>{txn.amount}</td>
@@ -196,29 +212,25 @@ export default function ManagerDashboardTransaction() {
           )}
         </div>
 
-        {/* PAGINATION */}
         <div className="pagination">
           <div className="pagination-btns">
             <button
               className="prev-btn"
               disabled={page <= 1}
-              onClick={() => fetchTransactions(category, page - 1)}
+              onClick={() => fetchTransactions(category, startDate, endDate, page - 1)}
             >
               Previous
             </button>
-
             <span>Page {page} of {totalPages}</span>
-
             <button
               className="next-btn"
               disabled={page >= totalPages}
-              onClick={() => fetchTransactions(category, page + 1)}
+              onClick={() => fetchTransactions(category, startDate, endDate, page + 1)}
             >
               Next
             </button>
           </div>
         </div>
-
       </main>
     </div>
   );
