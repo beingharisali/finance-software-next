@@ -1,86 +1,161 @@
-/* /* FILTER ROW */
+/* FILTER ROW */
 .filter-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 15px;
   width: 100%;
+  flex-wrap: wrap;
 }
+
+/* Center search filter */
+.search-center {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.search-input {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #bcbcbc;
+  font-size: 15px;
+  width: 300px;
+}
+
+.search-btn, .reset-btn {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.search-btn { background: #022d58d0; color: white; }
+.search-btn:hover { background: #033055; }
+
+.reset-btn { background: #8c8c8e; }
+.reset-btn:hover { background: #d1d5db; color:#033055 ;}
 
 /* CATEGORY SECTION */
 .category-section {
-  width: 45%;
+  width: 48%;
+  position: relative;
 }
 
-.filter-select {
+/* CUSTOM DROPDOWN */
+.custom-dropdown {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 6px;
   border: 1px solid #bcbcbc;
-  font-size: 15px;
-  outline: none;
+  border-radius: 6px;
   background: white;
   cursor: pointer;
+  position: relative;
 }
 
-/* CUSTOM CATEGORY BOX */
-.custom-box {
-  margin-top: 10px;
+.dropdown-header {
+  padding: 10px 12px;
+  font-size: 15px;
   display: flex;
-  gap: 8px;
+  justify-content: space-between;
   align-items: center;
 }
 
-.custom-input {
-  flex: 1;
-  padding: 10px 12px;
+.dropdown-arrow {
+  margin-left: 8px;
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 250px;
+  overflow-y: auto;
   border: 1px solid #bcbcbc;
   border-radius: 6px;
+  background: white;
+  z-index: 100;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
   font-size: 15px;
-  transition: all 0.2s ease-in-out;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.custom-input:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 4px rgba(79, 70, 229, 0.4);
-  outline: none;
+.dropdown-item:last-child { border-bottom: none; }
+
+.dropdown-item:hover {
+  background: #f0f4ff;
 }
 
-.custom-add-btn {
-  padding: 8px 14px;
-  background: #022d58d0;
-  color: white;
+.dropdown-text {
+  flex: 1;
+  cursor: pointer;
+}
+
+.delete-btn {
+  margin-left: 10px;
+  color: red;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  color: darkred;
+}
+
+/* ADD CUSTOM CATEGORY */
+.add-custom-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+}
+
+.add-custom {
+  color: #022d58d0;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.add-custom:hover { text-decoration: underline; }
+
+.add-custom-item input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #bcbcbc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.add-custom-item button {
+  padding: 6px 12px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  transition: 0.2s;
 }
 
-.custom-add-btn:hover {
-  background: #033055;
-}
+.add-custom-item button:first-child { background: #022d58d0; color: white; }
+.add-custom-item button:first-child:hover { background: #033055; }
 
-.custom-cancel-btn {
-  padding: 8px 14px;
-  background: #e5e7eb;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.2s;
-}
-
-.custom-cancel-btn:hover {
-  background: #d1d5db;
-}
+.add-custom-item button:last-child { background: #e5e7eb; }
+.add-custom-item button:last-child:hover { background: #d1d5db; }
 
 /* DATE SECTION */
 .date-section {
-  width: 50%;
+  width: 48%;
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
 }
 
@@ -89,49 +164,95 @@
   border-radius: 6px;
   border: 1px solid #bcbcbc;
   font-size: 15px;
-  width: 160px;
-  outline: none;
-  background: white;
+  width: 150px;
 }
 
 .apply-btn {
   padding: 10px 16px;
   background: #022d58d0;
   color: white;
-  font-size: 14px;
-  border: none;
   border-radius: 6px;
+  border: none;
   cursor: pointer;
-  transition: 0.2s;
 }
 
-.apply-btn:hover {
-  background: #033055;
-}
+.apply-btn:hover { background: #033055; }
+/* customCategory.css */
 
-/* DATE FILTER BOX (Optional for separate styling) */
-.date-filter-box {
+/* Container for inline custom category inside dropdown */
+.custom-box {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #f3f4f6;
-  padding: 10px 14px;
-  border-radius: 8px;
+  gap: 8px;
+  padding: 5px 8px;
+  border-top: 1px solid #ddd;
+  background-color: #f9f9f9;
 }
+
+/* Input field for new category */
+.custom-input {
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Add button styling */
+.custom-add-btn {
+  background-color: #022d58d0;
+  color: #fff;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.custom-add-btn:hover {
+  background-color: #033055;
+}
+
+/* Cancel button styling */
+.custom-cancel-btn {
+  background-color: #8c8c8e;
+  color: #fff;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.custom-cancel-btn:hover {
+  background-color: #c4c4c6;
+}
+
+/* "+ Add Custom Category" text */
+.add-custom {
+  display: block;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #1976d2;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.add-custom:hover {
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  color: #0d47a1;
+}
+
 
 /* Responsive */
 @media (max-width: 768px) {
   .filter-row {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
   }
-
-  .category-section,
-  .date-section {
-    width: 100%;
-  }
-
-  .date-section {
-    justify-content: flex-start;
-  }
+  .category-section, .date-section { width: 100%; justify-content: flex-start; }
+  .search-center { justify-content: center; }
 }
