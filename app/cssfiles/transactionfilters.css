@@ -1,0 +1,137 @@
+/* /* FILTER ROW */
+.filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  width: 100%;
+}
+
+/* CATEGORY SECTION */
+.category-section {
+  width: 45%;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #bcbcbc;
+  font-size: 15px;
+  outline: none;
+  background: white;
+  cursor: pointer;
+}
+
+/* CUSTOM CATEGORY BOX */
+.custom-box {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.custom-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #bcbcbc;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: all 0.2s ease-in-out;
+}
+
+.custom-input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 4px rgba(79, 70, 229, 0.4);
+  outline: none;
+}
+
+.custom-add-btn {
+  padding: 8px 14px;
+  background: #022d58d0;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.custom-add-btn:hover {
+  background: #033055;
+}
+
+.custom-cancel-btn {
+  padding: 8px 14px;
+  background: #e5e7eb;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.custom-cancel-btn:hover {
+  background: #d1d5db;
+}
+
+/* DATE SECTION */
+.date-section {
+  width: 50%;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
+}
+
+.date-input {
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #bcbcbc;
+  font-size: 15px;
+  width: 160px;
+  outline: none;
+  background: white;
+}
+
+.apply-btn {
+  padding: 10px 16px;
+  background: #022d58d0;
+  color: white;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.apply-btn:hover {
+  background: #033055;
+}
+
+/* DATE FILTER BOX (Optional for separate styling) */
+.date-filter-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f3f4f6;
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filter-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .category-section,
+  .date-section {
+    width: 100%;
+  }
+
+  .date-section {
+    justify-content: flex-start;
+  }
+}
