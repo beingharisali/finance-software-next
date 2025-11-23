@@ -1,4 +1,5 @@
 
+
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { useAuthContext } from "@/context/AuthContext";
@@ -8,13 +9,16 @@ import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
 import "../../../cssfiles/transactionfilters.css";
 
-
 import {
   fetchTransactions as getTransactions,
-  addCategory,
-  deleteCategory,
   TransactionType,
 } from "@/services/transactionService";
+
+import {
+  fetchCustomCategories,
+  addCustomCategory,
+  deleteCustomCategory,
+} from "@/services/category";
 
 export default function ManagerDashboardTransaction() {
   const { user, logoutUser } = useAuthContext();
@@ -38,7 +42,7 @@ export default function ManagerDashboardTransaction() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch transactions
+  // ---------------------- FETCH TRANSACTIONS ----------------------
   const fetchTransactions = async (
     selectedCategory = "",
     start = "",
@@ -49,18 +53,18 @@ export default function ManagerDashboardTransaction() {
       setLoading(true);
       const res = await getTransactions(pageNum, limit, selectedCategory, start, end);
       const fetchedTransactions: TransactionType[] = res.transactions || [];
-
       setTransactions(fetchedTransactions);
       setPage(res.page || 1);
       setTotalPages(res.totalPages || 1);
 
-      // FIX: safely extract categories
-      if (!selectedCategory && !start && !end) {
-        const cats = fetchedTransactions
-          .map((t) => t.category)
-          .filter((c): c is string => Boolean(c)); // only valid strings
-        setAllCategories([...new Set(cats)]);
-      }
+      // Update dropdown categories from transactions
+      const txnCategories = fetchedTransactions
+        .map((t) => t.category)
+        .filter(Boolean);
+      setAllCategories((prev) => {
+        const merged = [...new Set([...txnCategories, ...prev])];
+        return merged;
+      });
     } catch (error) {
       console.error("Failed to fetch transactions", error);
       setTransactions([]);
@@ -69,8 +73,22 @@ export default function ManagerDashboardTransaction() {
     }
   };
 
+  // ---------------------- FETCH CUSTOM CATEGORIES ----------------------
+  const fetchCategories = async () => {
+    try {
+      const res = await fetchCustomCategories();
+      if (res.success && res.categories) {
+        setAllCategories((prev) => [...new Set([...prev, ...res.categories])]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch custom categories", error);
+    }
+  };
+
   useEffect(() => {
-    if (user) fetchTransactions();
+    if (user) {
+      fetchTransactions().then(() => fetchCategories());
+    }
 
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -84,6 +102,7 @@ export default function ManagerDashboardTransaction() {
 
   if (!user) return <p>Loading user...</p>;
 
+  // ---------------------- RESET FILTERS ----------------------
   const resetFilters = () => {
     setSearchCategory("");
     setCategory("");
@@ -91,16 +110,37 @@ export default function ManagerDashboardTransaction() {
     setEndDate("");
     setIsAddingCustom(false);
     setNewCustomCategory("");
-    fetchTransactions("", "", "", 1);
+    fetchTransactions("", "", "", 1).then(() => fetchCategories());
   };
 
+  // ---------------------- ADD CUSTOM CATEGORY ----------------------
+  const handleAddCustomCategory = async () => {
+    if (!newCustomCategory.trim()) return;
+    try {
+      const res = await addCustomCategory(newCustomCategory.trim());
+      if (res.success) {
+        setAllCategories((prev) => [...prev, newCustomCategory.trim()]);
+        setCategory(newCustomCategory.trim());
+        setNewCustomCategory("");
+        setIsAddingCustom(false);
+        setDropdownOpen(false);
+        alert(res.msg);
+      } else {
+        alert(res.msg);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to add category");
+    }
+  };
+
+  // ---------------------- DELETE CATEGORY ----------------------
   const handleDeleteCategory = async (cat: string) => {
     try {
-      const res = await deleteCategory(cat);
+      const res = await deleteCustomCategory(cat);
       if (res.success) {
         setAllCategories((prev) => prev.filter((c) => c !== cat));
         if (category === cat) setCategory("");
-        setTransactions((prev) => prev.filter((txn) => txn.category !== cat));
         alert(res.msg);
       } else {
         alert("Failed to delete category");
@@ -111,25 +151,7 @@ export default function ManagerDashboardTransaction() {
     }
   };
 
-  const handleAddCustomCategory = async () => {
-    if (!newCustomCategory.trim()) return;
-    try {
-      const res = await addCategory(newCustomCategory);
-      if (res.success) {
-        setAllCategories((prev) => [...prev, newCustomCategory]);
-        setCategory(newCustomCategory);
-        fetchTransactions(newCustomCategory, startDate, endDate, 1);
-        setNewCustomCategory("");
-        setIsAddingCustom(false);
-        setDropdownOpen(false);
-        alert(res.msg);
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Failed to add category");
-    }
-  };
-
+  // ---------------------- JSX ----------------------
   return (
     <div className="dashboard-container">
       <nav className="sidebar">
