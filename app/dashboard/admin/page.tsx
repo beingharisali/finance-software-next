@@ -1,272 +1,5 @@
 
 
-// "use client";
-
-// import React, { useEffect, useState } from "react";
-// import { useAuthContext } from "@/context/AuthContext";
-// import { Chart, registerables } from "chart.js";
-// import "../../cssfiles/admin.css";
-// import "../../cssfiles/sidebarcomponents.css";
-// import Link from "next/link";
-// import CreateUser from "../createusers/page"; 
-// import UploadCSV from "./uploadcsv/page"; 
-// import "../../cssfiles/uploadCSV.css"
-// import http from "@/services/http";
-
-// Chart.register(...registerables);
-
-// interface TransactionType {
-//   date: string;
-//   description: string;
-//   category: string;
-//   amount: number;
-// }
-
-// export default function AdminDashboard() {
-//   const [showModal, setShowModal] = useState(false);
-//   const [transactions, setTransactions] = useState<TransactionType[]>([]);
-//   const [categoryTotals, setCategoryTotals] = useState<Record<string, number>>({});
-//   const [graphFilter, setGraphFilter] = useState<"thisYear" | "lastYear" | "month" | "week">("thisYear");
-//   const { user, logoutUser } = useAuthContext();
-//   const [selectedRole, setSelectedRole] = useState<"agent" | "manager" | "broker" | "">("");
-
-//   const handleOpenModal = (role: "agent" | "manager" | "broker") => {
-//     setSelectedRole(role);
-//     setShowModal(true);
-//   };
-
-//   // Fetch transactions
-//   const fetchTransactions = async () => {
-//     try {
-//       const res = await http.get("/transactions"); 
-//       const data = res.data.transactions || [];
-//       // Sort by most recent date first
-//       data.sort((a: TransactionType, b: TransactionType) => new Date(b.date).getTime() - new Date(a.date).getTime());
-//       setTransactions(data);
-//     } catch (err) {
-//       console.error("Failed to fetch transactions", err);
-//       setTransactions([]);
-//     }
-//   };
-
-//   // Calculate totals per category
-//   const calculateCategoryTotals = () => {
-//     const totals: Record<string, number> = {};
-//     transactions.forEach(txn => {
-//       const val = Math.abs(txn.amount);
-//       const category = txn.category.trim();
-//       totals[category] = (totals[category] || 0) + val;
-//     });
-//     setCategoryTotals(totals);
-//   };
-
-//   useEffect(() => { fetchTransactions(); }, []);
-//   useEffect(() => { if (transactions.length) calculateCategoryTotals(); }, [transactions]);
-
-//   // Dynamic chart
-//   useEffect(() => {
-//     let cashflowChart: Chart | null = null;
-
-//     const filteredTransactions = transactions.filter(txn => {
-//       const txnDate = new Date(txn.date);
-//       const currentYear = new Date().getFullYear();
-//       switch(graphFilter) {
-//         case "thisYear": return txnDate.getFullYear() === currentYear;
-//         case "lastYear": return txnDate.getFullYear() === currentYear - 1;
-//         case "month": return txnDate.getFullYear() === currentYear;
-//         case "week": return txnDate.getFullYear() === currentYear;
-//         default: return true;
-//       }
-//     });
-
-//     const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-//     const incomePerMonth = Array(12).fill(0);
-//     const expensePerMonth = Array(12).fill(0);
-//     const incomePerWeek = Array(52).fill(0);
-//     const expensePerWeek = Array(52).fill(0);
-
-//     filteredTransactions.forEach(txn => {
-//       const txnDate = new Date(txn.date);
-//       const monthIdx = txnDate.getMonth();
-//       const weekIdx = Math.floor((txnDate.getTime() - new Date(txnDate.getFullYear(),0,1).getTime())/(7*24*60*60*1000));
-//       if (txn.amount >= 0) {
-//         incomePerMonth[monthIdx] += txn.amount;
-//         incomePerWeek[weekIdx] += txn.amount;
-//       } else {
-//         expensePerMonth[monthIdx] += Math.abs(txn.amount);
-//         expensePerWeek[weekIdx] += Math.abs(txn.amount);
-//       }
-//     });
-
-//     const cashflowCtx = document.getElementById("cashflowChart") as HTMLCanvasElement;
-//     if (cashflowCtx) {
-//       const labels = graphFilter === "week" ? Array.from({length: 52}, (_, i) => `W${i+1}`) :
-//                      graphFilter === "month" ? months :
-//                      months;
-
-//       const incomeData = graphFilter === "week" ? incomePerWeek : incomePerMonth;
-//       const expenseData = graphFilter === "week" ? expensePerWeek : expensePerMonth;
-
-//       cashflowChart = new Chart(cashflowCtx.getContext("2d")!, {
-//         type: "bar",
-//         data: {
-//           labels,
-//           datasets: [
-//             {
-//               label: "Income",
-//               data: incomeData,
-//               backgroundColor: '#146985',
-//               stack: 'stack1',
-//               borderRadius: 8,
-//               barPercentage: 0.7
-//             },
-//             {
-//               label: "Expense",
-//               data: expenseData,
-//               backgroundColor: '#ff4d4f',
-//               stack: 'stack1',
-//               borderRadius: 8,
-//               barPercentage: 0.7
-//             }
-//           ]
-//         },
-//         options: {
-//           responsive: true,
-//           scales: {
-//             y: {
-//               stacked: true,
-//               beginAtZero: true,
-//               ticks: {
-//                 callback: (value) => Number(value).toLocaleString(),
-//                 color: "#000",
-//                 font: { weight: "bold" }
-//               },
-//               grid: { color: '#eee' }
-//             },
-//             x: {
-//               stacked: true,
-//               ticks: { color: '#146985', font: { weight: "bold" } },
-//               grid: { display: false }
-//             }
-//           },
-//           plugins: {
-//             legend: {
-//               labels: { color: '#146985', boxWidth: 18, padding: 24, font: { weight: "bold", size: 16 } }
-//             },
-//             tooltip: {
-//               callbacks: {
-//                 label: (ctx) => {
-//                   const val = ctx.parsed.y as number;
-//                   return ctx.dataset.label + ': ' + val.toLocaleString();
-//                 }
-//               }
-//             }
-//           }
-//         }
-//       });
-//     }
-
-//     return () => { cashflowChart?.destroy(); };
-//   }, [transactions, graphFilter]);
-
-//   return (
-//     <div className="dashboard-container">
-//       <nav className="sidebar">
-//         <h1>Finance</h1>
-//         <div className="nav-list">
-//           <Link href="app/dashboard/admin" className="nav-item active">Dashboard</Link>
-//           <Link href="/dashboard/admin/adminmanagerrecord" className="nav-item">Manager Record</Link>
-//           <Link href="/dashboard/admin/adminagentrecord" className="nav-item">Agent Record</Link>
-//           <Link href="/dashboard/admin/adminbrokerrecord" className="nav-item">Broker Record</Link>
-//           <Link href="/dashboard/admin/transaction" className="nav-item">Transaction</Link>
-//           <Link href="/dashboard/sidebarcomponent/payment" className="nav-item">Payment</Link>
-//           <Link href="/dashboard/sidebarcomponent/card" className="nav-item">Card</Link>
-//           <Link href="/dashboard/sidebarcomponent/insight" className="nav-item">Insights</Link>
-//           <Link href="/dashboard/sidebarcomponent/settings" className="nav-item">Settings</Link>
-//         </div>
-//       </nav>
-
-//       <main className="main-content">
-//         <div className="main-top">
-//           <h1 className="header">Dashboard</h1>
-//           <div className="top-right">
-//             <span className="profile-name">{user?.fullname || user?.email || "Guest"}</span>
-//             <button className="logout-btn" onClick={logoutUser}>Logout</button>
-//           </div>
-//         </div>
-
-//         <div className="upload-csv-section">
-//           <UploadCSV onUploadSuccess={fetchTransactions} />
-//         </div>
-
-//         <div className="register-buttons">
-//           <button className="create-user" onClick={() => handleOpenModal("manager")}>Manager Create</button>
-//           <button className="create-user" onClick={() => handleOpenModal("broker")}>Broker Create</button>
-//           <button className="create-user" onClick={() => handleOpenModal("agent")}>Agent Create</button>
-//         </div>
-
-//         {showModal && selectedRole && (
-//           <CreateUser role={selectedRole} onClose={() => setShowModal(false)} />
-//         )}
-
-//         {/* Cards Section */}
-//         <section className="cards">
-//           {Object.entries(categoryTotals).map(([cat, total], idx) => (
-//             <div className="card" key={idx}>
-//               <div className="card-title">{cat}</div>
-//               <div className="card-value">{total.toLocaleString()}</div>
-//             </div>
-//           ))}
-//         </section>
-
-//         {/* Charts Section */}
-//         <section className="charts">
-//           <div className="chart-card">
-//             <div className="chart-header">
-//               <h2>Cashflow</h2>
-//               <select 
-//               title="graph"
-//                 value={graphFilter} 
-//                 onChange={(e) => setGraphFilter(e.target.value as any)}
-//               >
-//                 <option value="thisYear">This Year</option>
-//                 <option value="lastYear">Last Year</option>
-//                 <option value="month">Month-wise</option>
-//                 <option value="week">Week-wise</option>
-//               </select>
-//             </div>
-//             <canvas id="cashflowChart"></canvas>
-//           </div>
-//         </section>
-        
-//         {/* Recent Transactions */}
-//         <section className="transactions">
-//           <h2>Recent Transactions</h2>
-//           <table>
-//             <thead>
-//               <tr>
-//                 <th>Date</th><th>Description</th><th>Amount</th><th>Category</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {transactions.slice(0, 5).map((txn, idx) => (
-//                 <tr key={idx}>
-//                   <td>{new Date(txn.date).toLocaleDateString()}</td>
-//                   <td>{txn.description}</td>
-//                   <td className={txn.amount >= 0 ? "positive" : "negative"}>
-//                     {Math.abs(txn.amount).toLocaleString()}
-//                   </td>
-//                   <td>{txn.category}</td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </section>
-        
-//       </main>
-//     </div>
-//   );
-// }
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -277,7 +10,7 @@ import "../../cssfiles/sidebarcomponents.css";
 import Link from "next/link";
 import CreateUser from "../createusers/page"; 
 import UploadCSV from "./uploadcsv/page"; 
-import "../../cssfiles/uploadCSV.css"
+import "../../cssfiles/uploadCSV.css";
 import http from "@/services/http";
 
 Chart.register(...registerables);
@@ -302,13 +35,13 @@ export default function AdminDashboard() {
     setShowModal(true);
   };
 
-  // Fetch transactions
+  // ------------------ FETCH TRANSACTIONS ------------------
   const fetchTransactions = async () => {
     try {
       const res = await http.get("/transactions"); 
-      const data = res.data.transactions || [];
-      // Sort by date descending for recent transactions
-      data.sort((a: TransactionType, b: TransactionType) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      const data: TransactionType[] = res.data.transactions || [];
+      // Sort by date descending
+      data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setTransactions(data);
     } catch (err) {
       console.error("Failed to fetch transactions", err);
@@ -316,13 +49,13 @@ export default function AdminDashboard() {
     }
   };
 
-  // Calculate totals per category
+  // ------------------ CALCULATE TOTALS ------------------
   const calculateCategoryTotals = () => {
     const totals: Record<string, number> = {};
     transactions.forEach(txn => {
       const val = Math.abs(txn.amount);
-      const category = txn.category.trim();
-      totals[category] = (totals[category] || 0) + val;
+      const cat = txn.category?.trim() || "Uncategorized";
+      totals[cat] = (totals[cat] || 0) + val;
     });
     setCategoryTotals(totals);
   };
@@ -330,14 +63,14 @@ export default function AdminDashboard() {
   useEffect(() => { 
     fetchTransactions(); 
 
-    // Polling every 10 seconds for real-time updates
+    // Polling every 10 sec for real-time updates
     const interval = setInterval(fetchTransactions, 10000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => { if (transactions.length) calculateCategoryTotals(); }, [transactions]);
 
-  // Dynamic chart
+  // ------------------ DYNAMIC CHART ------------------
   useEffect(() => {
     let cashflowChart: Chart | null = null;
 
@@ -376,7 +109,6 @@ export default function AdminDashboard() {
     if (cashflowCtx) {
       const labels = graphFilter === "week" ? Array.from({length: 52}, (_, i) => `W${i+1}`) :
                      graphFilter === "month" ? months : months;
-
       const incomeData = graphFilter === "week" ? incomePerWeek : incomePerMonth;
       const expenseData = graphFilter === "week" ? expensePerWeek : expensePerMonth;
 
@@ -406,34 +138,8 @@ export default function AdminDashboard() {
         options: {
           responsive: true,
           scales: {
-            y: {
-              stacked: true,
-              beginAtZero: true,
-              ticks: {
-                callback: (value) => Number(value).toLocaleString(),
-                color: "#000",
-                font: { weight: "bold" }
-              },
-              grid: { color: '#eee' }
-            },
-            x: {
-              stacked: true,
-              ticks: { color: '#146985', font: { weight: "bold" } },
-              grid: { display: false }
-            }
-          },
-          plugins: {
-            legend: {
-              labels: { color: '#146985', boxWidth: 18, padding: 24, font: { weight: "bold", size: 16 } }
-            },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => {
-                  const val = ctx.parsed.y as number;
-                  return ctx.dataset.label + ': ' + val.toLocaleString();
-                }
-              }
-            }
+            y: { stacked: true, beginAtZero: true, ticks: { callback: (v) => Number(v).toLocaleString() } },
+            x: { stacked: true }
           }
         }
       });
@@ -468,10 +174,12 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* CSV Upload */}
         <div className="upload-csv-section">
           <UploadCSV onUploadSuccess={fetchTransactions} />
         </div>
 
+        {/* User Create */}
         <div className="register-buttons">
           <button className="create-user" onClick={() => handleOpenModal("manager")}>Manager Create</button>
           <button className="create-user" onClick={() => handleOpenModal("broker")}>Broker Create</button>
@@ -497,11 +205,7 @@ export default function AdminDashboard() {
           <div className="chart-card">
             <div className="chart-header">
               <h2>Cashflow</h2>
-              <select 
-              title="graph"
-                value={graphFilter} 
-                onChange={(e) => setGraphFilter(e.target.value as any)}
-              >
+              <select title="graph" value={graphFilter} onChange={(e) => setGraphFilter(e.target.value as any)}>
                 <option value="thisYear">This Year</option>
                 <option value="lastYear">Last Year</option>
                 <option value="month">Month-wise</option>
@@ -512,7 +216,7 @@ export default function AdminDashboard() {
           </div>
         </section>
         
-        {/* Recent Transactions - show latest 5 transactions */}
+        {/* Recent Transactions */}
         <section className="transactions">
           <h2>Recent Transactions</h2>
           <table>
@@ -526,10 +230,8 @@ export default function AdminDashboard() {
                 <tr key={idx}>
                   <td>{new Date(txn.date).toLocaleDateString()}</td>
                   <td>{txn.description}</td>
-                  <td className={txn.amount >= 0 ? "positive" : "negative"}>
-                    {Math.abs(txn.amount).toLocaleString()}
-                  </td>
-                  <td>{txn.category}</td>
+                  <td className={txn.amount >= 0 ? "positive" : "negative"}>{Math.abs(txn.amount).toLocaleString()}</td>
+                  <td>{txn.category || "Uncategorized"}</td>
                 </tr>
               ))}
             </tbody>

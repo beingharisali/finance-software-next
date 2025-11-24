@@ -1,10 +1,12 @@
 
 
 "use client";
+
 import React, { useEffect, useState, useRef } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import Link from "next/link";
 import moment from "moment";
+
 import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
 import "../../../cssfiles/transactionfilters.css";
@@ -22,6 +24,7 @@ import {
 
 export default function ManagerDashboardTransaction() {
   const { user, logoutUser } = useAuthContext();
+
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,15 +55,18 @@ export default function ManagerDashboardTransaction() {
     try {
       setLoading(true);
       const res = await getTransactions(pageNum, limit, selectedCategory, start, end);
+
       const fetchedTransactions: TransactionType[] = res.transactions || [];
+
       setTransactions(fetchedTransactions);
       setPage(res.page || 1);
       setTotalPages(res.totalPages || 1);
 
-      // Update dropdown categories from transactions
+      // Merge categories dynamically from transactions
       const txnCategories = fetchedTransactions
         .map((t) => t.category)
         .filter(Boolean);
+
       setAllCategories((prev) => {
         const merged = [...new Set([...txnCategories, ...prev])];
         return merged;
@@ -96,6 +102,7 @@ export default function ManagerDashboardTransaction() {
         setIsAddingCustom(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [user]);
@@ -110,6 +117,7 @@ export default function ManagerDashboardTransaction() {
     setEndDate("");
     setIsAddingCustom(false);
     setNewCustomCategory("");
+
     fetchTransactions("", "", "", 1).then(() => fetchCategories());
   };
 
@@ -154,6 +162,7 @@ export default function ManagerDashboardTransaction() {
   // ---------------------- JSX ----------------------
   return (
     <div className="dashboard-container">
+      {/* SIDEBAR */}
       <nav className="sidebar">
         <h1>Finance</h1>
         <div className="nav-list">
@@ -169,6 +178,7 @@ export default function ManagerDashboardTransaction() {
         </div>
       </nav>
 
+      {/* MAIN CONTENT */}
       <main className="main-content">
         <div className="main-top">
           <h1 className="header">Transactions</h1>
@@ -220,7 +230,7 @@ export default function ManagerDashboardTransaction() {
                     </div>
                   ))}
 
-                  {/* ADD CUSTOM CATEGORY INLINE */}
+                  {/* ADD CUSTOM CATEGORY */}
                   <div className="dropdown-item">
                     {isAddingCustom ? (
                       <div className="custom-box">
@@ -245,22 +255,28 @@ export default function ManagerDashboardTransaction() {
             </div>
           </div>
 
+          {/* DATE FILTER */}
           <div className="date-section">
             <input
-              title="date"
+            title="date"
               type="date"
               className="date-input"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
             <input
-              title="date"
+            title="date"
               type="date"
               className="date-input"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
-            <button className="apply-btn" onClick={() => fetchTransactions(category || searchCategory, startDate, endDate, 1)}>Apply</button>
+            <button
+              className="apply-btn"
+              onClick={() => fetchTransactions(category || searchCategory, startDate, endDate, 1)}
+            >
+              Apply
+            </button>
           </div>
         </div>
 
@@ -274,21 +290,34 @@ export default function ManagerDashboardTransaction() {
             <table className="record-table">
               <thead>
                 <tr>
-                  <th>Date</th>
+                  <th>Transaction Date</th>
                   <th>Description</th>
-                  <th>Category</th>
+                  <th>Transaction Type</th>
                   <th>Amount</th>
+                  <th>Sort Code</th>
+                  <th>Account Number</th>
+                  <th>Balance</th>
                 </tr>
               </thead>
+
               <tbody>
-                {transactions.map((txn, idx) => (
-                  <tr key={idx}>
-                    <td>{moment(txn.date).format("DD/MM/YYYY")}</td>
-                    <td>{txn.description}</td>
-                    <td>{txn.category}</td>
-                    <td>{txn.amount}</td>
-                  </tr>
-                ))}
+                {transactions.map((txn, idx) => {
+                  const debit = parseFloat(txn.debitAmount || "0");
+                  const credit = parseFloat(txn.creditAmount || "0");
+                  const amount = credit > 0 ? credit : -debit;
+
+                  return (
+                    <tr key={idx}>
+                      <td>{moment(txn.transactionDate).format("DD/MM/YYYY")}</td>
+                      <td>{txn.transactionDescription}</td>
+                      <td>{txn.transactionType}</td>
+                      <td>{amount}</td>
+                      <td>{txn.sortCode}</td>
+                      <td>{txn.accountNumber}</td>
+                      <td>{txn.balance}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
@@ -297,11 +326,26 @@ export default function ManagerDashboardTransaction() {
         {/* PAGINATION */}
         <div className="pagination">
           <div className="pagination-btns">
-            <button className="prev-btn" disabled={page <= 1} onClick={() => fetchTransactions(category || searchCategory, startDate, endDate, page - 1)}>Previous</button>
+            <button
+              className="prev-btn"
+              disabled={page <= 1}
+              onClick={() => fetchTransactions(category || searchCategory, startDate, endDate, page - 1)}
+            >
+              Previous
+            </button>
+
             <span>Page {page} of {totalPages}</span>
-            <button className="next-btn" disabled={page >= totalPages} onClick={() => fetchTransactions(category || searchCategory, startDate, endDate, page + 1)}>Next</button>
+
+            <button
+              className="next-btn"
+              disabled={page >= totalPages}
+              onClick={() => fetchTransactions(category || searchCategory, startDate, endDate, page + 1)}
+            >
+              Next
+            </button>
           </div>
         </div>
+
       </main>
     </div>
   );
