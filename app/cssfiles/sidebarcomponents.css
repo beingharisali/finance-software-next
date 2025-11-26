@@ -80,3 +80,57 @@
 .logout-btn:hover {
   background-color: #033055;
 }
+/* createuser */
+/* userManagementButtons.css */
+
+/* Container for buttons in table */
+.record-table td button {
+  padding: 5px 12px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Edit button styling */
+.record-table td button:first-child {
+  background-color: #146985; /* blue for edit */
+  color: white;
+}
+
+.record-table td button:first-child:hover {
+  background-color: #0f5166;
+}
+
+/* Delete button styling */
+.record-table td button:last-child {
+  background-color: #ff4d4f; /* red for delete */
+  color: white;
+}
+
+.record-table td button:last-child:hover {
+  background-color: #d9363e;
+}
+
+/* Create User button (on top filter section) */
+.create-user {
+  padding: 6px 14px;
+  background-color: #146985; /* green */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.create-user:hover {
+  background-color: #146985;
+}
+
+/* Optional: small spacing between buttons */
+.record-table td button + button {
+  margin-left: 5px;
+}
