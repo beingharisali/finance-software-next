@@ -37,6 +37,8 @@ export default function ManagerBrokerRecord() {
         <h1>Finance</h1>
         <div className="nav-list">
           <Link href="/dashboard/admin" className="nav-item"> Dashboard</Link>
+           <Link href="/dashboard/admin/usermanagement" className="nav-item">User Management</Link>
+                   
           <Link href="/dashboard/admin/adminmanagerrecord" className="nav-item">Manager Record</Link>
           <Link  href="/dashboard/admin/adminagentrecord"  className="nav-item">Agent Record </Link>
           <Link href="/dashboard/admin/adminbrokerrecord" className="nav-item active">Broker Record</Link>

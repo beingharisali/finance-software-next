@@ -1,17 +1,11 @@
-
-
-
 "use client";
-
 import React, { useEffect, useState, useRef } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import Link from "next/link";
 import moment from "moment";
-
 import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
 import "../../../cssfiles/transactionfilters.css";
-
 import {
   fetchTransactions as getTransactions,
   TransactionType,
