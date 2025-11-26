@@ -1,5 +1,6 @@
 
 
+
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
@@ -57,20 +58,16 @@ export default function ManagerDashboardTransaction() {
       const res = await getTransactions(pageNum, limit, selectedCategory, start, end);
 
       const fetchedTransactions: TransactionType[] = res.transactions || [];
-
       setTransactions(fetchedTransactions);
       setPage(res.page || 1);
       setTotalPages(res.totalPages || 1);
 
       // Merge categories dynamically from transactions
       const txnCategories = fetchedTransactions
-        .map((t) => t.category)
+        .map((t) => t.transactionType)
         .filter(Boolean);
 
-      setAllCategories((prev) => {
-        const merged = [...new Set([...txnCategories, ...prev])];
-        return merged;
-      });
+      setAllCategories((prev) => [...new Set([...txnCategories, ...prev])]);
     } catch (error) {
       console.error("Failed to fetch transactions", error);
       setTransactions([]);
@@ -299,25 +296,18 @@ export default function ManagerDashboardTransaction() {
                   <th>Balance</th>
                 </tr>
               </thead>
-
               <tbody>
-                {transactions.map((txn, idx) => {
-                  const debit = parseFloat(txn.debitAmount || "0");
-                  const credit = parseFloat(txn.creditAmount || "0");
-                  const amount = credit > 0 ? credit : -debit;
-
-                  return (
-                    <tr key={idx}>
-                      <td>{moment(txn.transactionDate).format("DD/MM/YYYY")}</td>
-                      <td>{txn.transactionDescription}</td>
-                      <td>{txn.transactionType}</td>
-                      <td>{amount}</td>
-                      <td>{txn.sortCode}</td>
-                      <td>{txn.accountNumber}</td>
-                      <td>{txn.balance}</td>
-                    </tr>
-                  );
-                })}
+                {transactions.map((txn, idx) => (
+                  <tr key={idx}>
+                    <td>{txn.transactionDate ? moment(txn.transactionDate).format("DD/MM/YYYY") : "-"}</td>
+                    <td>{txn.transactionDescription || "-"}</td>
+                    <td>{txn.transactionType || "-"}</td>
+                    <td>{txn.amount || 0}</td>
+                    <td>{txn.sortCode || "-"}</td>
+                    <td>{txn.accountNumber || "-"}</td>
+                    <td>{txn.balance || 0}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           )}

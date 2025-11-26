@@ -1,7 +1,6 @@
 
 
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { Chart, registerables } from "chart.js";
@@ -16,10 +15,13 @@ import http from "@/services/http";
 Chart.register(...registerables);
 
 interface TransactionType {
-  date: string;
-  description: string;
-  category: string;
+  transactionDate: string;
+  transactionDescription: string;
+  transactionType: string;
   amount: number;
+  sortCode?: string;
+  accountNumber?: string;
+  balance?: number;
 }
 
 export default function AdminDashboard() {
@@ -40,8 +42,7 @@ export default function AdminDashboard() {
     try {
       const res = await http.get("/transactions"); 
       const data: TransactionType[] = res.data.transactions || [];
-      // Sort by date descending
-      data.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      data.sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime());
       setTransactions(data);
     } catch (err) {
       console.error("Failed to fetch transactions", err);
@@ -54,7 +55,7 @@ export default function AdminDashboard() {
     const totals: Record<string, number> = {};
     transactions.forEach(txn => {
       const val = Math.abs(txn.amount);
-      const cat = txn.category?.trim() || "Uncategorized";
+      const cat = txn.transactionType?.trim() || "Uncategorized";
       totals[cat] = (totals[cat] || 0) + val;
     });
     setCategoryTotals(totals);
@@ -62,8 +63,6 @@ export default function AdminDashboard() {
 
   useEffect(() => { 
     fetchTransactions(); 
-
-    // Polling every 10 sec for real-time updates
     const interval = setInterval(fetchTransactions, 10000);
     return () => clearInterval(interval);
   }, []);
@@ -75,7 +74,7 @@ export default function AdminDashboard() {
     let cashflowChart: Chart | null = null;
 
     const filteredTransactions = transactions.filter(txn => {
-      const txnDate = new Date(txn.date);
+      const txnDate = new Date(txn.transactionDate);
       const currentYear = new Date().getFullYear();
       switch(graphFilter) {
         case "thisYear": return txnDate.getFullYear() === currentYear;
@@ -93,7 +92,7 @@ export default function AdminDashboard() {
     const expensePerWeek = Array(52).fill(0);
 
     filteredTransactions.forEach(txn => {
-      const txnDate = new Date(txn.date);
+      const txnDate = new Date(txn.transactionDate);
       const monthIdx = txnDate.getMonth();
       const weekIdx = Math.floor((txnDate.getTime() - new Date(txnDate.getFullYear(),0,1).getTime())/(7*24*60*60*1000));
       if (txn.amount >= 0) {
@@ -228,10 +227,10 @@ export default function AdminDashboard() {
             <tbody>
               {transactions.slice(0, 5).map((txn, idx) => (
                 <tr key={idx}>
-                  <td>{new Date(txn.date).toLocaleDateString()}</td>
-                  <td>{txn.description}</td>
+                  <td>{new Date(txn.transactionDate).toLocaleDateString()}</td>
+                  <td>{txn.transactionDescription}</td>
                   <td className={txn.amount >= 0 ? "positive" : "negative"}>{Math.abs(txn.amount).toLocaleString()}</td>
-                  <td>{txn.category || "Uncategorized"}</td>
+                  <td>{txn.transactionType || "Uncategorized"}</td>
                 </tr>
               ))}
             </tbody>
