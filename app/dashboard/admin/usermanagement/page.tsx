@@ -10,6 +10,7 @@ import ProtectedRoute from "@/utilies/ProtectedRoute";
 import CreateUser from "../../createusers/page";
 import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
+import Sidebar from "@/app/dashboard/components/Sidebar";
 
 export default function UserManagement() {
   const { user, logoutUser } = useAuthContext();
@@ -69,23 +70,10 @@ export default function UserManagement() {
   return (
     <ProtectedRoute allowedRoles={["admin", "manager"]}>
       <div className="dashboard-container">
-        <nav className="sidebar">
-          <h1>Finance</h1>
-          
+        {/* sidebar */}
+        <Sidebar activePage="User Management" />
 
-          <div className="nav-list">
-          <Link href="/dashboard/admin" className="nav-item">Dashboard</Link>
-                      <Link href="/dashboard/admin/usermanagement" className="nav-item active">User Management</Link>
-          <Link href="/dashboard/admin/adminmanagerrecord" className="nav-item ">Manager Record</Link>
-          <Link href="/dashboard/admin/adminagentrecord" className="nav-item">Agent Record</Link>
-          <Link href="/dashboard/admin/adminbrokerrecord" className="nav-item">Broker Record</Link>
-          <Link href="/dashboard/sidebarcomponent/transaction" className="nav-item ">Transaction</Link>
-          <Link href="/dashboard/sidebarcomponent/payment" className="nav-item">Payment</Link>
-          <Link href="/dashboard/sidebarcomponent/card" className="nav-item">Card</Link>
-          <Link href="/dashboard/sidebarcomponent/insight" className="nav-item">Insights</Link>
-          <Link href="/dashboard/sidebarcomponent/settings" className="nav-item">Settings</Link>
-        </div>
-        </nav>
+      
 
         <main className="main-content">
           <div className="main-top">
@@ -97,7 +85,7 @@ export default function UserManagement() {
           </div>
 
           <div className="filter-section">
-            <select value={filter} onChange={e => setFilter(e.target.value)} className="filter-dropdown">
+            <select title="options" value={filter} onChange={e => setFilter(e.target.value)} className="filter-dropdown">
               <option value="all">All Users</option>
               <option value="manager">Managers</option>
               <option value="agent">Agents</option>
