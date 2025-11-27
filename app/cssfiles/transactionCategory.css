@@ -18,19 +18,6 @@
   color: #333;
 }
 
-.edit-btn {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 3px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.edit-btn:hover {
-  background-color: #0056b3;
-}
 
 /* Editing state */
 .edit-wrapper {
@@ -52,7 +39,7 @@
 }
 
 .save-btn {
-  background-color: #06227c;
+  background-color:  #0b325c !important;
   color: white;
   border: none;
   padding: 4px 8px;
@@ -62,7 +49,7 @@
 }
 
 .save-btn:hover {
-  background-color: #223f9f;
+  background-color: #0b325c ;
 }
 
 .cancel-btn {
@@ -79,3 +66,11 @@
   background-color: #223f9f;
 }
 
+.txn-edit-btn {
+  background-color: #0b325c !important;
+  color: #fff;
+}
+.txn-edit-btn-cancle{
+   background-color: #989a9b !important;
+
+}
