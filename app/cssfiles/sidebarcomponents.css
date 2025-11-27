@@ -106,12 +106,12 @@
 
 /* Delete button styling */
 .record-table td button:last-child {
-  background-color: #ff4d4f; /* red for delete */
+  background-color: #ff4d4d; /* red for delete */
   color: white;
 }
 
 .record-table td button:last-child:hover {
-  background-color: #d9363e;
+  background-color: #ff4d4d;
 }
 
 /* Create User button (on top filter section) */

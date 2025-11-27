@@ -1,0 +1,82 @@
+/* MAIN SIDEBAR */
+.sidebar-container {
+  width: 240px;
+  background: #1e293b;
+  color: white;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  padding: 20px;
+  transition: width 0.3s ease;
+  overflow-y: auto;
+}
+
+/* COLLAPSED */
+.sidebar-container.collapsed {
+  width: 70px;
+}
+
+/* TOGGLE BUTTON */
+.sidebar-toggle {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 22px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+/* LOGO */
+.sidebar-logo {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+/* MENU */
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-link {
+  padding: 10px 14px;
+  border-radius: 6px;
+  color: #cbd5e1;
+  text-decoration: none;
+  display: block;
+  transition: 0.2s;
+}
+
+.sidebar-link:hover {
+  background: #334155;
+  color: white;
+}
+
+.sidebar-link.active {
+  background: #0284c7;
+  color: white;
+  font-weight: 600;
+}
+
+/* MAIN LAYOUT */
+.dashboard-container {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  margin-left: 240px;
+  transition: margin-left 0.3s;
+}
+
+/* When sidebar collapsed */
+.sidebar-container.collapsed ~ .main-content {
+  margin-left: 70px;
+}

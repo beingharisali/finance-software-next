@@ -1,0 +1,81 @@
+/* transactio  edit */
+/* Container for category column */
+.category-column {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Viewing state */
+.view-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.view-wrapper span {
+  font-weight: 500;
+  color: #333;
+}
+
+.edit-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.edit-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Editing state */
+.edit-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.edit-input {
+  padding: 5px 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.edit-btns {
+  display: flex;
+  gap: 5px;
+}
+
+.save-btn {
+  background-color: #06227c;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.save-btn:hover {
+  background-color: #223f9f;
+}
+
+.cancel-btn {
+  background-color: #06227c;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.cancel-btn:hover {
+  background-color: #223f9f;
+}
+
