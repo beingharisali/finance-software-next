@@ -151,6 +151,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* CSV Upload */}
+          {/* csv upload */}
           <div className="upload-csv-section">
             <UploadCSV onUploadSuccess={fetchTransactions} />
           </div>
