@@ -1,9 +1,14 @@
+/* Sidebar styles */
 .sidebar {
-  background: #141c31;
-  color: #fff;
+  
+  background: #141c31; /* original color */
+  color: #fff;          /* original text color */
   padding: 2.5rem 1.5rem;
   display: flex;
   flex-direction: column;
+  height: 100vh;       /* full viewport height */
+  overflow-y: auto;    /* make scrollable if content overflows */
+  box-sizing: border-box;
 }
 
 .sidebar h1 {
@@ -33,8 +38,8 @@
 
 .nav-item.active,
 .nav-item:hover {
-  background: white;
-  color: #141c31;
+  background: white;       /* original hover color */
+  color: #141c31;          /* original hover text color */
   font-weight: 700;
 }
 
@@ -48,7 +53,7 @@
   margin-left: auto;
 }
 
-/* logout */
+/* Logout and top section */
 .main-top {
   display: flex;
   justify-content: space-between;
@@ -80,10 +85,8 @@
 .logout-btn:hover {
   background-color: #033055;
 }
-/* createuser */
-/* userManagementButtons.css */
 
-/* Container for buttons in table */
+/* Create User and table buttons */
 .record-table td button {
   padding: 5px 12px;
   margin-right: 5px;
@@ -94,9 +97,9 @@
   transition: all 0.2s ease-in-out;
 }
 
-/* Edit button styling */
+/* Edit button styling (if used) */
 .record-table td button:first-child {
-  background-color: #146985; /* blue for edit */
+  background-color: #146985; /* original blue */
   color: white;
 }
 
@@ -106,18 +109,18 @@
 
 /* Delete button styling */
 .record-table td button:last-child {
-  background-color: #858383; /* red for delete */
+  background-color: #858383; /* original gray */
   color: white;
 }
 
 .record-table td button:last-child:hover {
-  background-color:   #a6a5a5;
+  background-color: #a6a5a5;
 }
 
 /* Create User button (on top filter section) */
 .create-user {
   padding: 6px 14px;
-  background-color: #146985; /* green */
+  background-color: #146985; 
   color: white;
   border: none;
   border-radius: 5px;
@@ -128,10 +131,31 @@
 }
 
 .create-user:hover {
-  background-color: #146985;
+  background-color: #146985; /* keep original */
 }
 
 /* Optional: small spacing between buttons */
 .record-table td button + button {
   margin-left: 5px;
+}
+
+/* Scrollbar styles (optional, subtle) */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Responsive fix: sidebar always full height on smaller screens */
+@media (max-height: 700px) {
+  .sidebar {
+    padding: 2rem 1rem;
+  }
 }
