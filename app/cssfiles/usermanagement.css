@@ -1,0 +1,79 @@
+.record-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Inter', sans-serif;
+}
+
+.record-table th,
+.record-table td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.record-table thead {
+  background-color: #0f506c; /* dark header */
+  color: white;
+}
+
+/* .record-table tbody tr {
+  background-color: #2b2f3a;
+  color: #e5e7eb;
+  transition: background 0.2s;
+} */
+/* 
+.record-table tbody tr:hover {
+  background-color: #3b3f4a;
+} */
+
+.role-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.role-dropdown {
+  background-color: #0f506c;
+  color: #fff;
+  border: 1px solid #4b5563;
+  padding: 5px 15px;
+  border-radius: 5px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.role-dropdown option {
+  background-color: #0f506c;
+  color: #fff;
+}
+
+.row-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+
+/* Custom dropdown */
+.role-dropdown.white-dropdown {
+  color: #fff; /* white text */
+  background-color: #0f506c; /* dark background */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 30px 5px 10px;
+  appearance: none; /* remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  width: 120px;
+}
+
+/* White arrow always visible */
+.role-dropdown-wrapper::after {
+  content: "▼";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff; /* white arrow */
+  pointer-events: none; /* arrow not clickable separately */
+  font-size: 12px;
+}
