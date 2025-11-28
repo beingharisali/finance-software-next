@@ -8,7 +8,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import SaleModal from "./saleforms";
 import http from "@/services/http";
 import Link from "next/link";
-
+import Sidebar from "@/app/dashboard/components/Sidebar";
 
 interface Sale {
   _id: string;
@@ -53,18 +53,7 @@ useEffect(() => {
 
   return (
     <div className="dashboard">
-      <nav className="sidebar">
-        <h1>Finance</h1>
-        <div className="nav-list">
-          <Link href="/dashboard/sidebarcomponent" className="nav-item active">Dashboard</Link>
-          <Link href="/dashboard/sidebarcomponent/transaction" className="nav-item">Transaction</Link>
-          <Link href="/dashboard/sidebarcomponent/payment" className="nav-item">Payment</Link>
-          <Link href="/dashboard/sidebarcomponent/card" className="nav-item">Card</Link>
-          <Link href="/dashboard/sidebarcomponent/insight" className="nav-item">Insights</Link>
-          <Link href="/dashboard/sidebarcomponent/settings" className="nav-item">Settings</Link>
-        </div>
-        
-      </nav>
+     <Sidebar activePage="Dashboardagent" />
 
       <main className="main">
 <div className="main-top">

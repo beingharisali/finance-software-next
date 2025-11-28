@@ -97,8 +97,8 @@ import { fetchUsers } from "@/services/user.api";
 import type { User } from "@/types/user";
 import Sidebar from "@/app/dashboard/components/Sidebar";
 import ProtectedRoute from "@/utilies/ProtectedRoute"; // Protected wrapper
-import "../../../cssfiles/record.css";
-import "../../../cssfiles/sidebarcomponents.css";
+import "../../cssfiles/record.css";
+import "../../cssfiles/sidebarcomponents.css";
 
 export default function ManagerBrokerRecord() {
   const { user, logoutUser } = useAuthContext();
@@ -124,7 +124,7 @@ export default function ManagerBrokerRecord() {
   if (!user) return <p>Loading...</p>;
 
   return (
-    <ProtectedRoute allowedRoles={["manager", "admin"]}>
+    <ProtectedRoute allowedRoles={[ "admin","manager"]}>
       <div className="dashboard-container">
         {/* Sidebar */}
         <Sidebar activePage="Broker Record" />

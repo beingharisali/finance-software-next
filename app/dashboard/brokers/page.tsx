@@ -1,3 +1,5 @@
+// assistanpage 
+
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
@@ -7,6 +9,7 @@ import "../../cssfiles/admin.css";
 import "../../cssfiles/sidebarcomponents.css";
 import "../../cssfiles/agent.css"; // reuse agent.css for table styling
 import http from "@/services/http";
+import Sidebar from "@/app/dashboard/components/Sidebar"; 
 
 interface Sale {
   _id: string;
@@ -101,17 +104,7 @@ export default function BrokerDashboard() {
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
-      <nav className="sidebar">
-        <h1>Finance</h1>
-          <div className="nav-list">
-          <Link href="/dashboard/sidebarcomponent" className="nav-item active">Dashboard</Link>
-          <Link href="/dashboard/sidebarcomponent/transaction" className="nav-item">Transaction</Link>
-          <Link href="/dashboard/sidebarcomponent/payment" className="nav-item">Payment</Link>
-          <Link href="/dashboard/sidebarcomponent/card" className="nav-item">Card</Link>
-          <Link href="/dashboard/sidebarcomponent/insight" className="nav-item">Insights</Link>
-          <Link href="/dashboard/sidebarcomponent/settings" className="nav-item">Settings</Link>
-        </div>
-      </nav>
+        <Sidebar activePage="Dashboard" />
 
       {/* Main Content */}
       <main className="main-content">

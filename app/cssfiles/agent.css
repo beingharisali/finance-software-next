@@ -247,3 +247,41 @@ tbody tr td {
     font-size: 0;
   }
 }
+/* salemodel for admin and manger */
+
+/* Filter section */
+.filter-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.filter-dropdown {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  min-width: 180px;
+}
+
+.reset-filter-btn {
+  padding: 6px 12px;
+  background-color: #9a9a9a; /* red */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.reset-filter-btn:hover {
+  background-color: #a5a3a3;
+}
