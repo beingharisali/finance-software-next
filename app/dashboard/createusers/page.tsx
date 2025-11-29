@@ -8,7 +8,7 @@ import http from "@/services/http";
 import "../../cssfiles/register.css";
 
 interface CreateUserProps {
-  role?: "manager" | "agent" | "broker";
+  role?: "manager" | "broker" | "assistant";
   onClose: () => void;
   editUser?: {
     id: string;
@@ -20,14 +20,20 @@ interface CreateUserProps {
 }
 
 export default function CreateUser({ role, onClose, editUser }: CreateUserProps) {
-  const { user, registerUser, refreshProfile } = useAuthContext();
+  const { user, refreshProfile } = useAuthContext();
   const router = useRouter();
+
+  const roleMap: { [key: string]: string } = {
+    agent: "broker",
+    broker: "assistant",
+    manager: "manager",
+  };
 
   const [formData, setFormData] = useState({
     fullname: editUser?.fullname || "",
     email: editUser?.email || "",
     password: "",
-    role: editUser?.role || role || "agent",
+    role: editUser?.role ? roleMap[editUser.role] || editUser.role : role || "broker",
     phone: editUser?.phone || "",
   });
 
@@ -35,14 +41,9 @@ export default function CreateUser({ role, onClose, editUser }: CreateUserProps)
 
   const allowedRolesToCreate = () => {
     if (!user) return [];
-    switch (user.role) {
-      case "admin":
-        return ["manager", "agent", "broker"];
-      case "manager":
-        return ["agent", "broker"];
-      default:
-        return [];
-    }
+    if (user.role === "admin") return ["manager", "broker", "assistant"];
+    if (user.role === "manager") return ["broker", "assistant"];
+    return [];
   };
 
   useEffect(() => {
@@ -67,13 +68,12 @@ export default function CreateUser({ role, onClose, editUser }: CreateUserProps)
     try {
       setLoading(true);
       if (editUser) {
-        await http.put(`/users/${editUser.id}`, formData);
+        await http.put(`/users/${editUser.id}`, { ...formData, role: formData.role });
         alert("User updated successfully!");
       } else {
-        await registerUser(formData.fullname, formData.email, formData.password, formData.role, false);
+        await http.post("/users", { ...formData, role: formData.role });
         alert("User created successfully!");
       }
-      setFormData({ fullname: "", email: "", password: "", role: role || "agent", phone: "" });
       onClose();
       refreshProfile();
     } catch (error: any) {
@@ -106,21 +106,69 @@ export default function CreateUser({ role, onClose, editUser }: CreateUserProps)
   return (
     <div className="modal-overlay">
       <div className="modal">
-        <h2 className="register-title">{editUser ? `Edit User: ${editUser.fullname}` : `Create New ${formData.role}`}</h2>
+        <h2 className="register-title">
+          {editUser ? `Edit User: ${editUser.fullname}` : `Create New User`}
+        </h2>
         <form onSubmit={handleSubmit} className="register-form">
-          <input type="text" name="fullname" value={formData.fullname} onChange={handleChange} placeholder="Full Name" required className="register-input" />
-          <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email" required className="register-input" />
-          {!editUser && <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Password" required className="register-input" />}
-          <input type="text" name="phone" value={formData.phone} onChange={handleChange} placeholder="Phone (optional)" className="register-input" />
-          <select title="register-input" name="role" value={formData.role} onChange={handleChange} className="register-input">
+          <input
+            type="text"
+            name="fullname"
+            value={formData.fullname}
+            onChange={handleChange}
+            placeholder="Full Name"
+            required
+            className="register-input"
+          />
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email"
+            required
+            className="register-input"
+          />
+          {!editUser && (
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Password"
+              required
+              className="register-input"
+            />
+          )}
+          <input
+            type="text"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="Phone (optional)"
+            className="register-input"
+          />
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="register-input"
+          >
             {allowedRolesToCreate().map(r => (
-              <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
+              <option key={r} value={r}>
+                {r.charAt(0).toUpperCase() + r.slice(1)}
+              </option>
             ))}
           </select>
           <div className="button-row">
-            <button type="submit" disabled={loading} className="register-btn">{loading ? (editUser ? "Updating..." : "Creating...") : editUser ? "Update" : `Create ${formData.role}`}</button>
+            <button type="submit" disabled={loading} className="register-btn">
+              {loading ? (editUser ? "Updating..." : "Creating...") : editUser ? "Update" : `Create ${formData.role}`}
+            </button>
             <button type="button" onClick={onClose} className="close-btn">Cancel</button>
-            {editUser && user.role === "admin" && <button type="button" onClick={handleDelete} disabled={loading} className="delete-btn">Delete</button>}
+            {editUser && user.role === "admin" && (
+              <button type="button" onClick={handleDelete} disabled={loading} className="delete-btn">
+                Delete
+              </button>
+            )}
           </div>
         </form>
       </div>

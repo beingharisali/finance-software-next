@@ -109,7 +109,7 @@ export default function BrokerDashboard() {
       {/* Main Content */}
       <main className="main-content">
         <div className="main-top">
-          <h1 className="header">Broker Dashboard</h1>
+          <h1 className="header">Assistant Dashboard</h1>
           <div className="top-right">
             <span className="profile-name">{user.fullname || user.email}</span>
             <button className="logout-btn" onClick={logoutUser}>Logout</button>

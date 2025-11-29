@@ -319,6 +319,7 @@
 //     </ProtectedRoute>
 //   );
 // }
+
 // "use client";
 
 // import React, { useEffect, useState } from "react";
@@ -326,11 +327,11 @@
 // import { fetchUsers, deleteUser, updateUserRole } from "@/services/user.api";
 // import type { User } from "@/types/user";
 // import ProtectedRoute from "@/utilies/ProtectedRoute";
-// import CreateUser from "../../createusers/page";
-// import "../../../cssfiles/record.css";
-// import "../../../cssfiles/sidebarcomponents.css";
+// import CreateUser from "../createusers/page";
+// import "../../cssfiles/record.css";
+// import "../../cssfiles/sidebarcomponents.css";
 // import Sidebar from "@/app/dashboard/components/Sidebar";
-// import "../../../cssfiles/usermanagement.css"; // New CSS file for table and dropdown design
+// import "../../cssfiles/usermanagement.css";
 
 // export default function UserManagement() {
 //   const { user, logoutUser } = useAuthContext();
@@ -344,10 +345,20 @@
 //     setLoading(true);
 //     try {
 //       const result: any = await fetchUsers(roleFilter);
-//       const usersWithId = result.map((u: any) => ({
+//       let filtered = result;
+
+//       // Manager should only see agents & brokers
+//       if (user?.role === "manager") {
+//         filtered = result.filter(
+//           (u: any) => u.role === "agent" || u.role === "broker"
+//         );
+//       }
+
+//       const usersWithId = filtered.map((u: any) => ({
 //         ...u,
 //         id: u._id || u.id,
 //       }));
+
 //       setUsers(usersWithId);
 //     } catch (err) {
 //       console.log("Error fetching users:", err);
@@ -398,7 +409,6 @@
 //     <ProtectedRoute allowedRoles={["admin", "manager"]}>
 //       <div className="dashboard-container">
 //         <Sidebar activePage="User Management" />
-
 //         <main className="main-content">
 //           <div className="main-top">
 //             <h1 className="header">User Management</h1>
@@ -420,8 +430,11 @@
 //               <option value="agent">Agents</option>
 //               <option value="broker">Brokers</option>
 //             </select>
-//             {user.role === "admin" && (
-//               <button className="create-user" onClick={() => handleOpenModal()}>Create User</button>
+
+//             {(user.role === "admin" || user.role === "manager") && (
+//               <button className="create-user" onClick={() => handleOpenModal()}>
+//                 Create User
+//               </button>
 //             )}
 //           </div>
 
@@ -434,7 +447,6 @@
 //               <table className="record-table">
 //                 <thead>
 //                   <tr>
-//                     <th></th>
 //                     <th>Name</th>
 //                     <th>Email</th>
 //                     <th>User Role</th>
@@ -445,33 +457,36 @@
 //                 <tbody>
 //                   {users.map(u => (
 //                     <tr key={u.id}>
-//                       <td>
-//                         <input type="checkbox" className="row-checkbox" />
-//                       </td>
 //                       <td>{u.fullname}</td>
 //                       <td>{u.email}</td>
 //                       <td>
 //                         {user.role === "admin" ? (
 //                           <div className="role-dropdown-wrapper">
 //                             <select
-//                             title="dropdown"
-//                               className="role-dropdown"
+//                               title="dropdown"
+//                               className="role-dropdown white-dropdown"
 //                               value={u.role}
 //                               onChange={e => handleRoleChange(u.id, e.target.value)}
 //                             >
 //                               <option value="admin">Admin</option>
 //                               <option value="manager">Manager</option>
-//                               <option value="agent">Agent</option>
 //                               <option value="broker">Broker</option>
+//                               <option value="agent">Assistant</option>
 //                             </select>
 //                           </div>
-//                         ) : u.role}
+//                         ) : (
+//                           u.role
+//                         )}
 //                       </td>
 //                       <td>{new Date(u.createdAt || "").toLocaleDateString()}</td>
 //                       {user.role === "admin" && (
 //                         <td>
-//                           <button onClick={() => handleOpenModal(u)}>Edit</button>
-//                           <button onClick={() => handleDeleteUser(u.id)}>Delete</button>
+//                           <button
+//                             className="delete-btn"
+//                             onClick={() => handleDeleteUser(u.id)}
+//                           >
+//                             Delete
+//                           </button>
 //                         </td>
 //                       )}
 //                     </tr>
@@ -483,11 +498,12 @@
 
 //           {showModal && (
 //             <CreateUser
-//               user={selectedUser}
+//               role={user.role === "manager" ? "agent" : undefined} 
 //               onClose={() => {
 //                 setShowModal(false);
 //                 loadUsers(filter);
 //               }}
+//               editUser={selectedUser || undefined}
 //             />
 //           )}
 //         </main>
@@ -502,11 +518,11 @@ import { useAuthContext } from "@/context/AuthContext";
 import { fetchUsers, deleteUser, updateUserRole } from "@/services/user.api";
 import type { User } from "@/types/user";
 import ProtectedRoute from "@/utilies/ProtectedRoute";
-import CreateUser from "../../createusers/page";
-import "../../../cssfiles/record.css";
-import "../../../cssfiles/sidebarcomponents.css";
+import CreateUser from "../createusers/page";
+import "../../cssfiles/record.css";
+import "../../cssfiles/sidebarcomponents.css";
 import Sidebar from "@/app/dashboard/components/Sidebar";
-import "../../../cssfiles/usermanagement.css"; // Custom CSS for table & dropdown
+import "../../cssfiles/usermanagement.css";
 
 export default function UserManagement() {
   const { user, logoutUser } = useAuthContext();
@@ -520,10 +536,20 @@ export default function UserManagement() {
     setLoading(true);
     try {
       const result: any = await fetchUsers(roleFilter);
-      const usersWithId = result.map((u: any) => ({
+      let filtered = result;
+
+      // Manager should only see assistants & brokers
+      if (user?.role === "manager") {
+        filtered = result.filter(
+          (u: any) => u.role === "assistant" || u.role === "broker"
+        );
+      }
+
+      const usersWithId = filtered.map((u: any) => ({
         ...u,
         id: u._id || u.id,
       }));
+
       setUsers(usersWithId);
     } catch (err) {
       console.log("Error fetching users:", err);
@@ -557,9 +583,11 @@ export default function UserManagement() {
 
   const handleRoleChange = async (id: string, newRole: string) => {
     try {
-      await updateUserRole(id, newRole);
+      // map frontend "Assistant" to backend "assistant"
+      const roleValue = newRole.toLowerCase() === "assistant" ? "assistant" : newRole.toLowerCase();
+      await updateUserRole(id, roleValue);
       setUsers(prev =>
-        prev.map(u => (u.id === id ? { ...u, role: newRole } : u))
+        prev.map(u => (u.id === id ? { ...u, role: roleValue } : u))
       );
       alert("Role updated successfully");
     } catch (err: any) {
@@ -574,7 +602,6 @@ export default function UserManagement() {
     <ProtectedRoute allowedRoles={["admin", "manager"]}>
       <div className="dashboard-container">
         <Sidebar activePage="User Management" />
-
         <main className="main-content">
           <div className="main-top">
             <h1 className="header">User Management</h1>
@@ -593,11 +620,14 @@ export default function UserManagement() {
             >
               <option value="all">All Users</option>
               <option value="manager">Managers</option>
-              <option value="agent">Agents</option>
+              <option value="assistant">Assistants</option>
               <option value="broker">Brokers</option>
             </select>
-            {user.role === "admin" && (
-              <button className="create-user" onClick={() => handleOpenModal()}>Create User</button>
+
+            {(user.role === "admin" || user.role === "manager") && (
+              <button className="create-user" onClick={() => handleOpenModal()}>
+                Create User
+              </button>
             )}
           </div>
 
@@ -633,11 +663,13 @@ export default function UserManagement() {
                             >
                               <option value="admin">Admin</option>
                               <option value="manager">Manager</option>
-                              <option value="agent">Agent</option>
                               <option value="broker">Broker</option>
+                              <option value="assistant">Assistant</option>
                             </select>
                           </div>
-                        ) : u.role}
+                        ) : (
+                          u.role
+                        )}
                       </td>
                       <td>{new Date(u.createdAt || "").toLocaleDateString()}</td>
                       {user.role === "admin" && (
@@ -659,11 +691,12 @@ export default function UserManagement() {
 
           {showModal && (
             <CreateUser
-              user={selectedUser}
+              role={user.role === "manager" ? "assistant" : undefined} 
               onClose={() => {
                 setShowModal(false);
                 loadUsers(filter);
               }}
+              editUser={selectedUser || undefined}
             />
           )}
         </main>

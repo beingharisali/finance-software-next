@@ -271,7 +271,7 @@ export default function SaleManagement() {
   if (!user) return <p>Loading...</p>;
 
   return (
-    <ProtectedRoute allowedRoles={["admin", "manager"]}>
+    <ProtectedRoute allowedRoles={["admin", "manager", "assistant"]}>
       <div className="dashboard-container">
         <Sidebar activePage="Sale" />
 
