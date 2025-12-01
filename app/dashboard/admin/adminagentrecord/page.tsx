@@ -1,4 +1,98 @@
 
+// "use client";
+
+// import React, { useEffect, useState } from "react";
+// import { useAuthContext } from "@/context/AuthContext";
+// import { fetchUsers } from "@/services/user.api";
+// import type { User } from "@/types/user";
+// import Sidebar from "@/app/dashboard/components/Sidebar";
+// import ProtectedRoute from "@/utilies/ProtectedRoute";
+// import "../../../cssfiles/record.css";
+// import "../../../cssfiles/sidebarcomponents.css";
+
+// export default function ManagerAgentRecord() {
+//   const { user, logoutUser } = useAuthContext();
+//   const [agents, setAgents] = useState<User[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     const loadAgents = async () => {
+//       try {
+//         if (user) {
+//           // 🔥 FIX: Correct role filter → backend expects "assistant"
+//           const users = await fetchUsers("assistant");
+//           setAgents(users);
+//         }
+//       } catch (error) {
+//         console.error("Error fetching assistants:", error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     loadAgents();
+//   }, [user]);
+
+//   if (!user) return <p>Loading...</p>;
+
+//   return (
+//     <ProtectedRoute allowedRoles={["admin"]}>
+//       <div className="dashboard-container">
+        
+//         {/* Sidebar */}
+//         <Sidebar activePage="Assistant Record" />
+
+//         {/* Main Content */}
+//         <main className="main-content">
+//           <div className="main-top">
+//             <h1 className="header">Assistant Records</h1>
+//             <div className="top-right">
+//               <span className="profile-name">
+//                 {user?.fullname || user?.email || "Guest"}
+//               </span>
+//               <button className="logout-btn" onClick={logoutUser}>
+//                 Logout
+//               </button>
+//             </div>
+//           </div>
+
+//           <div className="record-wrapper">
+//             {loading ? (
+//               <p className="loading-text">Loading...</p>
+//             ) : agents.length === 0 ? (
+//               <p className="no-records">No Assistant found.</p>
+//             ) : (
+//               <table className="record-table">
+//                 <thead>
+//                   <tr>
+//                     <th>Name</th>
+//                     <th>Email</th>
+//                     <th>Role</th>
+//                     <th>Created At</th>
+//                   </tr>
+//                 </thead>
+//                 <tbody>
+//                   {agents.map((agent) => (
+//                     <tr key={agent._id}>
+//                       <td>{agent.fullname}</td>
+//                       <td>{agent.email}</td>
+//                       <td>{agent.role}</td>
+//                       <td>
+//                         {agent.createdAt
+//                           ? new Date(agent.createdAt).toLocaleDateString()
+//                           : "-"}
+//                       </td>
+//                     </tr>
+//                   ))}
+//                 </tbody>
+//               </table>
+//             )}
+//           </div>
+//         </main>
+//       </div>
+//     </ProtectedRoute>
+//   );
+// }
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -6,35 +100,36 @@ import { useAuthContext } from "@/context/AuthContext";
 import { fetchUsers } from "@/services/user.api";
 import type { User } from "@/types/user";
 import Sidebar from "@/app/dashboard/components/Sidebar";
-import ProtectedRoute from "@/utilies/ProtectedRoute"; // Protected wrapper
+import ProtectedRoute from "@/utilies/ProtectedRoute"; 
 import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
 
 export default function ManagerAgentRecord() {
   const { user, logoutUser } = useAuthContext();
-  const [agents, setAgents] = useState<User[]>([]);
+  const [assistants, setAssistants] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadAgents = async () => {
+    const loadAssistants = async () => {
       try {
         if (user) {
-          const users = await fetchUsers("agent"); // admin ke data structure ka use
-          setAgents(users);
+          // FETCH ONLY ASSISTANTS
+          const users = await fetchUsers("assistant");
+          setAssistants(users);
         }
       } catch (error) {
-        console.error("Error fetching agents:", error);
+        console.error("Error fetching assistants:", error);
       } finally {
         setLoading(false);
       }
     };
-    loadAgents();
+    loadAssistants();
   }, [user]);
 
   if (!user) return <p>Loading...</p>;
 
   return (
-    <ProtectedRoute allowedRoles={[ "admin"]}>
+    <ProtectedRoute allowedRoles={["admin"]}>
       <div className="dashboard-container">
         {/* Sidebar */}
         <Sidebar activePage="Assistant Record" />
@@ -42,7 +137,7 @@ export default function ManagerAgentRecord() {
         {/* Main Content */}
         <main className="main-content">
           <div className="main-top">
-            <h1 className="header">Agent Records</h1>
+            <h1 className="header">Assistant Records</h1>
             <div className="top-right">
               <span className="profile-name">
                 {user?.fullname || user?.email || "Guest"}
@@ -56,8 +151,8 @@ export default function ManagerAgentRecord() {
           <div className="record-wrapper">
             {loading ? (
               <p className="loading-text">Loading...</p>
-            ) : agents.length === 0 ? (
-              <p className="no-records">No agents found.</p>
+            ) : assistants.length === 0 ? (
+              <p className="no-records">No Assistant found.</p>
             ) : (
               <table className="record-table">
                 <thead>
@@ -69,14 +164,14 @@ export default function ManagerAgentRecord() {
                   </tr>
                 </thead>
                 <tbody>
-                  {agents.map((agent) => (
-                    <tr key={agent.id}>
-                      <td>{agent.fullname}</td>
-                      <td>{agent.email}</td>
-                      <td>{agent.role}</td>
+                  {assistants.map((asst) => (
+                    <tr key={asst._id}>
+                      <td>{asst.fullname}</td>
+                      <td>{asst.email}</td>
+                      <td>{asst.role}</td>
                       <td>
-                        {agent.createdAt
-                          ? new Date(agent.createdAt).toLocaleDateString()
+                        {asst.createdAt
+                          ? new Date(asst.createdAt).toLocaleDateString()
                           : "-"}
                       </td>
                     </tr>
