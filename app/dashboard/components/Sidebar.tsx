@@ -21,39 +21,40 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
       { name: "Assistant Record", path: "/dashboard/admin/adminagentrecord" },
       { name: " Broker Record", path: "/dashboard/adminbrokerrecord" },
       { name: "Finance", path: "/dashboard/transaction" },
+      // { name: "Broker Sale", path: "/dashboard/broker/brokersaleform" },
       { name: "Sale", path: "/dashboard/sidebarcomponent/sale" },
-      { name: "Companycost", path: "/dashboard/sidebarcomponent/companycost" },
+      { name: "Company Cost", path: "/dashboard/sidebarcomponent/companycost" },
       { name: "Product", path: "/dashboard/sidebarcomponent/product" },
-      { name: "Insights", path: "/dashboard/sidebarcomponent/insight" },
+      { name: "Deals", path: "/dashboard/sidebarcomponent/deals" },
       { name: "Settings", path: "/dashboard/sidebarcomponent/settings" },
     ],
     manager: [
       { name: "Dashboard", path: "/dashboard/managers" },
       { name: "User Management", path: "/dashboard/usermanagement" },
       { name: "Broker Record", path: "/dashboard/adminbrokerrecord" },
-      // { name: "Assistant Record", path: "/dashboard/admin/adminagentrecord" },
       { name: "Finance", path: "/dashboard/transaction" },
       { name: "Sale", path: "/dashboard/sidebarcomponent/sale" },
-      { name: "Payment", path: "/dashboard/sidebarcomponent/payment" },
-      { name: "Card", path: "/dashboard/sidebarcomponent/card" },
-      { name: "Insights", path: "/dashboard/sidebarcomponent/insight" },
+      { name: "Company Cost", path: "/dashboard/sidebarcomponent/companycost" },
+      { name: "Product", path: "/dashboard/sidebarcomponent/product" },
+
     ],
      assistant: [
-      { name: "Dashboard", path: "/dashboard/assistant" }, // same as manager
-      // { name: "User Management", path: "/dashboard/usermanagement" },
-      // { name: "Assistant Record", path: "/dashboard/assistantrecord" }
+      { name: "Dashboard", path: "/dashboard/assistant" }, 
+      { name: "User Management", path: "/dashboard/usermanagement" },
+
       // Finance removed for assistant
       { name: "Broker Record", path: "/dashboard/adminbrokerrecord" },
       { name: "Sale", path: "/dashboard/sidebarcomponent/sale" },
-      { name: "Payment", path: "/dashboard/sidebarcomponent/payment" },
-      { name: "Card", path: "/dashboard/sidebarcomponent/card" },
-      { name: "Insights", path: "/dashboard/sidebarcomponent/insight" },
+      { name: "Company Cost", path: "/dashboard/sidebarcomponent/companycost" },
+      { name: "Product", path: "/dashboard/sidebarcomponent/product" },
+
     ],
     broker: [
       { name: "Dashboardagent", path: "/dashboard/broker" },
-      { name: "Companycost", path: "/dashboard/sidebarcomponent/companycost" },
+      { name: "Broker Sale", path: "/dashboard/broker/brokersaleform" },
+      // { name: "Company Cost", path: "/dashboard/sidebarcomponent/companycost" },
       { name: "Product", path: "/dashboard/sidebarcomponent/product" },
-      { name: "Insights", path: "/dashboard/sidebarcomponent/insight" },
+      { name: "Deals", path: "/dashboard/sidebarcomponent/deals" },
     ],
    
   };
