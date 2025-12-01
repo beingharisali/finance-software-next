@@ -1214,12 +1214,12 @@ export default function AdminDashboard() {
               <div className="chart-header">
                 <h2>Cashflow</h2>
                 <div className="filters">
-                  <select value={graphFilter} onChange={e => setGraphFilter(e.target.value as any)}>
+                  <select className="years-dropdown" value={graphFilter} onChange={e => setGraphFilter(e.target.value as any)}>
                     <option value="thisYear">This Year</option>
                     <option value="lastYear">Last Year</option>
                     <option value="month">Month-wise</option>
                     <option value="week">Week-wise</option>
-                    <option value="none">By Date Range</option>
+                    {/* <option value="none">By Date Range</option> */}
                   </select>
 
                   <label>From: <input type="date" name="from" value={tempDateRange.from} onChange={handleTempDateChange} /></label>
