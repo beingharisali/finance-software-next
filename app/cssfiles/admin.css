@@ -148,3 +148,107 @@ margin-bottom: 20px;
 .activity-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 20px; }
 .activity-card { background: #f9f9f9; padding: 15px; border-radius: 5px; text-align: center; }
 .activity-value { font-size: 20px; font-weight: bold; margin-top: 5px; }
+/* filterdate */
+/* ===== Dashboard Filters Styling ===== */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.filters label {
+  font-size: 0.875rem;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+}
+
+.filters input[type="date"] {
+  margin-top: 0.25rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: white;
+  color: black;
+  font-size: 0.875rem;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.filters input[type="date"]::placeholder {
+  color: #ccc;
+}
+
+.filters input[type="date"]:focus {
+  outline: none;
+  border-color: #146985;
+  box-shadow: 0 0 4px rgba(20, 105, 133, 0.5);
+}
+/* 
+.filters select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #1e263b;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.filters select:focus {
+  outline: none;
+  border-color: #146985;
+  box-shadow: 0 0 4px rgba(20, 105, 133, 0.5);
+} */
+
+/* Apply & Reset buttons */
+.filters button {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.filters button:hover {
+  transform: translateY(-1px);
+}
+
+.filters button:active {
+  transform: translateY(1px);
+}
+
+.filters button:nth-of-type(1) { /* Apply button */
+  background-color: #146985;
+  color: #fff;
+}
+
+.filters button:nth-of-type(1):hover {
+  background-color: #0f5271;
+}
+
+.filters button:nth-of-type(2) { /* Reset button */
+  background-color: #ff4d4f;
+  color: #fff;
+}
+
+.filters button:nth-of-type(2):hover {
+  background-color: #cc3a3c;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .filters label, .filters select, .filters button {
+    width: 100%;
+  }
+}

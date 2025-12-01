@@ -29,7 +29,8 @@ export default function DashboardPage() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch agent's sales
+  // Fetch agent's sales 
+  
   const fetchSales = async () => {
     try {
       setLoading(true);

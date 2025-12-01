@@ -127,7 +127,7 @@ export default function ManagerBrokerRecord() {
     <ProtectedRoute allowedRoles={[ "admin","manager", "assistant"]}>
       <div className="dashboard-container">
         {/* Sidebar */}
-        <Sidebar activePage="Assistant Record" />
+        <Sidebar activePage="Broker Record" />
 
         {/* Main Content */}
         <main className="main-content">
