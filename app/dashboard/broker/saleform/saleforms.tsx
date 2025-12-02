@@ -1,5 +1,6 @@
 
 "use client";
+
 import React, { useState, useEffect } from "react";
 import "../../../cssfiles/saleform.css";
 import { useAuthContext } from "@/context/AuthContext";
@@ -7,10 +8,11 @@ import http from "@/services/http";
 
 interface SaleModalProps {
   onClose: () => void;
-  refreshSales: () => void;
+  refreshSales: (sale: any) => void;
+  brokers: { _id: string; fullname: string; email: string }[];
 }
 
-export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
+export default function SaleModal({ onClose, refreshSales, brokers }: SaleModalProps) {
   const { user, loading } = useAuthContext();
   const [form, setForm] = useState({
     productType: "",
@@ -38,9 +40,9 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
       productType: form.productType.trim(),
       productId: form.productId.trim(),
       productDescription: form.productDescription.trim(),
-      price: form.price,
-      commission: form.commission,
-      broker: user.role === "broker" ? user._id : form.broker.trim(),
+      price: Number(form.price),
+      commission: Number(form.commission),
+      broker: user.role === "broker" ? user._id : form.broker,
     };
 
     if (!payload.productType || !payload.productId || !payload.productDescription || !payload.broker) {
@@ -50,29 +52,35 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
     try {
       const res = await http.post("/sales", payload);
       if (res.data.success) {
-        alert("Product added successfully!");
-        setForm({ productType: "", productId: "", productDescription: "", price: 0, broker: user.role === "broker" ? user._id : "", commission: 0 });
+        alert("Sale added successfully!");
+        refreshSales(res.data.sale);
         onClose();
-        refreshSales();
+        setForm({
+          productType: "",
+          productId: "",
+          productDescription: "",
+          price: 0,
+          commission: 0,
+          broker: user.role === "broker" ? user._id : "",
+        });
       } else {
-        alert(res.data.message || "Failed to add product");
+        alert(res.data.message || "Failed to add sale");
       }
     } catch (err: any) {
       console.error(err);
-      alert(err.response?.data?.message || "Error submitting product");
+      alert(err.response?.data?.message || "Error submitting sale");
     }
   };
 
-  if (loading || !user)
+  if (loading || !user) {
     return (
       <div className="modal-backdrop">
         <div className="modal">
-          <div className="modal-header">
-            <h2>Loading user...</h2>
-          </div>
+          <div className="modal-header"><h2>Loading user...</h2></div>
         </div>
       </div>
     );
+  }
 
   return (
     <div className="modal-backdrop">
@@ -106,8 +114,13 @@ export default function SaleModal({ onClose, refreshSales }: SaleModalProps) {
 
           {user.role !== "broker" && (
             <div className="form-group">
-              <label htmlFor="broker">Broker ID</label>
-              <input id="broker" type="text" name="broker" value={form.broker} onChange={handleChange} required />
+              <label htmlFor="broker">Select Broker</label>
+              <select id="broker" name="broker" value={form.broker} onChange={handleChange} required>
+                <option value="">Select Broker</option>
+                {brokers.map(b => (
+                  <option key={b._id} value={b._id}>{b.fullname || b.email}</option>
+                ))}
+              </select>
             </div>
           )}
 
