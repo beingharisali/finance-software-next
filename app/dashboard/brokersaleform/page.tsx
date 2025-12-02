@@ -2,12 +2,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import "../../../cssfiles/sidebarcomponents.css";
-import "../../../cssfiles/agent.css";
+import "../../cssfiles/sidebarcomponents.css";
+import "../../cssfiles/agent.css";
 import { useAuthContext } from "@/context/AuthContext";
 import http from "@/services/http";
 import Sidebar from "@/app/dashboard/components/Sidebar";
-import SaleModal from "../../broker/saleform/saleforms";
+import SaleModal from "../broker/saleform/saleforms";
 
 interface Sale {
   _id: string;
@@ -45,7 +45,6 @@ export default function BrokerSalesPage() {
     }
   };
 
-  // Fetch sales with optional broker filter
   const fetchSales = async (brokerId?: string) => {
     if (!user) return;
     try {
@@ -53,13 +52,14 @@ export default function BrokerSalesPage() {
       let url = "/sales";
 
       if (user.role === "broker") {
-        url += `?broker=${user._id}`; // Broker → own sales
+        url += `?broker=${user._id}`;
       } else if (brokerId) {
-        url += `?broker=${brokerId}`; // Admin/Manager/Assistant → filtered
+        url += `?broker=${brokerId}`;
       }
 
       const res = await http.get(url);
       if (res.data.success) setSales(res.data.sales);
+
     } catch (err) {
       console.error("Failed to fetch sales:", err);
       alert("Failed to fetch sales");
@@ -84,22 +84,6 @@ export default function BrokerSalesPage() {
   // ADD SALE (fresh record push without reload)
   const handleSaleAdded = (newSale: Sale) => {
     setSales(prev => [newSale, ...prev]);
-  };
-
-  // DELETE SALE
-  const handleDeleteSale = async (saleId: string) => {
-    if (!confirm("Are you sure you want to delete this sale?")) return;
-
-    try {
-      const res = await http.delete(`/sales/${saleId}`);
-      if (res.data.success) {
-        setSales(prev => prev.filter(s => s._id !== saleId));
-        alert("Sale deleted successfully");
-      }
-    } catch (err) {
-      console.error("Failed to delete sale:", err);
-      alert("Failed to delete sale");
-    }
   };
 
   if (userLoading || !user) {
@@ -137,14 +121,14 @@ export default function BrokerSalesPage() {
             onClose={() => setShowModal(false)}
             refreshSales={handleSaleAdded}
             brokers={brokers}
-            user={user}
+            user={user}       // FIX: user passed here
           />
         )}
 
         <section className="transactions">
           <h2>{user.role === "broker" ? "My Sales" : "All Sales"}</h2>
 
-          {/* Broker Filter Dropdown */}
+          {/* Filter Only for Admin/Manager/Assistant */}
           {["admin", "manager", "assistant"].includes(user.role) && (
             <div className="broker-filter">
               <label htmlFor="brokerSelect">Filter by Broker:</label>
@@ -174,9 +158,9 @@ export default function BrokerSalesPage() {
                   <th>Commission</th>
                   <th>Broker</th>
                   <th>Date</th>
-                  {["admin", "manager", "assistant"].includes(user.role) && <th>Actions</th>}
                 </tr>
               </thead>
+
               <tbody>
                 {sales.map(sale => (
                   <tr key={sale._id}>
@@ -185,21 +169,12 @@ export default function BrokerSalesPage() {
                     <td>{sale.productDescription}</td>
                     <td>{sale.price}</td>
                     <td>{sale.commission}</td>
-                    <td>{sale.broker?.fullname || sale.broker?.email || "N/A"}</td>
+                    <td>{sale.broker.fullname || sale.broker.email}</td>
                     <td>{new Date(sale.createdAt).toLocaleDateString()}</td>
-                    {["admin", "manager", "assistant"].includes(user.role) && (
-                      <td>
-                        <button
-                          className="delete-btn"
-                          onClick={() => handleDeleteSale(sale._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    )}
                   </tr>
                 ))}
               </tbody>
+
             </table>
           )}
         </section>

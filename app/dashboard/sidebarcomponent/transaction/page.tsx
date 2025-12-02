@@ -1,21 +1,17 @@
 
 "use client";
-
 import React, { useEffect, useState, useRef } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import moment from "moment";
-
-import "../../cssfiles/record.css";
-import "../../cssfiles/sidebarcomponents.css";
-import "../../cssfiles/transactionfilters.css";
-import "../../cssfiles/transactionCategory.css"; 
-
+import "../../../cssfiles/record.css";
+import "../../../cssfiles/sidebarcomponents.css";
+import "../../../cssfiles/transactionfilters.css";
+import "../../../cssfiles/transactionCategory.css"; 
 import {
   fetchTransactions as getTransactions,
   TransactionType,
   updateTransactionCategory
 } from "@/services/transactionService";
-
 import {
   fetchCustomCategories,
   addCustomCategory,
@@ -67,13 +63,7 @@ export default function ManagerDashboardTransaction() {
       setPage(res.page || 1);
       setTotalPages(res.totalPages || 1);
 
-      // Combine transaction categories & custom categories
-      // const txnCategories = fetchedTransactions
-      //   .map((t) => t.category)
-      //   .filter(Boolean);
-
-      // setAllCategories((prev) => [...new Set([...txnCategories, ...prev])]);
-      // Categories from transactions
+     
 const txnCategories = fetchedTransactions
   .map((t) => t.category)
   .filter(Boolean);
@@ -329,7 +319,7 @@ setAllCategories((prev) => [
                     <th>Sort Code</th>
                     <th>Account Number</th>
                     <th>Balance</th>
-                    <th>Category / Edit</th>
+                    <th>Category </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -343,6 +333,36 @@ setAllCategories((prev) => [
                       <td>{txn.accountNumber || "-"}</td>
                       <td>{txn.balance || 0}</td>
                       <td className="category-column">
+  <select
+    value={txn.category || ""}
+    onChange={async (e) => {
+      const newCategory = e.target.value;
+      try {
+        const res = await updateTransactionCategory(txn._id, newCategory);
+        if (res.success) {
+          setTransactions(prev =>
+            prev.map(t =>
+              t._id === txn._id ? { ...t, category: newCategory } : t
+            )
+          );
+          alert("Category updated successfully");
+        } else {
+          alert("Failed to update category");
+        }
+      } catch (error) {
+        console.error(error);
+        alert("Error updating category");
+      }
+    }}
+  >
+    <option value="">Select Category</option>
+    {allCategories.map((cat, idx) => (
+      <option key={idx} value={cat}>{cat}</option>
+    ))}
+  </select>
+</td>
+
+                      {/* <td className="category-column">
                         {editingId === txn._id ? (
                           <div className="edit-wrapper">
                             <input
@@ -366,7 +386,7 @@ setAllCategories((prev) => [
                             }}>Edit</button>
                           </div>
                         )}
-                      </td>
+                      </td> */}
                     </tr>
                   ))}
                 </tbody>
