@@ -44,15 +44,7 @@ export const deleteCategory = async (categoryName: string) => {
 };
 
 // ---------------------- UPDATE TRANSACTION CATEGORY ----------------------
-// export const updateTransactionCategory = async (
-//   transactionId: string,
-//   newCategory: string
-// ) => {
-//   const res = await http.put(`/transactions/${transactionId}/update-category`, {
-//     category: newCategory,
-//   });
-//   return res.data;
-// };
+
 export const updateTransactionCategory = async (
   transactionId: string,
   newCategory: string,
