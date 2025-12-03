@@ -100,9 +100,10 @@
 /* ---------------- Popup Box ---------------- */
 .popup-box {
   background: #fff;
-  padding: 25px 30px;
+  padding: 40px 30px;
   border-radius: 12px;
-  width: 400px;
+  width: 700px;
+  height: 250px;
   max-width: 90%;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   text-align: center;
@@ -138,7 +139,7 @@
 .popup-btn {
   flex: 1;
   padding: 10px 12px;
-  border-radius: 6px;
+  border-radius: 5px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -147,17 +148,17 @@
 }
 
 .popup-btn.single {
-  background-color: #4caf50;
+  background-color: #0b325c;
   color: white;
 }
 
 .popup-btn.all {
-  background-color: #2196f3;
+  background-color: #0b518a;
   color: white;
 }
 
 .popup-btn.cancel {
-  background-color: #f44336;
+  background-color: #838383;
   color: white;
 }
 
