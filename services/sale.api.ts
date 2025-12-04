@@ -1,20 +1,4 @@
-// import http from "./http";
 
-// export const getSales = async () => {
-//   return http.get("/sales");
-// };
-
-// export const createSale = async (payload: any) => {
-//   return http.post("/sales", payload);
-// };
-
-// export const updateSale = async (id: string, payload: any) => {
-//   return http.put(`/sales/${id}`, payload);
-// };
-
-// export const deleteSale = async (id: string) => {
-//   return http.delete(`/sales/${id}`);
-// };
 import http from "./http";
 
 export const fetchSales = async () => {
