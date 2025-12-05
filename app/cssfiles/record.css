@@ -40,22 +40,32 @@
 /*RECORDS TABLE */
 
 .record-table {
+  margin-top: 20px;
   width: 100%;
   border-collapse: collapse;
 }
 
 .record-table th,
 .record-table td {
-  padding: 12px 16px;
+  padding: 16px 16px;
   text-align: left;
 }
-
+/* 
 .record-table th {
   background-color: #0e4a5f;
   color: white;
   font-weight: 600;
   letter-spacing: 0.5px;
+} */
+ .record-table th {
+  background-color: #0e4a5f;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  white-space: nowrap; /* content ko break nahi honay dega */
+  width: 200px;        /* yahan apni zaroorat ke mutabiq width set karein */
 }
+
 
 .record-table tbody tr:nth-child(even) {
   background-color: #f2f2f2;
