@@ -101,10 +101,8 @@ export default function ManagerDashboardTransaction() {
   const fetchCategories = async () => {
   try {
     const res = await fetchCustomCategories();
-
-    // Ensure res.categories exists and is an array
     if (res.categories && Array.isArray(res.categories)) {
-      // Filter only valid non-empty strings
+   
       const safeCategories = res.categories.filter(
         (c): c is string => typeof c === "string" && c.trim() !== ""
       );
