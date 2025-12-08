@@ -70,25 +70,26 @@ export default function UserManagement() {
       alert(err.response?.data?.msg || "Delete failed!");
     }
   };
+const handleRoleChange = async (id: string, newRole: string) => {
+  try {
+    const roleValue =
+      newRole.toLowerCase() === "assistant"
+        ? "assistant"
+        : newRole.toLowerCase();
 
-  const handleRoleChange = async (id: string, newRole: string) => {
-    try {
-      const roleValue =
-        newRole.toLowerCase() === "assistant"
-          ? "assistant"
-          : newRole.toLowerCase();
-      await updateUserRole(id, roleValue);
-      setUsers((prev) =>
-  prev.map((u) => (u._id === id ? { ...u, role: roleValue } : u))
-);
+    // API call, assume successful if no error thrown
+    await updateUserRole(id, roleValue);
 
-      
-      alert("Role updated successfully");
-    } catch (err: any) {
-      console.error(err);
-      alert(err.response?.data?.msg || "Role update failed!");
-    }
-  };
+    // Refresh users list from backend
+    await loadUsers(filter);
+
+    alert("Role updated successfully");
+  } catch (err: any) {
+    console.error(err);
+    alert(err.response?.data?.msg || "Role update failed!");
+  }
+};
+
 
   if (!user) return <p>Loading...</p>;
 

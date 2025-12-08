@@ -99,18 +99,25 @@ export default function ManagerDashboardTransaction() {
 
   // ---------------------- FETCH CUSTOM CATEGORIES ----------------------
   const fetchCategories = async () => {
-    try {
-      const res = await fetchCustomCategories();
-      if (res.success && Array.isArray(res.categories)) {
-  setAllCategories((prev) => [
-    ...new Set([...prev, ...res.categories])
-  ]);
-}
+  try {
+    const res = await fetchCustomCategories();
 
-    } catch (error) {
-      console.error("Failed to fetch custom categories", error);
+    // Ensure res.categories exists and is an array
+    if (res.categories && Array.isArray(res.categories)) {
+      // Filter only valid non-empty strings
+      const safeCategories = res.categories.filter(
+        (c): c is string => typeof c === "string" && c.trim() !== ""
+      );
+
+      setAllCategories((prev) => [
+        ...new Set([...(prev || []), ...safeCategories]),
+      ]);
     }
-  };
+  } catch (error) {
+    console.error("Failed to fetch custom categories", error);
+  }
+};
+
 
   useEffect(() => {
     if (user) {
@@ -302,12 +309,14 @@ export default function ManagerDashboardTransaction() {
 
             <div className="date-section">
               <input
+              title="date"
                 type="date"
                 className="date-input"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
               <input
+              title="date "
                 type="date"
                 className="date-input"
                 value={endDate}
