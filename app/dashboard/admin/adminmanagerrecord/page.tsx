@@ -7,7 +7,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import { fetchUsers } from "@/services/user.api";
 import type { User } from "@/types/user";
 import Sidebar from "@/app/dashboard/components/Sidebar";
-import ProtectedRoute from "@/utilies/ProtectedRoute"; // Protected wrapper
+import ProtectedRoute from "@/utilies/ProtectedRoute"; 
 import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
 

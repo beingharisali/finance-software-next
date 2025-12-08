@@ -16,25 +16,25 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
   const roleBasedLinks: Record<string, { name: string; path: string }[]> = {
     admin: [
       { name: "Dashboard", path: "/dashboard/admin" },
-      // { name: "User Management", path: "/dashboard/usermanagement" },
+
       { name: "User Management", path: "/dashboard/sidebarcomponent/usermanagement" },
       { name: "Manager Record", path: "/dashboard/admin/adminmanagerrecord" },
       { name: "Assistant Record", path: "/dashboard/admin/adminagentrecord" },
       { name: " Broker Record", path: "/dashboard/adminbrokerrecord" },
       { name: "Finance", path: "/dashboard/sidebarcomponent/transaction" },
-      // { name: "Broker Sale", path: "/dashboard/broker/brokersaleform" },
+
       { name: "Sale", path: "/dashboard/sidebarcomponent/sale" },
       { name: "Company Cost", path: "/dashboard/sidebarcomponent/companycost" },
       { name: "Product", path: "/dashboard/sidebarcomponent/product" },
       { name: "Deals", path: "/dashboard/sidebarcomponent/deals" },
-      // { name: "Settings", path: "/dashboard/sidebarcomponent/settings" },
+
     ],
     manager: [
       { name: "Dashboard", path: "/dashboard/managers" },
-      // { name: "User Management", path: "/dashboard/usermanagement" },
+
         { name: "User Management", path: "/dashboard/sidebarcomponent/usermanagement" },
       { name: "Broker Record", path: "/dashboard/adminbrokerrecord" },
-      // { name: "Finance", path: "/dashboard/transaction" },
+
         { name: "Finance", path: "/dashboard/sidebarcomponent/transaction" },
       { name: "Sale", path: "/dashboard/sidebarcomponent/sale" },
       { name: "Company Cost", path: "/dashboard/sidebarcomponent/companycost" },
