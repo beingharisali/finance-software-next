@@ -43,9 +43,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
     ],
      assistant: [
       { name: "Dashboard", path: "/dashboard/assistant" }, 
-      // { name: "User Management", path: "/dashboard/usermanagement" },
+
   { name: "User Management", path: "/dashboard/sidebarcomponent/usermanagement" },
-      // Finance removed for assistant
+
       { name: "Broker Record", path: "/dashboard/adminbrokerrecord" },
       { name: "Sale", path: "/dashboard/sidebarcomponent/sale" },
       { name: "Company Cost", path: "/dashboard/sidebarcomponent/companycost" },
@@ -55,7 +55,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
     broker: [
       { name: "Dashboardagent", path: "/dashboard/broker" },
       { name: "Broker Sale", path: "/dashboard/brokersaleform" },
-      // { name: "Company Cost", path: "/dashboard/sidebarcomponent/companycost" },
+
       { name: "Product", path: "/dashboard/sidebarcomponent/product" },
       { name: "Deals", path: "/dashboard/sidebarcomponent/deals" },
     ],
