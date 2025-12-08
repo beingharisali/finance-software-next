@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -12,7 +10,7 @@ interface CreateUserProps {
   role?: "manager" | "broker" | "assistant";
   onClose: () => void;
   editUser?: {
-    id: string;
+    _id: string;
     fullname: string;
     email: string;
     role: string;
@@ -20,7 +18,11 @@ interface CreateUserProps {
   };
 }
 
-export default function CreateUser({ role, onClose, editUser }: CreateUserProps) {
+export default function CreateUser({
+  role,
+  onClose,
+  editUser,
+}: CreateUserProps) {
   const { user, refreshProfile } = useAuthContext();
   const router = useRouter();
 
@@ -58,7 +60,9 @@ export default function CreateUser({ role, onClose, editUser }: CreateUserProps)
     }
   }, [user, router]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -77,7 +81,10 @@ export default function CreateUser({ role, onClose, editUser }: CreateUserProps)
     try {
       setLoading(true);
       if (editUser) {
-        await http.put(`/users/${editUser.id}`, { ...formData, role: formData.role });
+        await http.put(`/users/${editUser._id}`, {
+          ...formData,
+          role: formData.role,
+        });
         alert("User updated successfully!");
       } else {
         await http.post("/users", { ...formData, role: formData.role });
@@ -95,11 +102,12 @@ export default function CreateUser({ role, onClose, editUser }: CreateUserProps)
 
   const handleDelete = async () => {
     if (!editUser) return;
-    if (!confirm(`Are you sure you want to delete ${editUser.fullname}?`)) return;
+    if (!confirm(`Are you sure you want to delete ${editUser.fullname}?`))
+      return;
 
     try {
       setLoading(true);
-      await http.delete(`/users/${editUser.id}`);
+      await http.delete(`/users/${editUser._id}`);
       alert("User deleted successfully!");
       onClose();
     } catch (error: any) {
@@ -162,7 +170,7 @@ export default function CreateUser({ role, onClose, editUser }: CreateUserProps)
             onChange={handleChange}
             className="register-input"
           >
-            {allowedRolesToCreate().map(r => (
+            {allowedRolesToCreate().map((r) => (
               <option key={r} value={r}>
                 {r.charAt(0).toUpperCase() + r.slice(1)}
               </option>

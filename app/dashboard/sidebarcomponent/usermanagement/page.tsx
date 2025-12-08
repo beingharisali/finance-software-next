@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -65,7 +63,7 @@ export default function UserManagement() {
 
     try {
       await deleteUser(id);
-      setUsers(prev => prev.filter(u => u.id !== id));
+      setUsers((prev) => prev.filter((u) => u._id !== id));
       alert("User deleted successfully");
     } catch (err: any) {
       console.error(err);
@@ -76,11 +74,13 @@ export default function UserManagement() {
   const handleRoleChange = async (id: string, newRole: string) => {
     try {
       const roleValue =
-        newRole.toLowerCase() === "assistant" ? "assistant" : newRole.toLowerCase();
+        newRole.toLowerCase() === "assistant"
+          ? "assistant"
+          : newRole.toLowerCase();
       await updateUserRole(id, roleValue);
-      setUsers(prev =>
-        prev.map(u => (u.id === id ? { ...u, role: roleValue } : u))
-      );
+      // setUsers((prev) =>
+      //   prev.map((u) => (u.id === id ? { ...u, role: roleValue } : u))
+      // );
       alert("Role updated successfully");
     } catch (err: any) {
       console.error(err);
@@ -98,8 +98,12 @@ export default function UserManagement() {
           <div className="main-top">
             <h1 className="header">User Management</h1>
             <div className="top-right">
-              <span className="profile-name">{user?.fullname || user?.email}</span>
-              <button className="logout-btn" onClick={logoutUser}>Logout</button>
+              <span className="profile-name">
+                {user?.fullname || user?.email}
+              </span>
+              <button className="logout-btn" onClick={logoutUser}>
+                Logout
+              </button>
             </div>
           </div>
 
@@ -107,7 +111,7 @@ export default function UserManagement() {
             <select
               title="options"
               value={filter}
-              onChange={e => setFilter(e.target.value)}
+              onChange={(e) => setFilter(e.target.value)}
               className="filter-dropdown"
             >
               <option value="all">All Users</option>
@@ -117,7 +121,9 @@ export default function UserManagement() {
             </select>
 
             {/* Show create button for admin, manager, and assistant */}
-            {(user.role === "admin" || user.role === "manager" || user.role === "assistant") && (
+            {(user.role === "admin" ||
+              user.role === "manager" ||
+              user.role === "assistant") && (
               <button className="create-user" onClick={() => handleOpenModal()}>
                 Create User
               </button>
@@ -137,12 +143,14 @@ export default function UserManagement() {
                     <th>Email</th>
                     <th>User Role</th>
                     <th>Created At</th>
-                    {(user.role === "admin" || user.role === "manager") && <th>Actions</th>}
+                    {(user.role === "admin" || user.role === "manager") && (
+                      <th>Actions</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map(u => (
-                    <tr key={u.id}>
+                  {users.map((u) => (
+                    <tr key={u._id}>
                       <td>{u.fullname}</td>
                       <td>{u.email}</td>
                       <td>
@@ -152,7 +160,9 @@ export default function UserManagement() {
                               title="dropdown"
                               className="role-dropdown white-dropdown"
                               value={u.role}
-                              onChange={e => handleRoleChange(u.id, e.target.value)}
+                              onChange={(e) =>
+                                handleRoleChange(u._id, e.target.value)
+                              }
                             >
                               <option value="admin">Admin</option>
                               <option value="manager">Manager</option>
@@ -164,12 +174,14 @@ export default function UserManagement() {
                           u.role
                         )}
                       </td>
-                      <td>{new Date(u.createdAt || "").toLocaleDateString()}</td>
+                      <td>
+                        {new Date(u.createdAt || "").toLocaleDateString()}
+                      </td>
                       {(user.role === "admin" || user.role === "manager") && (
                         <td>
                           <button
                             className="delete-btn"
-                            onClick={() => handleDeleteUser(u.id)}
+                            onClick={() => handleDeleteUser(u._id)}
                           >
                             Delete
                           </button>
@@ -184,7 +196,11 @@ export default function UserManagement() {
 
           {showModal && (
             <CreateUser
-              role={user.role === "manager" || user.role === "assistant" ? "assistant" : undefined} 
+              role={
+                user.role === "manager" || user.role === "assistant"
+                  ? "assistant"
+                  : undefined
+              }
               onClose={() => {
                 setShowModal(false);
                 loadUsers(filter);

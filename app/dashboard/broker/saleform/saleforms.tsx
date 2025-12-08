@@ -1,18 +1,23 @@
-
 "use client";
 
 import React, { useState, useEffect } from "react";
 import "../../../cssfiles/saleform.css";
 import { useAuthContext } from "@/context/AuthContext";
 import http from "@/services/http";
+import { User } from "@/types/user";
 
 interface SaleModalProps {
   onClose: () => void;
   refreshSales: (sale: any) => void;
   brokers: { _id: string; fullname: string; email: string }[];
+  user?: User;
 }
 
-export default function SaleModal({ onClose, refreshSales, brokers }: SaleModalProps) {
+export default function SaleModal({
+  onClose,
+  refreshSales,
+  brokers,
+}: SaleModalProps) {
   const { user, loading } = useAuthContext();
   const [form, setForm] = useState({
     productType: "",
@@ -24,12 +29,20 @@ export default function SaleModal({ onClose, refreshSales, brokers }: SaleModalP
   });
 
   useEffect(() => {
-    if (user?.role === "broker") setForm(prev => ({ ...prev, broker: user._id }));
+    if (user?.role === "broker")
+      setForm((prev) => ({ ...prev, broker: user._id }));
   }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value, type } = e.target;
-    setForm(prev => ({ ...prev, [name]: type === "number" ? Number(value) : value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "number" ? Number(value) : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -45,7 +58,12 @@ export default function SaleModal({ onClose, refreshSales, brokers }: SaleModalP
       broker: user.role === "broker" ? user._id : form.broker,
     };
 
-    if (!payload.productType || !payload.productId || !payload.productDescription || !payload.broker) {
+    if (
+      !payload.productType ||
+      !payload.productId ||
+      !payload.productDescription ||
+      !payload.broker
+    ) {
       return alert("Please fill all required fields");
     }
 
@@ -76,7 +94,9 @@ export default function SaleModal({ onClose, refreshSales, brokers }: SaleModalP
     return (
       <div className="modal-backdrop">
         <div className="modal">
-          <div className="modal-header"><h2>Loading user...</h2></div>
+          <div className="modal-header">
+            <h2>Loading user...</h2>
+          </div>
         </div>
       </div>
     );
@@ -87,14 +107,22 @@ export default function SaleModal({ onClose, refreshSales, brokers }: SaleModalP
       <div className="modal">
         <div className="modal-header">
           <h2>Record New Sale</h2>
-          <button className="close-btn" onClick={onClose}>&times;</button>
+          <button className="close-btn" onClick={onClose}>
+            &times;
+          </button>
         </div>
 
         <form className="modal-form" onSubmit={handleSubmit}>
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="productType">Product Type</label>
-              <select id="productType" name="productType" value={form.productType} onChange={handleChange} required>
+              <select
+                id="productType"
+                name="productType"
+                value={form.productType}
+                onChange={handleChange}
+                required
+              >
                 <option value="">Select Type</option>
                 <option value="Gold">Gold</option>
                 <option value="Whisky">Whisky</option>
@@ -104,21 +132,42 @@ export default function SaleModal({ onClose, refreshSales, brokers }: SaleModalP
 
           <div className="form-group">
             <label htmlFor="productId">Product ID</label>
-            <input id="productId" type="text" name="productId" value={form.productId} onChange={handleChange} required />
+            <input
+              id="productId"
+              type="text"
+              name="productId"
+              value={form.productId}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="form-group">
             <label htmlFor="productDescription">Product Description</label>
-            <textarea id="productDescription" name="productDescription" value={form.productDescription} onChange={handleChange} required />
+            <textarea
+              id="productDescription"
+              name="productDescription"
+              value={form.productDescription}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           {user.role !== "broker" && (
             <div className="form-group">
               <label htmlFor="broker">Select Broker</label>
-              <select id="broker" name="broker" value={form.broker} onChange={handleChange} required>
+              <select
+                id="broker"
+                name="broker"
+                value={form.broker}
+                onChange={handleChange}
+                required
+              >
                 <option value="">Select Broker</option>
-                {brokers.map(b => (
-                  <option key={b._id} value={b._id}>{b.fullname || b.email}</option>
+                {brokers.map((b) => (
+                  <option key={b._id} value={b._id}>
+                    {b.fullname || b.email}
+                  </option>
                 ))}
               </select>
             </div>
@@ -127,18 +176,38 @@ export default function SaleModal({ onClose, refreshSales, brokers }: SaleModalP
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="price">Price</label>
-              <input id="price" type="number" name="price" min={0} value={form.price} onChange={handleChange} required />
+              <input
+                id="price"
+                type="number"
+                name="price"
+                min={0}
+                value={form.price}
+                onChange={handleChange}
+                required
+              />
             </div>
 
             <div className="form-group">
               <label htmlFor="commission">Commission</label>
-              <input id="commission" type="number" name="commission" min={0} value={form.commission} onChange={handleChange} required />
+              <input
+                id="commission"
+                type="number"
+                name="commission"
+                min={0}
+                value={form.commission}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
           <div className="modal-buttons">
-            <button type="submit" className="submit-btn">Submit</button>
-            <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
+            <button type="submit" className="submit-btn">
+              Submit
+            </button>
+            <button type="button" className="cancel-btn" onClick={onClose}>
+              Cancel
+            </button>
           </div>
         </form>
       </div>

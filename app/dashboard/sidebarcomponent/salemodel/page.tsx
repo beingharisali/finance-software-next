@@ -17,7 +17,12 @@ interface SaleModalProps {
   editingSale?: any | null;
 }
 
-export default function SaleModal({ onClose, refreshSales, agents = [], editingSale }: SaleModalProps) {
+export default function SaleModal({
+  onClose,
+  refreshSales,
+  agents = [],
+  editingSale,
+}: SaleModalProps) {
   const { user, loading } = useAuthContext();
 
   const [form, setForm] = useState({
@@ -27,7 +32,7 @@ export default function SaleModal({ onClose, refreshSales, agents = [], editingS
     price: 0,
     broker: "",
     commission: 0,
-    agent: user?.id || "", // default current user
+    agent: user?._id || "", // default current user
   });
 
   // Pre-fill form if editing
@@ -40,7 +45,7 @@ export default function SaleModal({ onClose, refreshSales, agents = [], editingS
         price: editingSale.price,
         broker: editingSale.broker,
         commission: editingSale.commission,
-        agent: editingSale.agent?._id || user?.id || "",
+        agent: editingSale.agent?._id || user?._id || "",
       });
     } else {
       setForm({
@@ -50,16 +55,18 @@ export default function SaleModal({ onClose, refreshSales, agents = [], editingS
         price: 0,
         broker: "",
         commission: 0,
-        agent: user?.id || "",
+        agent: user?._id || "",
       });
     }
-  }, [editingSale, user?.id]);
+  }, [editingSale, user?._id]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value, type } = e.target;
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       [name]: type === "number" ? Number(value) : value,
     }));
@@ -107,7 +114,11 @@ export default function SaleModal({ onClose, refreshSales, agents = [], editingS
       <div className="modal">
         <div className="modal-header">
           <h2>{editingSale ? "Edit Sale" : "Record New Sale"}</h2>
-          <button className="close-btn" onClick={onClose} aria-label="Close Modal">
+          <button
+            className="close-btn"
+            onClick={onClose}
+            aria-label="Close Modal"
+          >
             &times;
           </button>
         </div>
@@ -117,10 +128,18 @@ export default function SaleModal({ onClose, refreshSales, agents = [], editingS
           {agents.length > 0 && (
             <div className="form-group">
               <label htmlFor="agent">Agent</label>
-              <select name="agent" id="agent" value={form.agent} onChange={handleChange} required>
+              <select
+                name="agent"
+                id="agent"
+                value={form.agent}
+                onChange={handleChange}
+                required
+              >
                 <option value="">Select Agent</option>
-                {agents.map(a => (
-                  <option key={a._id} value={a._id}>{a.fullname} ({a.email})</option>
+                {agents.map((a) => (
+                  <option key={a._id} value={a._id}>
+                    {a.fullname} ({a.email})
+                  </option>
                 ))}
               </select>
             </div>
@@ -128,7 +147,13 @@ export default function SaleModal({ onClose, refreshSales, agents = [], editingS
 
           <div className="form-group">
             <label htmlFor="productType">Product Type</label>
-            <select id="productType" name="productType" value={form.productType} onChange={handleChange} required>
+            <select
+              id="productType"
+              name="productType"
+              value={form.productType}
+              onChange={handleChange}
+              required
+            >
               <option value="">Select Type</option>
               <option value="Gold">Gold</option>
               <option value="Whisky">Whisky</option>
@@ -137,34 +162,74 @@ export default function SaleModal({ onClose, refreshSales, agents = [], editingS
 
           <div className="form-group">
             <label htmlFor="productId">Product ID</label>
-            <input id="productId" type="text" name="productId" value={form.productId} onChange={handleChange} required />
+            <input
+              id="productId"
+              type="text"
+              name="productId"
+              value={form.productId}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="form-group">
             <label htmlFor="productDescription">Product Description</label>
-            <textarea id="productDescription" name="productDescription" value={form.productDescription} onChange={handleChange} required />
+            <textarea
+              id="productDescription"
+              name="productDescription"
+              value={form.productDescription}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="form-group">
             <label htmlFor="broker">Broker</label>
-            <input id="broker" type="text" name="broker" value={form.broker} onChange={handleChange} required />
+            <input
+              id="broker"
+              type="text"
+              name="broker"
+              value={form.broker}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="price">Price</label>
-              <input id="price" type="number" name="price" min={0} value={form.price} onChange={handleChange} required />
+              <input
+                id="price"
+                type="number"
+                name="price"
+                min={0}
+                value={form.price}
+                onChange={handleChange}
+                required
+              />
             </div>
 
             <div className="form-group">
               <label htmlFor="commission">Commission</label>
-              <input id="commission" type="number" name="commission" min={0} value={form.commission} onChange={handleChange} required />
+              <input
+                id="commission"
+                type="number"
+                name="commission"
+                min={0}
+                value={form.commission}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
           <div className="modal-buttons">
-            <button type="submit" className="submit-btn">{editingSale ? "Update" : "Submit"}</button>
-            <button type="button" className="cancel-btn" onClick={onClose}>Cancel</button>
+            <button type="submit" className="submit-btn">
+              {editingSale ? "Update" : "Submit"}
+            </button>
+            <button type="button" className="cancel-btn" onClick={onClose}>
+              Cancel
+            </button>
           </div>
         </form>
       </div>

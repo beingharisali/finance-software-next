@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -7,7 +5,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import { fetchUsers } from "@/services/user.api";
 import type { User } from "@/types/user";
 import Sidebar from "@/app/dashboard/components/Sidebar";
-import ProtectedRoute from "@/utilies/ProtectedRoute"; 
+import ProtectedRoute from "@/utilies/ProtectedRoute";
 import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
 
@@ -35,7 +33,7 @@ export default function ManagerRecord() {
   if (!user) return <p>Loading...</p>;
 
   return (
-    <ProtectedRoute allowedRoles={[ "admin"]}>
+    <ProtectedRoute allowedRoles={["admin"]}>
       <div className="dashboard-container">
         {/* Sidebar */}
         <Sidebar activePage="Manager Record" />
@@ -71,7 +69,7 @@ export default function ManagerRecord() {
                 </thead>
                 <tbody>
                   {managers.map((manager) => (
-                    <tr key={manager.id}>
+                    <tr key={manager._id}>
                       <td>{manager.fullname}</td>
                       <td>{manager.email}</td>
                       <td>{manager.role}</td>

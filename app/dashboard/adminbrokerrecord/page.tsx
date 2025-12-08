@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -35,7 +33,7 @@ export default function ManagerBrokerRecord() {
   if (!user) return <p>Loading...</p>;
 
   return (
-    <ProtectedRoute allowedRoles={[ "admin","manager", "assistant"]}>
+    <ProtectedRoute allowedRoles={["admin", "manager", "assistant"]}>
       <div className="dashboard-container">
         {/* Sidebar */}
         <Sidebar activePage="Broker Record" />
@@ -71,7 +69,7 @@ export default function ManagerBrokerRecord() {
                 </thead>
                 <tbody>
                   {brokers.map((broker) => (
-                    <tr key={broker.id}>
+                    <tr key={broker._id}>
                       <td>{broker.fullname}</td>
                       <td>{broker.email}</td>
                       <td>{broker.role}</td>

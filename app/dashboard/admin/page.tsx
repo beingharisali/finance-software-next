@@ -1,7 +1,3 @@
-
-
-
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -16,7 +12,7 @@ import UploadCSV from "../admin/uploadcsv/page";
 import "../../cssfiles/admin.css";
 import "../../cssfiles/sidebarcomponents.css";
 import "../../cssfiles/uploadCSV.css";
-import Sidebar from "@/app/dashboard/components/Sidebar"; 
+import Sidebar from "@/app/dashboard/components/Sidebar";
 Chart.register(...registerables);
 
 interface TransactionType {
@@ -29,24 +25,36 @@ interface TransactionType {
 export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
-  const [categoryTotals, setCategoryTotals] = useState<Record<string, number>>({});
-  const [graphFilter, setGraphFilter] = useState<"thisYear" | "lastYear" | "month" | "week" | "none">("thisYear");
+  const [categoryTotals, setCategoryTotals] = useState<Record<string, number>>(
+    {}
+  );
+  const [graphFilter, setGraphFilter] = useState<
+    "thisYear" | "lastYear" | "month" | "week" | "none"
+  >("thisYear");
 
   const { user, logoutUser } = useAuthContext();
-  const [selectedRole, setSelectedRole] = useState<"agent" | "manager" | "broker" | "">("");
+  const [selectedRole, setSelectedRole] = useState<
+    "assistant" | "manager" | "broker" | ""
+  >("");
 
   // Date filter state for chart only
-  const [tempDateRange, setTempDateRange] = useState<{ from: string; to: string }>({ from: "", to: "" });
-  const [dateRange, setDateRange] = useState<{ from: string; to: string }>({ from: "", to: "" });
+  const [tempDateRange, setTempDateRange] = useState<{
+    from: string;
+    to: string;
+  }>({ from: "", to: "" });
+  const [dateRange, setDateRange] = useState<{ from: string; to: string }>({
+    from: "",
+    to: "",
+  });
 
-  const handleOpenModal = (role: "agent" | "manager" | "broker") => {
+  const handleOpenModal = (role: "assistant" | "manager" | "broker") => {
     setSelectedRole(role);
     setShowModal(true);
   };
 
   const handleTempDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setTempDateRange(prev => ({ ...prev, [name]: value }));
+    setTempDateRange((prev) => ({ ...prev, [name]: value }));
   };
 
   const applyDateRange = () => {
@@ -65,7 +73,11 @@ export default function AdminDashboard() {
     try {
       const res = await http.get("/transactions");
       const data: TransactionType[] = res.data.transactions || [];
-      data.sort((a, b) => new Date(a.transactionDate).getTime() - new Date(b.transactionDate).getTime());
+      data.sort(
+        (a, b) =>
+          new Date(a.transactionDate).getTime() -
+          new Date(b.transactionDate).getTime()
+      );
       setTransactions(data);
     } catch (err) {
       console.error("Failed to fetch transactions", err);
@@ -76,7 +88,7 @@ export default function AdminDashboard() {
   // Calculate category totals for cards (ALL transactions, no filter)
   const calculateCategoryTotals = () => {
     const totals: Record<string, number> = {};
-    transactions.forEach(txn => {
+    transactions.forEach((txn) => {
       const cat = txn.transactionType?.trim() || "Uncategorized";
       totals[cat] = (totals[cat] || 0) + Math.abs(txn.amount);
     });
@@ -98,7 +110,7 @@ export default function AdminDashboard() {
     let chart: Chart | null = null;
     const nowYear = new Date().getFullYear();
 
-    const filtered = transactions.filter(txn => {
+    const filtered = transactions.filter((txn) => {
       const txnDate = new Date(txn.transactionDate);
 
       // Calendar filter
@@ -108,25 +120,49 @@ export default function AdminDashboard() {
       // Graph filter
       if (!dateRange.from && !dateRange.to && graphFilter !== "none") {
         switch (graphFilter) {
-          case "thisYear": if (txnDate.getFullYear() !== nowYear) return false; break;
-          case "lastYear": if (txnDate.getFullYear() !== nowYear - 1) return false; break;
-          case "month": if (txnDate.getFullYear() !== nowYear) return false; break;
-          case "week": if (txnDate.getFullYear() !== nowYear) return false; break;
+          case "thisYear":
+            if (txnDate.getFullYear() !== nowYear) return false;
+            break;
+          case "lastYear":
+            if (txnDate.getFullYear() !== nowYear - 1) return false;
+            break;
+          case "month":
+            if (txnDate.getFullYear() !== nowYear) return false;
+            break;
+          case "week":
+            if (txnDate.getFullYear() !== nowYear) return false;
+            break;
         }
       }
       return true;
     });
 
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const incomeMonth = Array(12).fill(0);
     const expenseMonth = Array(12).fill(0);
     const incomeWeek = Array(52).fill(0);
     const expenseWeek = Array(52).fill(0);
 
-    filtered.forEach(txn => {
+    filtered.forEach((txn) => {
       const d = new Date(txn.transactionDate);
       const m = d.getMonth();
-      const w = Math.floor((d.getTime() - new Date(d.getFullYear(), 0, 1).getTime()) / (7 * 86400 * 1000));
+      const w = Math.floor(
+        (d.getTime() - new Date(d.getFullYear(), 0, 1).getTime()) /
+          (7 * 86400 * 1000)
+      );
 
       if (txn.amount >= 0) {
         incomeMonth[m] += txn.amount;
@@ -139,8 +175,12 @@ export default function AdminDashboard() {
 
     const ctx = document.getElementById("cashflowChart") as HTMLCanvasElement;
     if (ctx) {
-      const labels = graphFilter === "week" ? Array.from({ length: 52 }, (_, i) => `W${i+1}`) :
-                     graphFilter === "month" ? months : months;
+      const labels =
+        graphFilter === "week"
+          ? Array.from({ length: 52 }, (_, i) => `W${i + 1}`)
+          : graphFilter === "month"
+          ? months
+          : months;
       const incomeData = graphFilter === "week" ? incomeWeek : incomeMonth;
       const expenseData = graphFilter === "week" ? expenseWeek : expenseMonth;
 
@@ -149,9 +189,21 @@ export default function AdminDashboard() {
         data: {
           labels,
           datasets: [
-            { label: "Income", data: incomeData, backgroundColor: "#146985", stack: "stack1", borderRadius: 4 },
-            { label: "Expense", data: expenseData.map(v => -v), backgroundColor: "#ff4d4f", stack: "stack1", borderRadius: 4 }
-          ]
+            {
+              label: "Income",
+              data: incomeData,
+              backgroundColor: "#146985",
+              stack: "stack1",
+              borderRadius: 4,
+            },
+            {
+              label: "Expense",
+              data: expenseData.map((v) => -v),
+              backgroundColor: "#ff4d4f",
+              stack: "stack1",
+              borderRadius: 4,
+            },
+          ],
         },
         options: {
           responsive: true,
@@ -161,19 +213,22 @@ export default function AdminDashboard() {
               min: -Math.max(...expenseData) * 1.2,
               max: Math.max(...incomeData) * 1.2,
               ticks: {
-                callback: (v) => Math.abs(Number(v)).toLocaleString()
-              }
+                callback: (v) => Math.abs(Number(v)).toLocaleString(),
+              },
             },
-            x: { stacked: true }
+            x: { stacked: true },
           },
           plugins: {
             tooltip: {
               callbacks: {
-                label: (context) => `${context.dataset.label}: ${Math.abs(context.raw as number).toLocaleString()}`
-              }
-            }
-          }
-        }
+                label: (context) =>
+                  `${context.dataset.label}: ${Math.abs(
+                    context.raw as number
+                  ).toLocaleString()}`,
+              },
+            },
+          },
+        },
       });
     }
 
@@ -189,8 +244,12 @@ export default function AdminDashboard() {
           <div className="main-top">
             <h1 className="header">Dashboard</h1>
             <div className="top-right">
-              <span className="profile-name">{user?.fullname || user?.email || "Guest"}</span>
-              <button className="logout-btn" onClick={logoutUser}>Logout</button>
+              <span className="profile-name">
+                {user?.fullname || user?.email || "Guest"}
+              </span>
+              <button className="logout-btn" onClick={logoutUser}>
+                Logout
+              </button>
             </div>
           </div>
 
@@ -199,7 +258,10 @@ export default function AdminDashboard() {
           </div>
 
           {showModal && selectedRole && (
-            <CreateUser role={selectedRole} onClose={() => setShowModal(false)} />
+            <CreateUser
+              role={selectedRole}
+              onClose={() => setShowModal(false)}
+            />
           )}
 
           {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
@@ -218,7 +280,11 @@ export default function AdminDashboard() {
               <div className="chart-header">
                 <h2>Cashflow</h2>
                 <div className="filters">
-                  <select className="years-dropdown" value={graphFilter} onChange={e => setGraphFilter(e.target.value as any)}>
+                  <select
+                    className="years-dropdown"
+                    value={graphFilter}
+                    onChange={(e) => setGraphFilter(e.target.value as any)}
+                  >
                     <option value="thisYear">This Year</option>
                     <option value="lastYear">Last Year</option>
                     <option value="month">Month-wise</option>
@@ -226,8 +292,24 @@ export default function AdminDashboard() {
                     {/* <option value="none">By Date Range</option> */}
                   </select>
 
-                  <label>From: <input type="date" name="from" value={tempDateRange.from} onChange={handleTempDateChange} /></label>
-                  <label>To: <input type="date" name="to" value={tempDateRange.to} onChange={handleTempDateChange} /></label>
+                  <label>
+                    From:{" "}
+                    <input
+                      type="date"
+                      name="from"
+                      value={tempDateRange.from}
+                      onChange={handleTempDateChange}
+                    />
+                  </label>
+                  <label>
+                    To:{" "}
+                    <input
+                      type="date"
+                      name="to"
+                      value={tempDateRange.to}
+                      onChange={handleTempDateChange}
+                    />
+                  </label>
                   <button onClick={applyDateRange}>Apply</button>
                   <button onClick={resetDateRange}>Reset</button>
                 </div>
@@ -242,15 +324,22 @@ export default function AdminDashboard() {
             <table>
               <thead>
                 <tr>
-                  <th>Date</th><th>Description</th><th>Amount</th><th>Category</th>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Category</th>
                 </tr>
               </thead>
               <tbody>
-                {transactions.slice(0,5).map((txn, idx) => (
+                {transactions.slice(0, 5).map((txn, idx) => (
                   <tr key={idx}>
-                    <td>{new Date(txn.transactionDate).toLocaleDateString()}</td>
+                    <td>
+                      {new Date(txn.transactionDate).toLocaleDateString()}
+                    </td>
                     <td>{txn.transactionDescription}</td>
-                    <td className={txn.amount >=0 ? "positive" : "negative"}>{Math.abs(txn.amount).toLocaleString()}</td>
+                    <td className={txn.amount >= 0 ? "positive" : "negative"}>
+                      {Math.abs(txn.amount).toLocaleString()}
+                    </td>
                     <td>{txn.transactionType || "Uncategorized"}</td>
                   </tr>
                 ))}

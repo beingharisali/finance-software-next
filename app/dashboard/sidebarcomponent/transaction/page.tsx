@@ -1,6 +1,3 @@
-
-
-
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { useAuthContext } from "@/context/AuthContext";
@@ -12,7 +9,7 @@ import "../../../cssfiles/transactionCategory.css";
 import {
   fetchTransactions as getTransactions,
   TransactionType,
-  updateTransactionCategory
+  updateTransactionCategory,
 } from "@/services/transactionService";
 
 import {
@@ -58,14 +55,22 @@ export default function ManagerDashboardTransaction() {
     try {
       setLoading(true);
 
-      const res = await getTransactions(pageNum, limit, selectedCategory, start, end);
+      const res = await getTransactions(
+        pageNum,
+        limit,
+        selectedCategory,
+        start,
+        end
+      );
       const fetchedTransactions: TransactionType[] = res.transactions || [];
 
       // ------------------- CLEAN CATEGORY (REMOVE UNCATEGORIZED) -------------------
-      const transactionsCleaned = fetchedTransactions.map(txn => ({
+      const transactionsCleaned = fetchedTransactions.map((txn) => ({
         ...txn,
         category:
-          txn.category && txn.category.trim() !== "" && txn.category.trim().toLowerCase() !== "uncategorized"
+          txn.category &&
+          txn.category.trim() !== "" &&
+          txn.category.trim().toLowerCase() !== "uncategorized"
             ? txn.category
             : "", // blank if empty or "uncategorized"
       }));
@@ -75,10 +80,15 @@ export default function ManagerDashboardTransaction() {
       setTotalPages(res.totalPages || 1);
 
       // Combine transaction categories + types + custom categories
-      const txnCategories = transactionsCleaned.map(t => t.category).filter(Boolean);
-      const txnTypes = transactionsCleaned.map(t => t.transactionType).filter(Boolean);
-      setAllCategories(prev => [...new Set([...prev, ...txnCategories, ...txnTypes])]);
-
+      const txnCategories = transactionsCleaned
+        .map((t) => t.category)
+        .filter(Boolean);
+      const txnTypes = transactionsCleaned
+        .map((t) => t.transactionType)
+        .filter(Boolean);
+      setAllCategories((prev) => [
+        ...new Set([...prev, ...txnCategories, ...txnTypes]),
+      ]);
     } catch (error) {
       console.error("Failed to fetch transactions", error);
       setTransactions([]);
@@ -92,7 +102,7 @@ export default function ManagerDashboardTransaction() {
     try {
       const res = await fetchCustomCategories();
       if (res.success && res.categories) {
-        setAllCategories(prev => [...new Set([...prev, ...res.categories])]);
+        // setAllCategories((prev) => [...new Set([...prev, ...res.categories])]);
       }
     } catch (error) {
       console.error("Failed to fetch custom categories", error);
@@ -105,7 +115,10 @@ export default function ManagerDashboardTransaction() {
     }
 
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false);
         setIsAddingCustom(false);
       }
@@ -130,7 +143,7 @@ export default function ManagerDashboardTransaction() {
     try {
       const res = await addCustomCategory(newCustomCategory.trim());
       if (res.success) {
-        setAllCategories(prev => [...prev, newCustomCategory.trim()]);
+        setAllCategories((prev) => [...prev, newCustomCategory.trim()]);
         setCategory(newCustomCategory.trim());
         setNewCustomCategory("");
         setIsAddingCustom(false);
@@ -149,9 +162,9 @@ export default function ManagerDashboardTransaction() {
     try {
       const res = await deleteCustomCategory(cat);
       if (res.success) {
-        setAllCategories(prev => prev.filter(c => c !== cat));
-        setTransactions(prev =>
-          prev.map(t => t.category === cat ? { ...t, category: "" } : t)
+        setAllCategories((prev) => prev.filter((c) => c !== cat));
+        setTransactions((prev) =>
+          prev.map((t) => (t.category === cat ? { ...t, category: "" } : t))
         );
         if (category === cat) setCategory("");
         alert(res.msg);
@@ -173,8 +186,12 @@ export default function ManagerDashboardTransaction() {
           <div className="main-top">
             <h1 className="header">Transactions</h1>
             <div className="top-right">
-              <span className="profile-name">{user.fullname || user.email}</span>
-              <button className="logout-btn" onClick={logoutUser}>Logout</button>
+              <span className="profile-name">
+                {user.fullname || user.email}
+              </span>
+              <button className="logout-btn" onClick={logoutUser}>
+                Logout
+              </button>
             </div>
           </div>
 
@@ -188,13 +205,18 @@ export default function ManagerDashboardTransaction() {
                 value={searchCategory}
                 onChange={(e) => setSearchCategory(e.target.value)}
               />
-              <button className="search-btn"
-                onClick={() => fetchTransactions(searchCategory, startDate, endDate, 1)}
+              <button
+                className="search-btn"
+                onClick={() =>
+                  fetchTransactions(searchCategory, startDate, endDate, 1)
+                }
               >
                 Search
               </button>
 
-              <button className="reset-btn" onClick={resetFilters}>Reset</button>
+              <button className="reset-btn" onClick={resetFilters}>
+                Reset
+              </button>
             </div>
           </div>
 
@@ -202,9 +224,14 @@ export default function ManagerDashboardTransaction() {
           <div className="filter-row">
             <div className="category-section" ref={dropdownRef}>
               <div className="custom-dropdown">
-                <div className="dropdown-header" onClick={() => setDropdownOpen(!dropdownOpen)}>
+                <div
+                  className="dropdown-header"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
                   {category || "Select Category"}
-                  <span className="dropdown-arrow">{dropdownOpen ? "▲" : "▼"}</span>
+                  <span className="dropdown-arrow">
+                    {dropdownOpen ? "▲" : "▼"}
+                  </span>
                 </div>
 
                 {dropdownOpen && (
@@ -222,7 +249,12 @@ export default function ManagerDashboardTransaction() {
                           {cat}
                         </span>
 
-                        <span className="delete-btn" onClick={() => handleDeleteCategory(cat)}>×</span>
+                        <span
+                          className="delete-btn"
+                          onClick={() => handleDeleteCategory(cat)}
+                        >
+                          ×
+                        </span>
                       </div>
                     ))}
 
@@ -234,13 +266,28 @@ export default function ManagerDashboardTransaction() {
                             value={newCustomCategory}
                             placeholder="New category..."
                             className="custom-input"
-                            onChange={(e) => setNewCustomCategory(e.target.value)}
+                            onChange={(e) =>
+                              setNewCustomCategory(e.target.value)
+                            }
                           />
-                          <button className="custom-add-btn" onClick={handleAddCustomCategory}>Add</button>
-                          <button className="custom-cancel-btn" onClick={() => setIsAddingCustom(false)}>Cancel</button>
+                          <button
+                            className="custom-add-btn"
+                            onClick={handleAddCustomCategory}
+                          >
+                            Add
+                          </button>
+                          <button
+                            className="custom-cancel-btn"
+                            onClick={() => setIsAddingCustom(false)}
+                          >
+                            Cancel
+                          </button>
                         </div>
                       ) : (
-                        <span className="add-custom" onClick={() => setIsAddingCustom(true)}>
+                        <span
+                          className="add-custom"
+                          onClick={() => setIsAddingCustom(true)}
+                        >
                           + Add Custom Category
                         </span>
                       )}
@@ -267,7 +314,12 @@ export default function ManagerDashboardTransaction() {
               <button
                 className="apply-btn"
                 onClick={() =>
-                  fetchTransactions(category || searchCategory, startDate, endDate, 1)
+                  fetchTransactions(
+                    category || searchCategory,
+                    startDate,
+                    endDate,
+                    1
+                  )
                 }
               >
                 Apply
@@ -299,7 +351,11 @@ export default function ManagerDashboardTransaction() {
                 <tbody>
                   {transactions.map((txn) => (
                     <tr key={txn._id}>
-                      <td>{txn.transactionDate ? moment(txn.transactionDate).format("DD/MM/YYYY") : "-"}</td>
+                      <td>
+                        {txn.transactionDate
+                          ? moment(txn.transactionDate).format("DD/MM/YYYY")
+                          : "-"}
+                      </td>
                       <td>{txn.transactionDescription || "-"}</td>
                       <td>{txn.transactionType || "-"}</td>
                       <td>{txn.amount || 0}</td>
@@ -320,7 +376,9 @@ export default function ManagerDashboardTransaction() {
                         >
                           <option value="">Select Category</option>
                           {allCategories.map((cat, idx) => (
-                            <option key={idx} value={cat}>{cat}</option>
+                            <option key={idx} value={cat}>
+                              {cat}
+                            </option>
                           ))}
                         </select>
                       </td>
@@ -337,17 +395,33 @@ export default function ManagerDashboardTransaction() {
               <button
                 className="prev-btn"
                 disabled={page <= 1}
-                onClick={() => fetchTransactions(category || searchCategory, startDate, endDate, page - 1)}
+                onClick={() =>
+                  fetchTransactions(
+                    category || searchCategory,
+                    startDate,
+                    endDate,
+                    page - 1
+                  )
+                }
               >
                 Previous
               </button>
 
-              <span>Page {page} of {totalPages}</span>
+              <span>
+                Page {page} of {totalPages}
+              </span>
 
               <button
                 className="next-btn"
                 disabled={page >= totalPages}
-                onClick={() => fetchTransactions(category || searchCategory, startDate, endDate, page + 1)}
+                onClick={() =>
+                  fetchTransactions(
+                    category || searchCategory,
+                    startDate,
+                    endDate,
+                    page + 1
+                  )
+                }
               >
                 Next
               </button>
@@ -377,8 +451,8 @@ export default function ManagerDashboardTransaction() {
                       selectedNewCategory
                     );
                     if (res.success) {
-                      setTransactions(prev =>
-                        prev.map(t =>
+                      setTransactions((prev) =>
+                        prev.map((t) =>
                           t._id === selectedTransaction._id
                             ? { ...t, category: selectedNewCategory }
                             : t
@@ -406,14 +480,17 @@ export default function ManagerDashboardTransaction() {
                       true
                     );
                     if (res.success) {
-                      setTransactions(prev =>
-                        prev.map(t =>
-                          t.transactionDescription === selectedTransaction.transactionDescription
+                      setTransactions((prev) =>
+                        prev.map((t) =>
+                          t.transactionDescription ===
+                          selectedTransaction.transactionDescription
                             ? { ...t, category: selectedNewCategory }
                             : t
                         )
                       );
-                      alert("Category updated for all future transactions with same description.");
+                      alert(
+                        "Category updated for all future transactions with same description."
+                      );
                     }
                   } catch (error) {
                     console.error(error);

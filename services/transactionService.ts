@@ -1,15 +1,15 @@
-
 import http from "./http";
 
 export interface TransactionType {
-  _id: string;           
+  _id: string;
   transactionDate: string;
   transactionDescription: string;
-  transactionType: string; 
+  transactionType: string;
   amount: number;
   sortCode?: string;
   accountNumber?: string;
   balance?: number;
+  category: string;
 }
 
 // ---------------------- FETCH TRANSACTIONS ----------------------
@@ -48,11 +48,11 @@ export const deleteCategory = async (categoryName: string) => {
 export const updateTransactionCategory = async (
   transactionId: string,
   newCategory: string,
-  applyToFuture: boolean = false  // new param
+  applyToFuture: boolean = false // new param
 ) => {
   const res = await http.put(`/transactions/${transactionId}/update-category`, {
     category: newCategory,
-    applyToFuture,   // send this flag to backend
+    applyToFuture, // send this flag to backend
   });
   return res.data;
 };

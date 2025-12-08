@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
@@ -14,7 +13,9 @@ Chart.register(...registerables);
 export default function ManagerDashboard() {
   const { user, logoutUser } = useAuthContext();
   const [showModal, setShowModal] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<"agent" | "manager" | "broker" | "">("");
+  const [selectedRole, setSelectedRole] = useState<
+    "assistant" | "manager" | "broker" | ""
+  >("");
   const router = useRouter();
 
   // Role-based protection
@@ -25,7 +26,7 @@ export default function ManagerDashboard() {
     }
   }, [user, router]);
 
-  const handleOpenModal = (role: "agent" | "manager" | "broker") => {
+  const handleOpenModal = (role: "assistant" | "manager" | "broker") => {
     setSelectedRole(role);
     setShowModal(true);
   };
@@ -34,18 +35,36 @@ export default function ManagerDashboard() {
     let teamPerfChartInstance: Chart | null = null;
     let deptChartInstance: Chart | null = null;
 
-    const teamPerfCtx = document.getElementById("teamPerfChart") as HTMLCanvasElement;
+    const teamPerfCtx = document.getElementById(
+      "teamPerfChart"
+    ) as HTMLCanvasElement;
     if (teamPerfCtx) {
       teamPerfChartInstance = new Chart(teamPerfCtx.getContext("2d")!, {
         type: "line",
         data: {
-          labels: ["Jan","Feb","Mar","Apr","May","Jun"],
+          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
           datasets: [
-            { label: "Completed Tasks", data: [30,45,60,50,70,65], borderColor: "#146985", backgroundColor: "rgba(20,104,133,0.2)", tension: 0.3 },
-            { label: "Pending Tasks", data: [5,10,8,12,6,7], borderColor: "#d9534f", backgroundColor: "rgba(217,83,79,0.2)", tension: 0.3 }
-          ]
+            {
+              label: "Completed Tasks",
+              data: [30, 45, 60, 50, 70, 65],
+              borderColor: "#146985",
+              backgroundColor: "rgba(20,104,133,0.2)",
+              tension: 0.3,
+            },
+            {
+              label: "Pending Tasks",
+              data: [5, 10, 8, 12, 6, 7],
+              borderColor: "#d9534f",
+              backgroundColor: "rgba(217,83,79,0.2)",
+              tension: 0.3,
+            },
+          ],
         },
-        options: { responsive: true, plugins: { legend: { position: "top" } }, scales: { y: { beginAtZero: true } } }
+        options: {
+          responsive: true,
+          plugins: { legend: { position: "top" } },
+          scales: { y: { beginAtZero: true } },
+        },
       });
     }
 
@@ -53,8 +72,26 @@ export default function ManagerDashboard() {
     if (deptCtx) {
       deptChartInstance = new Chart(deptCtx.getContext("2d")!, {
         type: "doughnut",
-        data: { labels: ["Finance","HR","Operations","Sales","IT"], datasets: [{ data: [40,15,20,15,10], backgroundColor: ["#146985","#3b979a","#6db7bc","#9abec3","#c2d7dc"] }] },
-        options: { cutout: "70%", responsive: true, plugins: { legend: { position: "right" } } }
+        data: {
+          labels: ["Finance", "HR", "Operations", "Sales", "IT"],
+          datasets: [
+            {
+              data: [40, 15, 20, 15, 10],
+              backgroundColor: [
+                "#146985",
+                "#3b979a",
+                "#6db7bc",
+                "#9abec3",
+                "#c2d7dc",
+              ],
+            },
+          ],
+        },
+        options: {
+          cutout: "70%",
+          responsive: true,
+          plugins: { legend: { position: "right" } },
+        },
       });
     }
 
@@ -75,26 +112,50 @@ export default function ManagerDashboard() {
           <h1 className="header">Dashboard</h1>
           <div className="top-right">
             <span className="profile-name">{user.fullname || user.email}</span>
-            <button className="logout-btn" onClick={logoutUser}>Logout</button>
+            <button className="logout-btn" onClick={logoutUser}>
+              Logout
+            </button>
           </div>
         </div>
 
-
-
-        {showModal && selectedRole && <CreateUser role={selectedRole} onClose={() => setShowModal(false)} />}
+        {showModal && selectedRole && (
+          <CreateUser role={selectedRole} onClose={() => setShowModal(false)} />
+        )}
 
         {/* Summary Cards */}
         <section className="cards">
-          <div className="card"><div className="card-title">Team Members</div><div className="card-value">12</div><div className="card-sub">Active</div></div>
-          <div className="card"><div className="card-title">Tasks Completed</div><div className="card-value">560</div><div className="card-change positive">+12%</div></div>
-          <div className="card"><div className="card-title">Pending Tasks</div><div className="card-value">45</div><div className="card-change negative">-5%</div></div>
-          <div className="card"><div className="card-title">Team Performance</div><div className="card-value">95%</div><div className="card-change positive">+8%</div></div>
+          <div className="card">
+            <div className="card-title">Team Members</div>
+            <div className="card-value">12</div>
+            <div className="card-sub">Active</div>
+          </div>
+          <div className="card">
+            <div className="card-title">Tasks Completed</div>
+            <div className="card-value">560</div>
+            <div className="card-change positive">+12%</div>
+          </div>
+          <div className="card">
+            <div className="card-title">Pending Tasks</div>
+            <div className="card-value">45</div>
+            <div className="card-change negative">-5%</div>
+          </div>
+          <div className="card">
+            <div className="card-title">Team Performance</div>
+            <div className="card-value">95%</div>
+            <div className="card-change positive">+8%</div>
+          </div>
         </section>
 
         {/* Charts */}
         <section className="charts">
-          <div className="chart-card"><h2>Team Performance</h2><canvas id="teamPerfChart"></canvas></div>
-          <div className="chart-card"><h2>Department Allocation</h2><canvas id="deptChart"></canvas></div>
+          <div className="chart-card">
+            <h2>Team Performance</h2>
+            <canvas id="teamPerfChart"></canvas>
+          </div>
+          <div className="chart-card">
+            <h2>Department Allocation</h2>
+            <canvas id="deptChart"></canvas>
+          </div>
         </section>
       </main>
     </div>
