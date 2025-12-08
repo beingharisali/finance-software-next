@@ -79,10 +79,7 @@ export default function ManagerDashboard() {
           </div>
         </div>
 
-        {/* <div className="register-buttons">
-          <button className="create-user" onClick={() => handleOpenModal("broker")}>Broker Create</button>
-          <button className="create-user" onClick={() => handleOpenModal("agent")}>Agent Create</button>
-        </div> */}
+
 
         {showModal && selectedRole && <CreateUser role={selectedRole} onClose={() => setShowModal(false)} />}
 
