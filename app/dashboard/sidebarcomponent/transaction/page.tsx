@@ -101,9 +101,12 @@ export default function ManagerDashboardTransaction() {
   const fetchCategories = async () => {
     try {
       const res = await fetchCustomCategories();
-      if (res.success && res.categories) {
-        // setAllCategories((prev) => [...new Set([...prev, ...res.categories])]);
-      }
+      if (res.success && Array.isArray(res.categories)) {
+  setAllCategories((prev) => [
+    ...new Set([...prev, ...res.categories])
+  ]);
+}
+
     } catch (error) {
       console.error("Failed to fetch custom categories", error);
     }

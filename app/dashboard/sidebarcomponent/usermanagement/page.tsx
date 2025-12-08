@@ -78,9 +78,11 @@ export default function UserManagement() {
           ? "assistant"
           : newRole.toLowerCase();
       await updateUserRole(id, roleValue);
-      // setUsers((prev) =>
-      //   prev.map((u) => (u.id === id ? { ...u, role: roleValue } : u))
-      // );
+      setUsers((prev) =>
+  prev.map((u) => (u._id === id ? { ...u, role: roleValue } : u))
+);
+
+      
       alert("Role updated successfully");
     } catch (err: any) {
       console.error(err);
