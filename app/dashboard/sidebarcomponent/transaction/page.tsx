@@ -101,6 +101,9 @@ export default function ManagerDashboardTransaction() {
   const fetchCategories = async () => {
   try {
     const res = await fetchCustomCategories();
+    
+// setAllCategories((prev) => [...new Set([...prev, ...res.categories])]);
+
     if (res.categories && Array.isArray(res.categories)) {
    
       const safeCategories = res.categories.filter(

@@ -281,6 +281,7 @@ export default function AdminDashboard() {
                 <h2>Cashflow</h2>
                 <div className="filters">
                   <select
+                  title="dropdown"
                     className="years-dropdown"
                     value={graphFilter}
                     onChange={(e) => setGraphFilter(e.target.value as any)}
