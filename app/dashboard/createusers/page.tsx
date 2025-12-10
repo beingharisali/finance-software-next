@@ -157,6 +157,7 @@ export default function CreateUser({
             />
           )}
           <input
+           title="role"
             type="text"
             name="phone"
             value={formData.phone}
@@ -165,6 +166,7 @@ export default function CreateUser({
             className="register-input"
           />
           <select
+          title="role"
             name="role"
             value={formData.role}
             onChange={handleChange}
