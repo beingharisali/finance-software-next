@@ -101,8 +101,6 @@ export default function ManagerDashboardTransaction() {
   const fetchCategories = async () => {
   try {
     const res = await fetchCustomCategories();
-    
-// setAllCategories((prev) => [...new Set([...prev, ...res.categories])]);
 
     if (res.categories && Array.isArray(res.categories)) {
    
@@ -207,7 +205,7 @@ export default function ManagerDashboardTransaction() {
           </div>
 
           {/* SEARCH FILTER */}
-          <div className="filter-row">
+          <div className="filter-row text-black">
             <div className="search-container search-center">
               <input
                 type="text"
@@ -232,7 +230,7 @@ export default function ManagerDashboardTransaction() {
           </div>
 
           {/* CATEGORY + DATE FILTER */}
-          <div className="filter-row">
+          <div className="filter-row text-black">
             <div className="category-section" ref={dropdownRef}>
               <div className="custom-dropdown">
                 <div
@@ -272,6 +270,7 @@ export default function ManagerDashboardTransaction() {
                     <div className="dropdown-item">
                       {isAddingCustom ? (
                         <div className="custom-box">
+                           
                           <input
                             type="text"
                             value={newCustomCategory}
@@ -309,6 +308,7 @@ export default function ManagerDashboardTransaction() {
             </div>
 
             <div className="date-section">
+              <span className="text-sm">From:</span>
               <input
               title="date"
                 type="date"
@@ -316,6 +316,7 @@ export default function ManagerDashboardTransaction() {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
+              <span className="text-sm">To:</span>
               <input
               title="date "
                 type="date"

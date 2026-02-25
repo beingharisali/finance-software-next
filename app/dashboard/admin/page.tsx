@@ -265,7 +265,7 @@ export default function AdminDashboard() {
           )}
 
           {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
-          <section className="cards">
+          <section className="cards text-black ">
             {Object.entries(categoryTotals).map(([cat, total], idx) => (
               <div className="card" key={idx}>
                 <div className="card-title">{cat}</div>
@@ -278,19 +278,19 @@ export default function AdminDashboard() {
           <section className="charts">
             <div className="chart-card">
               <div className="chart-header">
-                <h2>Cashflow</h2>
+                <h2 className="text-black text-2xl font-bold">Cashflow</h2>
                 <div className="filters">
                   <select
                   title="dropdown"
-                    className="years-dropdown"
+                    className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
                     value={graphFilter}
                     onChange={(e) => setGraphFilter(e.target.value as any)}
                   >
-                    <option value="thisYear">This Year</option>
+                    <option value="thisYear ">This Year</option>
                     <option value="lastYear">Last Year</option>
                     <option value="month">Month-wise</option>
                     <option value="week">Week-wise</option>
-                    {/* <option value="none">By Date Range</option> */}
+                   
                   </select>
 
                   <label>
@@ -321,8 +321,8 @@ export default function AdminDashboard() {
 
           {/* ===== RECENT TRANSACTIONS ===== */}
           <section className="transactions">
-            <h2>Recent Transactions</h2>
-            <table>
+            <h2 className="text-black text-2xl font-bold">Recent Transactions</h2>
+            <table className="text-black ">
               <thead>
                 <tr>
                   <th>Date</th>

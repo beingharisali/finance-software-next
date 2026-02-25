@@ -10,12 +10,14 @@
 .upload-csv-label {
   font-weight: bold;
   font-size: 14px;
+  color: black;
 }
 
 .upload-csv-input {
   padding: 6px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  color: black;
 }
 
 .upload-csv-button {

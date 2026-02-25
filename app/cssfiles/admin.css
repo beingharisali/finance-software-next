@@ -84,7 +84,7 @@ margin-bottom: 20px;
 }
 .create-user{
  background-color: #022d58d0;
-  color: white;
+  color: black; 
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 5px;
@@ -109,9 +109,9 @@ margin-bottom: 20px;
   border-radius: 8px;
   box-shadow: 0 1px 5px rgba(0,0,0,0.1);
 }
-.card-title { color: #666; font-size: 14px; }
+.card-title { color: black; font-size: 14px;  font-weight: bold; }
 .card-value { font-size: 20px; font-weight: bold; margin-top: 5px; }
-.card-sub { color: #999; font-size: 12px; }
+.card-sub { color: black; font-size: 12px; }
 .card-change.positive { color: green; }
 .card-change.negative { color: red; }
 
@@ -162,7 +162,7 @@ margin-bottom: 20px;
 
 .filters label {
   font-size: 0.875rem;
-  color: #fff;
+  color: black;
   display: flex;
   flex-direction: column;
   font-weight: 500;
@@ -183,7 +183,7 @@ margin-bottom: 20px;
 }
 
 .filters input[type="date"]::placeholder {
-  color: #ccc;
+  color: white;
 }
 
 .filters input[type="date"]:focus {
