@@ -17,7 +17,6 @@ import {
   addCustomCategory,
   deleteCustomCategory,
 } from "@/services/category";
-// 2,3 lines chages sucessfull
 import Sidebar from "@/app/dashboard/components/Sidebar";
 import ProtectedRoute from "@/utilies/ProtectedRoute";
 
@@ -355,9 +354,9 @@ export default function ManagerDashboardTransaction() {
                     <th>Description</th>
                     <th>Transaction Type</th>
                     <th>Amount</th>
-                    <th>Sort Code</th>
+                    {/* <th>Sort Code</th>
                     <th>Account Number</th>
-                    <th>Balance</th>
+                    <th>Balance</th> */}
                     <th>Category</th>
                   </tr>
                 </thead>
@@ -373,9 +372,9 @@ export default function ManagerDashboardTransaction() {
                       <td>{txn.transactionDescription || "-"}</td>
                       <td>{txn.transactionType || "-"}</td>
                       <td>{txn.amount || 0}</td>
-                      <td>{txn.sortCode || "-"}</td>
+                      {/* <td>{txn.sortCode || "-"}</td>
                       <td>{txn.accountNumber || "-"}</td>
-                      <td>{txn.balance || 0}</td>
+                      <td>{txn.balance || 0}</td> */}
 
                       <td className="category-column">
                         <select
