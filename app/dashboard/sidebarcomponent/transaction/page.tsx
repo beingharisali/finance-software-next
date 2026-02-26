@@ -17,7 +17,6 @@ import {
   addCustomCategory,
   deleteCustomCategory,
 } from "@/services/category";
-
 import Sidebar from "@/app/dashboard/components/Sidebar";
 import ProtectedRoute from "@/utilies/ProtectedRoute";
 
@@ -47,62 +46,63 @@ export default function ManagerDashboardTransaction() {
 
   // ---------------------- FETCH TRANSACTIONS ----------------------
   const fetchTransactions = async (
-    selectedCategory = "",
-    start = "",
-    end = "",
-    pageNum = 1
-  ) => {
-    try {
-      setLoading(true);
+  selectedCategory = "",
+  start = "",
+  end = "",
+  pageNum = 1
+) => {
+  try {
+    setLoading(true);
+    const res = await getTransactions(pageNum, limit, "", start, end); 
+    const fetchedTransactions: TransactionType[] = res.transactions || [];
 
-      const res = await getTransactions(
-        pageNum,
-        limit,
-        selectedCategory,
-        start,
-        end
-      );
-      const fetchedTransactions: TransactionType[] = res.transactions || [];
+  
+    const transactionsCleaned = fetchedTransactions.map((txn) => ({
+      ...txn,
+      category:
+        txn.category &&
+        txn.category.trim() !== "" &&
+        txn.category.trim().toLowerCase() !== "uncategorized"
+          ? txn.category
+          : "",
+    }));
 
-      // ------------------- CLEAN CATEGORY (REMOVE UNCATEGORIZED) -------------------
-      const transactionsCleaned = fetchedTransactions.map((txn) => ({
-        ...txn,
-        category:
-          txn.category &&
-          txn.category.trim() !== "" &&
-          txn.category.trim().toLowerCase() !== "uncategorized"
-            ? txn.category
-            : "", // blank if empty or "uncategorized"
-      }));
+    // ----- NEW: Filter by transactionType if searchCategory is not empty -----
+    const filteredTransactions = searchCategory
+      ? transactionsCleaned.filter((txn) =>
+          txn.transactionType
+            ?.trim()
+            .toLowerCase()
+            .includes(searchCategory.toLowerCase())
+        )
+      : transactionsCleaned;
 
-      setTransactions(transactionsCleaned);
-      setPage(res.page || 1);
-      setTotalPages(res.totalPages || 1);
+    setTransactions(filteredTransactions);
 
-      // Combine transaction categories + types + custom categories
-      const txnCategories = transactionsCleaned
-        .map((t) => t.category)
-        .filter(Boolean);
-      const txnTypes = transactionsCleaned
-        .map((t) => t.transactionType)
-        .filter(Boolean);
-      setAllCategories((prev) => [
-        ...new Set([...prev, ...txnCategories, ...txnTypes]),
-      ]);
-    } catch (error) {
-      console.error("Failed to fetch transactions", error);
-      setTransactions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setPage(res.page || 1);
+    setTotalPages(res.totalPages || 1);
+
+    const txnCategories = transactionsCleaned
+      .map((t) => t.category)
+      .filter(Boolean);
+    const txnTypes = transactionsCleaned
+      .map((t) => t.transactionType)
+      .filter(Boolean);
+    setAllCategories((prev) => [
+      ...new Set([...prev, ...txnCategories, ...txnTypes]),
+    ]);
+  } catch (error) {
+    console.error("Failed to fetch transactions", error);
+    setTransactions([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ---------------------- FETCH CUSTOM CATEGORIES ----------------------
   const fetchCategories = async () => {
   try {
     const res = await fetchCustomCategories();
-    
-// setAllCategories((prev) => [...new Set([...prev, ...res.categories])]);
 
     if (res.categories && Array.isArray(res.categories)) {
    
@@ -207,11 +207,11 @@ export default function ManagerDashboardTransaction() {
           </div>
 
           {/* SEARCH FILTER */}
-          <div className="filter-row">
+          <div className="filter-row text-black">
             <div className="search-container search-center">
               <input
                 type="text"
-                placeholder="Search by category"
+                placeholder="Search by Transaction Type"
                 className="search-input"
                 value={searchCategory}
                 onChange={(e) => setSearchCategory(e.target.value)}
@@ -232,7 +232,7 @@ export default function ManagerDashboardTransaction() {
           </div>
 
           {/* CATEGORY + DATE FILTER */}
-          <div className="filter-row">
+          <div className="filter-row text-black">
             <div className="category-section" ref={dropdownRef}>
               <div className="custom-dropdown">
                 <div
@@ -272,6 +272,7 @@ export default function ManagerDashboardTransaction() {
                     <div className="dropdown-item">
                       {isAddingCustom ? (
                         <div className="custom-box">
+                           
                           <input
                             type="text"
                             value={newCustomCategory}
@@ -309,6 +310,7 @@ export default function ManagerDashboardTransaction() {
             </div>
 
             <div className="date-section">
+              <span className="text-sm">From:</span>
               <input
               title="date"
                 type="date"
@@ -316,6 +318,7 @@ export default function ManagerDashboardTransaction() {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
+              <span className="text-sm">To:</span>
               <input
               title="date "
                 type="date"
@@ -354,9 +357,9 @@ export default function ManagerDashboardTransaction() {
                     <th>Description</th>
                     <th>Transaction Type</th>
                     <th>Amount</th>
-                    <th>Sort Code</th>
+                    {/* <th>Sort Code</th>
                     <th>Account Number</th>
-                    <th>Balance</th>
+                    <th>Balance</th> */}
                     <th>Category</th>
                   </tr>
                 </thead>
@@ -372,9 +375,9 @@ export default function ManagerDashboardTransaction() {
                       <td>{txn.transactionDescription || "-"}</td>
                       <td>{txn.transactionType || "-"}</td>
                       <td>{txn.amount || 0}</td>
-                      <td>{txn.sortCode || "-"}</td>
+                      {/* <td>{txn.sortCode || "-"}</td>
                       <td>{txn.accountNumber || "-"}</td>
-                      <td>{txn.balance || 0}</td>
+                      <td>{txn.balance || 0}</td> */}
 
                       <td className="category-column">
                         <select
