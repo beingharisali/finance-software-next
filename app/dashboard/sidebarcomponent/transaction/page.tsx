@@ -46,55 +46,58 @@ export default function ManagerDashboardTransaction() {
 
   // ---------------------- FETCH TRANSACTIONS ----------------------
   const fetchTransactions = async (
-    selectedCategory = "",
-    start = "",
-    end = "",
-    pageNum = 1
-  ) => {
-    try {
-      setLoading(true);
+  selectedCategory = "",
+  start = "",
+  end = "",
+  pageNum = 1
+) => {
+  try {
+    setLoading(true);
+    const res = await getTransactions(pageNum, limit, "", start, end); 
+    const fetchedTransactions: TransactionType[] = res.transactions || [];
 
-      const res = await getTransactions(
-        pageNum,
-        limit,
-        selectedCategory,
-        start,
-        end
-      );
-      const fetchedTransactions: TransactionType[] = res.transactions || [];
+  
+    const transactionsCleaned = fetchedTransactions.map((txn) => ({
+      ...txn,
+      category:
+        txn.category &&
+        txn.category.trim() !== "" &&
+        txn.category.trim().toLowerCase() !== "uncategorized"
+          ? txn.category
+          : "",
+    }));
 
-      // ------------------- CLEAN CATEGORY (REMOVE UNCATEGORIZED) -------------------
-      const transactionsCleaned = fetchedTransactions.map((txn) => ({
-        ...txn,
-        category:
-          txn.category &&
-          txn.category.trim() !== "" &&
-          txn.category.trim().toLowerCase() !== "uncategorized"
-            ? txn.category
-            : "", // blank if empty or "uncategorized"
-      }));
+    // ----- NEW: Filter by transactionType if searchCategory is not empty -----
+    const filteredTransactions = searchCategory
+      ? transactionsCleaned.filter((txn) =>
+          txn.transactionType
+            ?.trim()
+            .toLowerCase()
+            .includes(searchCategory.toLowerCase())
+        )
+      : transactionsCleaned;
 
-      setTransactions(transactionsCleaned);
-      setPage(res.page || 1);
-      setTotalPages(res.totalPages || 1);
+    setTransactions(filteredTransactions);
 
-      // Combine transaction categories + types + custom categories
-      const txnCategories = transactionsCleaned
-        .map((t) => t.category)
-        .filter(Boolean);
-      const txnTypes = transactionsCleaned
-        .map((t) => t.transactionType)
-        .filter(Boolean);
-      setAllCategories((prev) => [
-        ...new Set([...prev, ...txnCategories, ...txnTypes]),
-      ]);
-    } catch (error) {
-      console.error("Failed to fetch transactions", error);
-      setTransactions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setPage(res.page || 1);
+    setTotalPages(res.totalPages || 1);
+
+    const txnCategories = transactionsCleaned
+      .map((t) => t.category)
+      .filter(Boolean);
+    const txnTypes = transactionsCleaned
+      .map((t) => t.transactionType)
+      .filter(Boolean);
+    setAllCategories((prev) => [
+      ...new Set([...prev, ...txnCategories, ...txnTypes]),
+    ]);
+  } catch (error) {
+    console.error("Failed to fetch transactions", error);
+    setTransactions([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ---------------------- FETCH CUSTOM CATEGORIES ----------------------
   const fetchCategories = async () => {
@@ -208,7 +211,7 @@ export default function ManagerDashboardTransaction() {
             <div className="search-container search-center">
               <input
                 type="text"
-                placeholder="Search by category"
+                placeholder="Search by Transaction Type"
                 className="search-input"
                 value={searchCategory}
                 onChange={(e) => setSearchCategory(e.target.value)}

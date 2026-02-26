@@ -25,6 +25,7 @@ interface TransactionType {
 export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
+  const [graphCategory, setGraphCategory] = useState<string>("All");
   const [categoryTotals, setCategoryTotals] = useState<Record<string, number>>(
     {}
   );
@@ -94,7 +95,14 @@ export default function AdminDashboard() {
     });
     setCategoryTotals(totals);
   };
-
+const uniqueCategories = [
+  "All",
+  ...new Set(
+    transactions
+      .map((t) => t.transactionType?.trim())
+      .filter(Boolean)
+  ),
+];
   useEffect(() => {
     fetchTransactions();
     const interval = setInterval(fetchTransactions, 10000);
@@ -112,7 +120,11 @@ export default function AdminDashboard() {
 
     const filtered = transactions.filter((txn) => {
       const txnDate = new Date(txn.transactionDate);
-
+// Category filter
+if (graphCategory !== "All") {
+  const cat = txn.transactionType?.trim() || "Uncategorized";
+  if (cat !== graphCategory) return false;
+}
       // Calendar filter
       if (dateRange.from && txnDate < new Date(dateRange.from)) return false;
       if (dateRange.to && txnDate > new Date(dateRange.to)) return false;
@@ -120,19 +132,18 @@ export default function AdminDashboard() {
       // Graph filter
       if (!dateRange.from && !dateRange.to && graphFilter !== "none") {
         switch (graphFilter) {
-          case "thisYear":
-            if (txnDate.getFullYear() !== nowYear) return false;
-            break;
-          case "lastYear":
-            if (txnDate.getFullYear() !== nowYear - 1) return false;
-            break;
-          case "month":
-            if (txnDate.getFullYear() !== nowYear) return false;
-            break;
-          case "week":
-            if (txnDate.getFullYear() !== nowYear) return false;
-            break;
-        }
+  case "thisYear":
+    if (txnDate.getFullYear() !== nowYear) return false;
+    break;
+  case "lastYear":
+    if (txnDate.getFullYear() !== nowYear - 1) return false;
+    break;
+  case "month":
+  case "week":
+    
+    break;
+}
+     
       }
       return true;
     });
@@ -233,7 +244,7 @@ export default function AdminDashboard() {
     }
 
     return () => chart?.destroy();
-  }, [transactions, dateRange, graphFilter]);
+  }, [transactions, dateRange, graphFilter,graphCategory]);
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
@@ -265,14 +276,21 @@ export default function AdminDashboard() {
           )}
 
           {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
-          <section className="cards text-black ">
-            {Object.entries(categoryTotals).map(([cat, total], idx) => (
-              <div className="card" key={idx}>
-                <div className="card-title">{cat}</div>
-                <div className="card-value">{total.toLocaleString()}</div>
-              </div>
-            ))}
-          </section>
+<section className="cards text-black">
+  {(() => {
+    const categoryTotals: Record<string, number> = {};
+    transactions.forEach(tx => {
+      categoryTotals[tx.category] = (categoryTotals[tx.category] || 0) + Math.abs(tx.amount);
+    });
+
+    return Object.entries(categoryTotals).map(([cat, total]) => (
+      <div className="card" key={cat}>
+        <div className="card-title">{cat}</div>
+        <div className="card-value">£{total.toLocaleString()}</div>
+      </div>
+    ));
+  })()}
+</section>
 
           {/* ===== CASHFLOW CHART (FILTERED) ===== */}
           <section className="charts">
@@ -281,12 +299,24 @@ export default function AdminDashboard() {
                 <h2 className="text-black text-2xl font-bold">Cashflow</h2>
                 <div className="filters">
                   <select
+  title="category-filter"
+  className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
+  value={graphCategory}
+  onChange={(e) => setGraphCategory(e.target.value)}
+>
+  {uniqueCategories.map((cat, idx) => (
+    <option key={idx} value={cat}>
+      {cat}
+    </option>
+  ))}
+</select>
+                  <select
                   title="dropdown"
                     className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
                     value={graphFilter}
                     onChange={(e) => setGraphFilter(e.target.value as any)}
                   >
-                    <option value="thisYear ">This Year</option>
+                    <option value="thisYear">This Year</option>
                     <option value="lastYear">Last Year</option>
                     <option value="month">Month-wise</option>
                     <option value="week">Week-wise</option>
@@ -339,7 +369,7 @@ export default function AdminDashboard() {
                     </td>
                     <td>{txn.transactionDescription}</td>
                     <td className={txn.amount >= 0 ? "positive" : "negative"}>
-                      {Math.abs(txn.amount).toLocaleString()}
+                       £{Math.abs(txn.amount).toLocaleString()}
                     </td>
                     <td>{txn.transactionType || "Uncategorized"}</td>
                   </tr>
