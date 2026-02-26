@@ -13,14 +13,10 @@ import "../../cssfiles/admin.css";
 import "../../cssfiles/sidebarcomponents.css";
 import "../../cssfiles/uploadCSV.css";
 import Sidebar from "@/app/dashboard/components/Sidebar";
+import { TransactionType } from "@/services/transactionService";
 Chart.register(...registerables);
 
-interface TransactionType {
-  transactionDate: string;
-  transactionDescription: string;
-  transactionType: string;
-  amount: number;
-}
+
 
 export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
@@ -283,7 +279,7 @@ if (graphCategory !== "All") {
             />
           )}
 
-          {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
+ {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
 
 <section className="cards text-black">
   {(() => {
