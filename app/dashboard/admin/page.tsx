@@ -25,6 +25,7 @@ interface TransactionType {
 export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
+  const [recentlyUploadedIds, setRecentlyUploadedIds] = useState<Set<string>>(new Set());
   const [graphCategory, setGraphCategory] = useState<string>("All");
   const [categoryTotals, setCategoryTotals] = useState<Record<string, number>>(
     {}
@@ -70,22 +71,43 @@ export default function AdminDashboard() {
   };
 
   // Fetch transactions from backend
-  const fetchTransactions = async () => {
-    try {
-      const res = await http.get("/transactions");
-      const data: TransactionType[] = res.data.transactions || [];
-      data.sort(
-        (a, b) =>
-          new Date(a.transactionDate).getTime() -
-          new Date(b.transactionDate).getTime()
-      );
-      setTransactions(data);
-    } catch (err) {
-      console.error("Failed to fetch transactions", err);
-      setTransactions([]);
-    }
-  };
+  // const fetchTransactions = async () => {
+  //   try {
+  //     const res = await http.get("/transactions");
+  //     const data: TransactionType[] = res.data.transactions || [];
+  //     data.sort(
+  //       (a, b) =>
+  //         new Date(a.transactionDate).getTime() -
+  //         new Date(b.transactionDate).getTime()
+  //     );
+  //     setTransactions(data);
+  //   } catch (err) {
+  //     console.error("Failed to fetch transactions", err);
+  //     setTransactions([]);
+  //   }
+  // };
+const fetchTransactions = async () => {
+  try {
+    const res = await http.get("/transactions");
+    const data: TransactionType[] = res.data.transactions || [];
+    data.sort((a, b) => new Date(a.transactionDate).getTime() - new Date(b.transactionDate).getTime());
 
+    // Detect newly uploaded
+    const newIds = new Set<string>();
+    data.forEach(tx => {
+      const id = `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.transactionType || "none"}`;
+      if (!transactions.find(t => `${t.transactionDate}-${t.transactionDescription}-${t.amount}-${t.transactionType || "none"}` === id)) {
+        newIds.add(id);
+      }
+    });
+    setRecentlyUploadedIds(newIds);
+
+    setTransactions(data);
+  } catch (err) {
+    console.error("Failed to fetch transactions", err);
+    setTransactions([]);
+  }
+};
   // Calculate category totals for cards (ALL transactions, no filter)
   const calculateCategoryTotals = () => {
     const totals: Record<string, number> = {};
@@ -276,7 +298,7 @@ if (graphCategory !== "All") {
           )}
 
           {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
-<section className="cards text-black">
+{/* <section className="cards text-black">
   {(() => {
     const categoryTotals: Record<string, number> = {};
     transactions.forEach(tx => {
@@ -289,6 +311,44 @@ if (graphCategory !== "All") {
         <div className="card-value">£{total.toLocaleString()}</div>
       </div>
     ));
+  })()}
+</section> */}
+<section className="cards text-black">
+  {(() => {
+    const categoryTotals: Record<string, number> = {};
+    const categoryTxns: Record<string, TransactionType[]> = {};
+
+    transactions.forEach(tx => {
+      const cat = tx.category || "Uncategorized";
+
+
+      categoryTotals[cat] = (categoryTotals[cat] || 0) + Math.abs(tx.amount);
+
+      if (!categoryTxns[cat]) categoryTxns[cat] = [];
+      categoryTxns[cat].push(tx);
+    });
+
+    return Object.entries(categoryTotals).map(([cat, total]) => {
+      // check if any transaction in this category is recently uploaded
+      const hasRecentlyUploaded = categoryTxns[cat].some(tx =>
+        recentlyUploadedIds.has(`${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.category || "none"}`)
+      );
+      const isUncategorized = cat === "Uncategorized";
+
+
+      const highlightClass = isUncategorized
+        ? "highlight-uncategorized-card"
+        : hasRecentlyUploaded
+        ? "highlight-uploaded-card"
+        : "";
+
+      return (
+        <div className={`card ${highlightClass}`} key={cat}>
+          <div className="card-title">{cat}</div>
+          <div className="card-value">£{total.toLocaleString()}</div>
+        </div>
+      );
+    });
   })()}
 </section>
 
