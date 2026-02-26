@@ -366,7 +366,14 @@ export default function ManagerDashboardTransaction() {
 
                 <tbody>
                   {transactions.map((txn) => (
-                    <tr key={txn._id}>
+                    <tr 
+      key={txn._id}
+      onDoubleClick={() => {
+        setSelectedTransaction(txn); 
+        setShowPopup(true); 
+      }}
+      style={{ cursor: "pointer" }}
+    >
                       <td>
                         {txn.transactionDate
                           ? moment(txn.transactionDate).format("DD/MM/YYYY")
@@ -375,9 +382,7 @@ export default function ManagerDashboardTransaction() {
                       <td>{txn.transactionDescription || "-"}</td>
                       <td>{txn.transactionType || "-"}</td>
                       <td>{txn.amount || 0}</td>
-                      {/* <td>{txn.sortCode || "-"}</td>
-                      <td>{txn.accountNumber || "-"}</td>
-                      <td>{txn.balance || 0}</td> */}
+                  
 
                       <td className="category-column">
                         <select
@@ -389,6 +394,7 @@ export default function ManagerDashboardTransaction() {
                             setSelectedNewCategory(newCat);
                             setShowPopup(true);
                           }}
+                          className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                           <option value="">Select Category</option>
                           {allCategories.map((cat, idx) => (
@@ -447,87 +453,117 @@ export default function ManagerDashboardTransaction() {
       </div>
 
       {/* ---------------- POPUP ---------------- */}
-      {showPopup && (
-        <div className="popup-overlay">
-          <div className="popup-box">
-            <h3>Apply Category Change</h3>
+      {showPopup && selectedTransaction && (
+  <div className="fullpage-overlay">
+    <div className="transaction-detail-page">
+      <h2>Transaction Details</h2>
 
-            <p>
-              Do you want to update category for <b>only this transaction</b> OR
-              <b> all future transactions</b> with the same description?
-            </p>
+      <p>
+        <b>Date:</b>{" "}
+        {selectedTransaction.transactionDate
+          ? moment(selectedTransaction.transactionDate).format("DD/MM/YYYY")
+          : "-"}
+      </p>
+      <p>
+        <b>Description:</b> {selectedTransaction.transactionDescription || "-"}
+      </p>
+      <p>
+        <b>Type:</b> {selectedTransaction.transactionType || "-"}
+      </p>
+      <p>
+        <b>Amount:</b> {selectedTransaction.amount || 0}
+      </p>
 
-            <div className="popup-buttons">
-              <button
-                className="popup-btn single"
-                onClick={async () => {
-                  try {
-                    const res = await updateTransactionCategory(
-                      selectedTransaction._id,
-                      selectedNewCategory
-                    );
-                    if (res.success) {
-                      setTransactions((prev) =>
-                        prev.map((t) =>
-                          t._id === selectedTransaction._id
-                            ? { ...t, category: selectedNewCategory }
-                            : t
-                        )
-                      );
-                      alert("Category updated for this transaction.");
-                    }
-                  } catch (error) {
-                    console.error(error);
-                    alert("Error updating category");
-                  }
-                  setShowPopup(false);
-                }}
-              >
-                Only This Transaction
-              </button>
+      {/* Category Dropdown */}
+      <div className="category-column">
+        <select
+          title="category-dropdown"
+          value={selectedTransaction.category || ""}
+          onChange={(e) => setSelectedNewCategory(e.target.value)}
+          className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Select Category</option>
+          {allCategories.map((cat, idx) => (
+            <option key={idx} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+      </div>
 
-              <button
-                className="popup-btn all"
-                onClick={async () => {
-                  try {
-                    const res = await updateTransactionCategory(
-                      selectedTransaction._id,
-                      selectedNewCategory,
-                      true
-                    );
-                    if (res.success) {
-                      setTransactions((prev) =>
-                        prev.map((t) =>
-                          t.transactionDescription ===
-                          selectedTransaction.transactionDescription
-                            ? { ...t, category: selectedNewCategory }
-                            : t
-                        )
-                      );
-                      alert(
-                        "Category updated for all future transactions with same description."
-                      );
-                    }
-                  } catch (error) {
-                    console.error(error);
-                    alert("Error updating category");
-                  }
-                  setShowPopup(false);
-                }}
-              >
-                All Future Transactions
-              </button>
+      {/* Buttons */}
+      <div className="popup-buttons">
+        <button
+          className="popup-btn single"
+          onClick={async () => {
+            try {
+              const res = await updateTransactionCategory(
+                selectedTransaction._id,
+                selectedNewCategory
+              );
+              if (res.success) {
+                setTransactions((prev) =>
+                  prev.map((t) =>
+                    t._id === selectedTransaction._id
+                      ? { ...t, category: selectedNewCategory }
+                      : t
+                  )
+                );
+                alert("Category updated for this transaction.");
+              }
+            } catch (error) {
+              console.error(error);
+              alert("Error updating category");
+            }
+            setShowPopup(false);
+          }}
+        >
+          Only This Transaction
+        </button>
 
-              <button
-                className="popup-btn cancel"
-                onClick={() => setShowPopup(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        <button
+          className="popup-btn all"
+          onClick={async () => {
+            try {
+              const res = await updateTransactionCategory(
+                selectedTransaction._id,
+                selectedNewCategory,
+                true
+              );
+              if (res.success) {
+                setTransactions((prev) =>
+                  prev.map((t) =>
+                    t.transactionDescription ===
+                    selectedTransaction.transactionDescription
+                      ? { ...t, category: selectedNewCategory }
+                      : t
+                  )
+                );
+                alert(
+                  "Category updated for all future transactions with same description."
+                );
+              }
+            } catch (error) {
+              console.error(error);
+              alert("Error updating category");
+            }
+            setShowPopup(false);
+          }}
+        >
+          All Future Transactions
+        </button>
+
+        <button
+          className="popup-btn cancel"
+          onClick={() => setShowPopup(false)}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+     
     </ProtectedRoute>
   );
 }

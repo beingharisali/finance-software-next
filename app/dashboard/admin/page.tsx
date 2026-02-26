@@ -71,21 +71,7 @@ export default function AdminDashboard() {
   };
 
   // Fetch transactions from backend
-  // const fetchTransactions = async () => {
-  //   try {
-  //     const res = await http.get("/transactions");
-  //     const data: TransactionType[] = res.data.transactions || [];
-  //     data.sort(
-  //       (a, b) =>
-  //         new Date(a.transactionDate).getTime() -
-  //         new Date(b.transactionDate).getTime()
-  //     );
-  //     setTransactions(data);
-  //   } catch (err) {
-  //     console.error("Failed to fetch transactions", err);
-  //     setTransactions([]);
-  //   }
-  // };
+
 const fetchTransactions = async () => {
   try {
     const res = await http.get("/transactions");
@@ -298,21 +284,7 @@ if (graphCategory !== "All") {
           )}
 
           {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
-{/* <section className="cards text-black">
-  {(() => {
-    const categoryTotals: Record<string, number> = {};
-    transactions.forEach(tx => {
-      categoryTotals[tx.category] = (categoryTotals[tx.category] || 0) + Math.abs(tx.amount);
-    });
 
-    return Object.entries(categoryTotals).map(([cat, total]) => (
-      <div className="card" key={cat}>
-        <div className="card-title">{cat}</div>
-        <div className="card-value">£{total.toLocaleString()}</div>
-      </div>
-    ));
-  })()}
-</section> */}
 <section className="cards text-black">
   {(() => {
     const categoryTotals: Record<string, number> = {};
