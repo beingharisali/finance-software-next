@@ -6,6 +6,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import { Chart, registerables } from "chart.js";
 import http from "@/services/http";
 
+import { fetchCustomCategories } from "@/services/category";
 import CreateUser from "../createusers/page";
 import UploadCSV from "../admin/uploadcsv/page";
 
@@ -23,6 +24,7 @@ export default function AdminDashboard() {
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [recentlyUploadedIds, setRecentlyUploadedIds] = useState<Set<string>>(new Set());
   const [graphCategory, setGraphCategory] = useState<string>("All");
+  const [allCategories, setAllCategories] = useState<string[]>([]);
   const [categoryTotals, setCategoryTotals] = useState<Record<string, number>>(
     {}
   );
@@ -66,30 +68,73 @@ export default function AdminDashboard() {
     setGraphFilter("thisYear");
   };
 
-  // Fetch transactions from backend
-
 const fetchTransactions = async () => {
   try {
     const res = await http.get("/transactions");
     const data: TransactionType[] = res.data.transactions || [];
-    data.sort((a, b) => new Date(a.transactionDate).getTime() - new Date(b.transactionDate).getTime());
 
-    // Detect newly uploaded
+    // Sort transactions by date
+    data.sort(
+      (a, b) =>
+        new Date(a.transactionDate).getTime() -
+        new Date(b.transactionDate).getTime()
+    );
+
+    // Set all categories (category + transactionType)
+    const txnCategories = data.map((t) => t.category).filter(Boolean);
+    const txnTypes = data.map((t) => t.transactionType).filter(Boolean);
+    setAllCategories([...new Set([...txnCategories, ...txnTypes])]);
+
+    // Detect newly uploaded transactions
+    const oldTransactions = transactions; // current state
     const newIds = new Set<string>();
-    data.forEach(tx => {
+    data.forEach((tx) => {
       const id = `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.transactionType || "none"}`;
-      if (!transactions.find(t => `${t.transactionDate}-${t.transactionDescription}-${t.amount}-${t.transactionType || "none"}` === id)) {
+      if (
+        !oldTransactions.find(
+          (t) =>
+            `${t.transactionDate}-${t.transactionDescription}-${t.amount}-${t.transactionType || "none"}` ===
+            id
+        )
+      ) {
         newIds.add(id);
       }
     });
     setRecentlyUploadedIds(newIds);
 
+    // Update state
     setTransactions(data);
   } catch (err) {
     console.error("Failed to fetch transactions", err);
     setTransactions([]);
+    setAllCategories([]);
+    setRecentlyUploadedIds(new Set());
   }
 };
+// Add this function inside AdminDashboard component
+const fetchAllCategories = async () => {
+  try {
+    const res = await fetchCustomCategories(); 
+    const customCats: string[] =
+      res.categories?.filter((c: string) => c?.trim()) || [];
+
+    // Merge transaction categories + transaction types + custom categories
+    const txnCategories = transactions.map((t) => t.category).filter(Boolean);
+    const txnTypes = transactions.map((t) => t.transactionType).filter(Boolean);
+
+    setAllCategories([...new Set([...txnCategories, ...txnTypes, ...customCats])]);
+  } catch (error) {
+    console.error("Failed to fetch custom categories", error);
+  }
+};
+
+useEffect(() => {
+  fetchTransactions().then(() => fetchAllCategories()); 
+  const interval = setInterval(() => {
+    fetchTransactions().then(() => fetchAllCategories()); 
+  }, 10000);
+  return () => clearInterval(interval);
+}, []);
   // Calculate category totals for cards (ALL transactions, no filter)
   const calculateCategoryTotals = () => {
     const totals: Record<string, number> = {};
@@ -125,8 +170,12 @@ const uniqueCategories = [
     const filtered = transactions.filter((txn) => {
       const txnDate = new Date(txn.transactionDate);
 // Category filter
+// if (graphCategory !== "All") {
+//   const cat = txn.transactionType?.trim() || "Uncategorized";
+//   if (cat !== graphCategory) return false;
+// }
 if (graphCategory !== "All") {
-  const cat = txn.transactionType?.trim() || "Uncategorized";
+  const cat = txn.transactionType?.trim() || txn.category || "Uncategorized";
   if (cat !== graphCategory) return false;
 }
       // Calendar filter
@@ -250,6 +299,7 @@ if (graphCategory !== "All") {
     return () => chart?.destroy();
   }, [transactions, dateRange, graphFilter,graphCategory]);
 
+
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
       <div className="dashboard-container">
@@ -281,28 +331,27 @@ if (graphCategory !== "All") {
 
  {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
 
+
+
 <section className="cards text-black">
-  {(() => {
-    const categoryTotals: Record<string, number> = {};
-    const categoryTxns: Record<string, TransactionType[]> = {};
-
-    transactions.forEach(tx => {
-      const cat = tx.category || "Uncategorized";
-
-
-      categoryTotals[cat] = (categoryTotals[cat] || 0) + Math.abs(tx.amount);
-
-      if (!categoryTxns[cat]) categoryTxns[cat] = [];
-      categoryTxns[cat].push(tx);
-    });
-
-    return Object.entries(categoryTotals).map(([cat, total]) => {
-      // check if any transaction in this category is recently uploaded
-      const hasRecentlyUploaded = categoryTxns[cat].some(tx =>
-        recentlyUploadedIds.has(`${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.category || "none"}`)
+  {allCategories
+    .filter((cat) => graphCategory === "All" || cat === graphCategory)
+    .map((cat) => {
+      const txns = transactions.filter(
+        (tx) =>
+          (tx.transactionType?.trim() || tx.category || "Uncategorized") === cat
       );
-      const isUncategorized = cat === "Uncategorized";
 
+      const total = txns.reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+
+      // check if any transaction in this category is recently uploaded
+      const hasRecentlyUploaded = txns.some((tx) =>
+        recentlyUploadedIds.has(
+          `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.category || "none"}`
+        )
+      );
+
+      const isUncategorized = cat === "Uncategorized";
 
       const highlightClass = isUncategorized
         ? "highlight-uncategorized-card"
@@ -316,23 +365,23 @@ if (graphCategory !== "All") {
           <div className="card-value">£{total.toLocaleString()}</div>
         </div>
       );
-    });
-  })()}
+    })}
 </section>
-
           {/* ===== CASHFLOW CHART (FILTERED) ===== */}
           <section className="charts">
             <div className="chart-card">
               <div className="chart-header">
                 <h2 className="text-black text-2xl font-bold">Cashflow</h2>
-                <div className="filters">
-                  <select
+
+<div className="filters">             
+<select
   title="category-filter"
   className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
   value={graphCategory}
   onChange={(e) => setGraphCategory(e.target.value)}
 >
-  {uniqueCategories.map((cat, idx) => (
+  <option value="All">All</option>
+  {allCategories.map((cat, idx) => (
     <option key={idx} value={cat}>
       {cat}
     </option>
@@ -407,6 +456,7 @@ if (graphCategory !== "All") {
           </section>
         </main>
       </div>
+      
     </ProtectedRoute>
   );
 }
