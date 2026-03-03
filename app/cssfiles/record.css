@@ -50,6 +50,9 @@
   padding: 16px 16px;
   text-align: left;
 }
+.record-table .text-right{
+  text-align: right;
+}
 /* 
 .record-table th {
   background-color: #0e4a5f;

@@ -356,7 +356,7 @@ export default function ManagerDashboardTransaction() {
                     <th>Transaction Date</th>
                     <th>Description</th>
                     <th>Transaction Type</th>
-                    <th>Amount</th>
+                    <th className="text-right">Amount</th>
                     {/* <th>Sort Code</th>
                     <th>Account Number</th>
                     <th>Balance</th> */}
@@ -381,7 +381,7 @@ export default function ManagerDashboardTransaction() {
                       </td>
                       <td>{txn.transactionDescription || "-"}</td>
                       <td>{txn.transactionType || "-"}</td>
-                      <td>{txn.amount || 0}</td>
+                      <td className="text-right ">{txn.amount || 0}</td>
                   
 
                       <td className="category-column">
