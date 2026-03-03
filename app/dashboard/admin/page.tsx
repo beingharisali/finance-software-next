@@ -112,26 +112,34 @@ const fetchTransactions = async () => {
   }
 };
 // Add this function inside AdminDashboard component
+
 const fetchAllCategories = async () => {
   try {
-    const res = await fetchCustomCategories(); 
+    //  Transaction types from existing transactions
+    const txnTypes = transactions
+      .map((t) => t.transactionType?.trim())
+      .filter(Boolean);
+
+    //  Custom categories from backend
+    const res = await fetchCustomCategories();
     const customCats: string[] =
       res.categories?.filter((c: string) => c?.trim()) || [];
 
-    // Merge transaction categories + transaction types + custom categories
-    const txnCategories = transactions.map((t) => t.category).filter(Boolean);
-    const txnTypes = transactions.map((t) => t.transactionType).filter(Boolean);
+    //  Merge and remove duplicates
+    const mergedCategories = Array.from(new Set([...txnTypes, ...customCats]));
 
-    setAllCategories([...new Set([...txnCategories, ...txnTypes, ...customCats])]);
+    //  Add all option at start
+    setAllCategories(["All", ...mergedCategories]);
   } catch (error) {
-    console.error("Failed to fetch custom categories", error);
+    console.error("Failed to fetch categories", error);
+    setAllCategories(["All"]);
   }
 };
 
 useEffect(() => {
-  fetchTransactions().then(() => fetchAllCategories()); 
+  fetchTransactions().then(fetchAllCategories);
   const interval = setInterval(() => {
-    fetchTransactions().then(() => fetchAllCategories()); 
+    fetchTransactions().then(fetchAllCategories);
   }, 10000);
   return () => clearInterval(interval);
 }, []);
@@ -152,11 +160,7 @@ const uniqueCategories = [
       .filter(Boolean)
   ),
 ];
-  useEffect(() => {
-    fetchTransactions();
-    const interval = setInterval(fetchTransactions, 10000);
-    return () => clearInterval(interval);
-  }, []);
+
 
   useEffect(() => {
     calculateCategoryTotals();
@@ -170,10 +174,6 @@ const uniqueCategories = [
     const filtered = transactions.filter((txn) => {
       const txnDate = new Date(txn.transactionDate);
 // Category filter
-// if (graphCategory !== "All") {
-//   const cat = txn.transactionType?.trim() || "Uncategorized";
-//   if (cat !== graphCategory) return false;
-// }
 if (graphCategory !== "All") {
   const cat = txn.transactionType?.trim() || txn.category || "Uncategorized";
   if (cat !== graphCategory) return false;
@@ -298,7 +298,40 @@ if (graphCategory !== "All") {
 
     return () => chart?.destroy();
   }, [transactions, dateRange, graphFilter,graphCategory]);
+const getFilteredTransactions = () => {
+  const nowYear = new Date().getFullYear();
+  return transactions.filter((txn) => {
+    const txnDate = new Date(txn.transactionDate);
 
+    // Category filter (graphCategory dropdown)
+    if (graphCategory !== "All") {
+      const cat = txn.transactionType?.trim() || txn.category || "Uncategorized";
+      if (cat !== graphCategory) return false;
+    }
+
+    // Date range filter
+    if (dateRange.from && txnDate < new Date(dateRange.from)) return false;
+    if (dateRange.to && txnDate > new Date(dateRange.to)) return false;
+
+    // Graph filter (thisYear, lastYear, month/week)
+    if (!dateRange.from && !dateRange.to && graphFilter !== "none") {
+      switch (graphFilter) {
+        case "thisYear":
+          if (txnDate.getFullYear() !== nowYear) return false;
+          break;
+        case "lastYear":
+          if (txnDate.getFullYear() !== nowYear - 1) return false;
+          break;
+        case "month":
+        case "week":
+          // Month/week filters can stay for chart only
+          break;
+      }
+    }
+
+    return true;
+  });
+};
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
@@ -332,19 +365,17 @@ if (graphCategory !== "All") {
  {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
 
 
-
 <section className="cards text-black">
   {allCategories
     .filter((cat) => graphCategory === "All" || cat === graphCategory)
     .map((cat) => {
-      const txns = transactions.filter(
+      const txns = getFilteredTransactions().filter(
         (tx) =>
           (tx.transactionType?.trim() || tx.category || "Uncategorized") === cat
       );
 
       const total = txns.reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
 
-      // check if any transaction in this category is recently uploaded
       const hasRecentlyUploaded = txns.some((tx) =>
         recentlyUploadedIds.has(
           `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.category || "none"}`
@@ -374,13 +405,14 @@ if (graphCategory !== "All") {
                 <h2 className="text-black text-2xl font-bold">Cashflow</h2>
 
 <div className="filters">             
+
+
 <select
   title="category-filter"
   className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
   value={graphCategory}
   onChange={(e) => setGraphCategory(e.target.value)}
 >
-  <option value="All">All</option>
   {allCategories.map((cat, idx) => (
     <option key={idx} value={cat}>
       {cat}
