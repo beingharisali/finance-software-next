@@ -17,16 +17,16 @@ import Sidebar from "@/app/dashboard/components/Sidebar";
 import { TransactionType } from "@/services/transactionService";
 Chart.register(...registerables);
 
-
-
 export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
-  const [recentlyUploadedIds, setRecentlyUploadedIds] = useState<Set<string>>(new Set());
+  const [recentlyUploadedIds, setRecentlyUploadedIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [graphCategory, setGraphCategory] = useState<string>("All");
   const [allCategories, setAllCategories] = useState<string[]>([]);
   const [categoryTotals, setCategoryTotals] = useState<Record<string, number>>(
-    {}
+    {},
   );
   const [graphFilter, setGraphFilter] = useState<
     "thisYear" | "lastYear" | "month" | "week" | "none"
@@ -63,104 +63,125 @@ export default function AdminDashboard() {
   };
 
   const resetDateRange = () => {
+    // date range reset
     setDateRange({ from: "", to: "" });
     setTempDateRange({ from: "", to: "" });
+
+    // graph filter reset
     setGraphFilter("thisYear");
+
+    // category filter reset
+    setGraphCategory("All");
   };
 
-const fetchTransactions = async () => {
-  try {
-    const res = await http.get("/transactions");
-    const data: TransactionType[] = res.data.transactions || [];
+  const fetchTransactions = async () => {
+    try {
+      const res = await http.get("/transactions");
+      const data: TransactionType[] = res.data.transactions || [];
 
-    // Sort transactions by date
-    data.sort(
-      (a, b) =>
-        new Date(a.transactionDate).getTime() -
-        new Date(b.transactionDate).getTime()
-    );
+      // Sort transactions by date
+      data.sort(
+        (a, b) =>
+          new Date(a.transactionDate).getTime() -
+          new Date(b.transactionDate).getTime(),
+      );
 
-    // Set all categories (category + transactionType)
-    const txnCategories = data.map((t) => t.category).filter(Boolean);
-    const txnTypes = data.map((t) => t.transactionType).filter(Boolean);
-    setAllCategories([...new Set([...txnCategories, ...txnTypes])]);
+      // Set all categories (category + transactionType)
+      const txnCategories = data.map((t) => t.category).filter(Boolean);
+      const txnTypes = data.map((t) => t.transactionType).filter(Boolean);
+      // setAllCategories([...new Set([...txnCategories, ...txnTypes])]);
+      setAllCategories((prev) =>
+        Array.from(new Set([...prev, ...txnCategories, ...txnTypes])),
+      );
 
-    // Detect newly uploaded transactions
-    const oldTransactions = transactions; // current state
-    const newIds = new Set<string>();
-    data.forEach((tx) => {
-      const id = `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.transactionType || "none"}`;
-      if (
-        !oldTransactions.find(
-          (t) =>
-            `${t.transactionDate}-${t.transactionDescription}-${t.amount}-${t.transactionType || "none"}` ===
-            id
-        )
-      ) {
-        newIds.add(id);
-      }
-    });
-    setRecentlyUploadedIds(newIds);
+      // Detect newly uploaded transactions
+      const oldTransactions = transactions; // current state
+      const newIds = new Set<string>();
+      data.forEach((tx) => {
+        const id = `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.transactionType || "none"}`;
+        if (
+          !oldTransactions.find(
+            (t) =>
+              `${t.transactionDate}-${t.transactionDescription}-${t.amount}-${t.transactionType || "none"}` ===
+              id,
+          )
+        ) {
+          newIds.add(id);
+        }
+      });
+      setRecentlyUploadedIds(newIds);
 
-    // Update state
-    setTransactions(data);
-  } catch (err) {
-    console.error("Failed to fetch transactions", err);
-    setTransactions([]);
-    setAllCategories([]);
-    setRecentlyUploadedIds(new Set());
-  }
-};
-// Add this function inside AdminDashboard component
+      // Update state
+      setTransactions(data);
+    } catch (err) {
+      console.error("Failed to fetch transactions", err);
+      setTransactions([]);
+      setAllCategories([]);
+      setRecentlyUploadedIds(new Set());
+    }
+  };
+  // Add this function inside AdminDashboard component
 
-const fetchAllCategories = async () => {
-  try {
-    //  Transaction types from existing transactions
-    const txnTypes = transactions
-      .map((t) => t.transactionType?.trim())
-      .filter(Boolean);
+  const fetchAllCategories = async () => {
+    try {
+      //  Transaction types from existing transactions
+      const txnTypes = transactions
+        .map((t) => t.transactionType?.trim())
+        .filter(Boolean);
 
-    //  Custom categories from backend
-    const res = await fetchCustomCategories();
-    const customCats: string[] =
-      res.categories?.filter((c: string) => c?.trim()) || [];
+      //  Custom categories from backend
+      const res = await fetchCustomCategories();
+      const customCats: string[] =
+        res.categories?.filter((c: string) => c?.trim()) || [];
 
-    //  Merge and remove duplicates
-    const mergedCategories = Array.from(new Set([...txnTypes, ...customCats]));
+      //  Merge and remove duplicates
+      const mergedCategories = Array.from(
+        new Set([...txnTypes, ...customCats]),
+      );
 
-    //  Add all option at start
-    setAllCategories(["All", ...mergedCategories]);
-  } catch (error) {
-    console.error("Failed to fetch categories", error);
-    setAllCategories(["All"]);
-  }
-};
+      //  Add all option at start
+      // setAllCategories(["All", ...mergedCategories]);
+      setAllCategories((prev) =>
+        Array.from(new Set(["All", ...prev, ...mergedCategories])),
+      );
+    } catch (error) {
+      console.error("Failed to fetch categories", error);
+      setAllCategories(["All"]);
+    }
+  };
 
-useEffect(() => {
-  fetchTransactions().then(fetchAllCategories);
-  const interval = setInterval(() => {
+  useEffect(() => {
     fetchTransactions().then(fetchAllCategories);
-  }, 10000);
-  return () => clearInterval(interval);
-}, []);
-  // Calculate category totals for cards (ALL transactions, no filter)
+  }, []); // sirf component mount pe fetch hoga
+
   const calculateCategoryTotals = () => {
     const totals: Record<string, number> = {};
+
+    // Initialize all categories to 0 first
+    allCategories.forEach((cat) => {
+      if (cat !== "All") totals[cat] = 0;
+    });
+
+    // Add amounts for transactions
     transactions.forEach((txn) => {
-      const cat = txn.transactionType?.trim() || "Uncategorized";
+      const cat =
+        txn.transactionType?.trim() || txn.category || "Uncategorized";
       totals[cat] = (totals[cat] || 0) + Math.abs(txn.amount);
     });
+    //  Add total for "All" category
+    totals["All"] = transactions.reduce(
+      (sum, tx) => sum + Math.abs(tx.amount),
+      0,
+    );
+
     setCategoryTotals(totals);
   };
-const uniqueCategories = [
-  "All",
-  ...new Set(
-    transactions
-      .map((t) => t.transactionType?.trim())
-      .filter(Boolean)
-  ),
-];
-
+  const uniqueCategories = [
+    "All",
+    ...new Set(
+      transactions.map((t) => t.transactionType?.trim()).filter(Boolean),
+    ),
+  ];
 
   useEffect(() => {
     calculateCategoryTotals();
@@ -173,11 +194,12 @@ const uniqueCategories = [
 
     const filtered = transactions.filter((txn) => {
       const txnDate = new Date(txn.transactionDate);
-// Category filter
-if (graphCategory !== "All") {
-  const cat = txn.transactionType?.trim() || txn.category || "Uncategorized";
-  if (cat !== graphCategory) return false;
-}
+      // Category filter
+      if (graphCategory !== "All") {
+        const cat =
+          txn.transactionType?.trim() || txn.category || "Uncategorized";
+        if (cat !== graphCategory) return false;
+      }
       // Calendar filter
       if (dateRange.from && txnDate < new Date(dateRange.from)) return false;
       if (dateRange.to && txnDate > new Date(dateRange.to)) return false;
@@ -185,18 +207,17 @@ if (graphCategory !== "All") {
       // Graph filter
       if (!dateRange.from && !dateRange.to && graphFilter !== "none") {
         switch (graphFilter) {
-  case "thisYear":
-    if (txnDate.getFullYear() !== nowYear) return false;
-    break;
-  case "lastYear":
-    if (txnDate.getFullYear() !== nowYear - 1) return false;
-    break;
-  case "month":
-  case "week":
-    
-    break;
-}
-     
+          case "thisYear":
+            if (txnDate.getFullYear() !== nowYear) return;
+            break;
+
+          case "lastYear":
+            if (txnDate.getFullYear() >= nowYear) return false;
+            break;
+          case "month":
+          case "week":
+            break;
+        }
       }
       return true;
     });
@@ -225,7 +246,7 @@ if (graphCategory !== "All") {
       const m = d.getMonth();
       const w = Math.floor(
         (d.getTime() - new Date(d.getFullYear(), 0, 1).getTime()) /
-          (7 * 86400 * 1000)
+          (7 * 86400 * 1000),
       );
 
       if (txn.amount >= 0) {
@@ -243,8 +264,8 @@ if (graphCategory !== "All") {
         graphFilter === "week"
           ? Array.from({ length: 52 }, (_, i) => `W${i + 1}`)
           : graphFilter === "month"
-          ? months
-          : months;
+            ? months
+            : months;
       const incomeData = graphFilter === "week" ? incomeWeek : incomeMonth;
       const expenseData = graphFilter === "week" ? expenseWeek : expenseMonth;
 
@@ -287,7 +308,7 @@ if (graphCategory !== "All") {
               callbacks: {
                 label: (context) =>
                   `${context.dataset.label}: ${Math.abs(
-                    context.raw as number
+                    context.raw as number,
                   ).toLocaleString()}`,
               },
             },
@@ -297,41 +318,43 @@ if (graphCategory !== "All") {
     }
 
     return () => chart?.destroy();
-  }, [transactions, dateRange, graphFilter,graphCategory]);
-const getFilteredTransactions = () => {
-  const nowYear = new Date().getFullYear();
-  return transactions.filter((txn) => {
-    const txnDate = new Date(txn.transactionDate);
+  }, [transactions, dateRange, graphFilter, graphCategory]);
+  const getFilteredTransactions = () => {
+    const nowYear = new Date().getFullYear();
+    return transactions.filter((txn) => {
+      const txnDate = new Date(txn.transactionDate);
 
-    // Category filter (graphCategory dropdown)
-    if (graphCategory !== "All") {
-      const cat = txn.transactionType?.trim() || txn.category || "Uncategorized";
-      if (cat !== graphCategory) return false;
-    }
-
-    // Date range filter
-    if (dateRange.from && txnDate < new Date(dateRange.from)) return false;
-    if (dateRange.to && txnDate > new Date(dateRange.to)) return false;
-
-    // Graph filter (thisYear, lastYear, month/week)
-    if (!dateRange.from && !dateRange.to && graphFilter !== "none") {
-      switch (graphFilter) {
-        case "thisYear":
-          if (txnDate.getFullYear() !== nowYear) return false;
-          break;
-        case "lastYear":
-          if (txnDate.getFullYear() !== nowYear - 1) return false;
-          break;
-        case "month":
-        case "week":
-          // Month/week filters can stay for chart only
-          break;
+      // Category filter (graphCategory dropdown)
+      if (graphCategory !== "All") {
+        const cat =
+          txn.transactionType?.trim() || txn.category || "Uncategorized";
+        if (cat !== graphCategory) return false;
       }
-    }
 
-    return true;
-  });
-};
+      // Date range filter
+      if (dateRange.from && txnDate < new Date(dateRange.from)) return false;
+      if (dateRange.to && txnDate > new Date(dateRange.to)) return false;
+
+      // Graph filter (thisYear, lastYear, month/week)
+      if (!dateRange.from && !dateRange.to && graphFilter !== "none") {
+        switch (graphFilter) {
+          case "thisYear":
+            if (txnDate.getFullYear() !== nowYear) return false;
+            break;
+          case "lastYear":
+            // if (txnDate.getFullYear() !== nowYear - 1) return false;
+            if (txnDate.getFullYear() >= nowYear) return false;
+            break;
+          case "month":
+          case "week":
+            // Month/week filters can stay for chart only
+            break;
+        }
+      }
+
+      return true;
+    });
+  };
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
@@ -351,8 +374,15 @@ const getFilteredTransactions = () => {
             </div>
           </div>
 
-          <div className="upload-csv-section">
+          {/* <div className="upload-csv-section">
             <UploadCSV onUploadSuccess={fetchTransactions} />
+          </div> */}
+          <div className="upload-csv-section">
+            <UploadCSV
+              onUploadSuccess={() =>
+                fetchTransactions().then(fetchAllCategories)
+              }
+            />
           </div>
 
           {showModal && selectedRole && (
@@ -362,73 +392,92 @@ const getFilteredTransactions = () => {
             />
           )}
 
- {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
+          {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
 
+          <section className="cards text-black w-full h-80 overflow-y-auto flex flex-col gap-4 p-4">
+            {(dateRange.from || dateRange.to
+              ? [
+                  ...new Set(
+                    getFilteredTransactions().map(
+                      (tx) =>
+                        tx.transactionType?.trim() ||
+                        tx.category ||
+                        "Uncategorized",
+                    ),
+                  ),
+                ]
+              : allCategories
+            )
+              .filter((cat) => graphCategory === "All" || cat === graphCategory)
+              .map((cat) => {
+                const txns = getFilteredTransactions().filter(
+                  (tx) =>
+                    (tx.transactionType?.trim() ||
+                      tx.category ||
+                      "Uncategorized") === cat,
+                );
 
-<section className="cards text-black">
-  {(dateRange.from || dateRange.to
-    ? [...new Set(
-        getFilteredTransactions().map(
-          (tx) =>
-            tx.transactionType?.trim() ||
-            tx.category ||
-            "Uncategorized"
-        )
-      )]
-    : allCategories
-  )
-    .filter((cat) => graphCategory === "All" || cat === graphCategory)
-    .map((cat) => {
-      const txns = getFilteredTransactions().filter(
-        (tx) =>
-          (tx.transactionType?.trim() || tx.category || "Uncategorized") === cat
-      );
+                const total = txns.reduce(
+                  (sum, tx) => sum + Math.abs(tx.amount),
+                  0,
+                );
 
-      const total = txns.reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+                const hasRecentlyUploaded = txns.some((tx) =>
+                  recentlyUploadedIds.has(
+                    `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.transactionType || "none"}`,
+                  ),
+                );
 
-      const hasRecentlyUploaded = txns.some((tx) =>
-        recentlyUploadedIds.has(
-          `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.transactionType || "none"}`
-        )
-      );
+                const isUncategorized = cat === "Uncategorized";
 
-      const isUncategorized = cat === "Uncategorized";
+                const highlightClass = isUncategorized
+                  ? "highlight-uncategorized-card"
+                  : hasRecentlyUploaded
+                    ? "highlight-uploaded-card"
+                    : "";
 
-      const highlightClass = isUncategorized
-        ? "highlight-uncategorized-card"
-        : hasRecentlyUploaded
-        ? "highlight-uploaded-card"
-        : "";
+                return (
+                  <div
+                    className={`card ${highlightClass} w-full bg-white rounded-lg shadow-md flex flex-col justify-between p-4`}
+                    key={cat}
+                  >
+                    <div className="card-title">{cat}</div>
 
-      return (
-        <div className={`card ${highlightClass}`} key={cat}>
-          <div className="card-title">{cat}</div>
-          <div className="card-value">£{total.toLocaleString()}</div>
-        </div>
-      );
-    })}
-</section>
+                    {/* <div className="card-value">£{categoryTotals[cat]?.toLocaleString() || 0}</div> */}
+                    {/* <div className="card-value">£{total.toLocaleString()}</div> */}
+                    <div className="card-value">
+                      £
+                      {dateRange.from ||
+                      dateRange.to ||
+                      graphFilter !== "thisYear"
+                        ? total.toLocaleString()
+                        : categoryTotals[cat]?.toLocaleString() || 0}
+                    </div>
+                  </div>
+                );
+              })}
+          </section>
           {/* ===== CASHFLOW CHART (FILTERED) ===== */}
           <section className="charts">
             <div className="chart-card">
               <div className="chart-header">
                 <h2 className="text-black text-2xl font-bold">Cashflow</h2>
 
-<div className="filters">             
-<select
-  title="category-filter"
-  className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
-  value={graphCategory}
-  onChange={(e) => setGraphCategory(e.target.value)}
->
-  {allCategories.map((cat, idx) => (
-    <option key={idx} value={cat}>
-      {cat}
-    </option>
-  ))}
-</select>
+                <div className="filters">
                   <select
-                  title="dropdown"
+                    title="category-filter"
+                    className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
+                    value={graphCategory}
+                    onChange={(e) => setGraphCategory(e.target.value)}
+                  >
+                    {allCategories.map((cat, idx) => (
+                      <option key={idx} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    title="dropdown"
                     className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
                     value={graphFilter}
                     onChange={(e) => setGraphFilter(e.target.value as any)}
@@ -437,7 +486,6 @@ const getFilteredTransactions = () => {
                     <option value="lastYear">Last Year</option>
                     <option value="month">Month-wise</option>
                     <option value="week">Week-wise</option>
-                   
                   </select>
 
                   <label>
@@ -468,7 +516,9 @@ const getFilteredTransactions = () => {
 
           {/* ===== RECENT TRANSACTIONS ===== */}
           <section className="transactions">
-            <h2 className="text-black text-2xl font-bold">Recent Transactions</h2>
+            <h2 className="text-black text-2xl font-bold">
+              Recent Transactions
+            </h2>
             <table className="text-black ">
               <thead>
                 <tr>
@@ -486,7 +536,7 @@ const getFilteredTransactions = () => {
                     </td>
                     <td>{txn.transactionDescription}</td>
                     <td className={txn.amount >= 0 ? "positive" : "negative"}>
-                       £{Math.abs(txn.amount).toLocaleString()}
+                      £{Math.abs(txn.amount).toLocaleString()}
                     </td>
                     <td>{txn.transactionType || "Uncategorized"}</td>
                   </tr>
@@ -496,7 +546,6 @@ const getFilteredTransactions = () => {
           </section>
         </main>
       </div>
-      
     </ProtectedRoute>
   );
 }

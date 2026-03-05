@@ -49,11 +49,12 @@ export default function ManagerDashboardTransaction() {
   selectedCategory = "",
   start = "",
   end = "",
-  pageNum = 1
+  pageNum = 1,
+  searchCategory= ""
 ) => {
   try {
     setLoading(true);
-    const res = await getTransactions(pageNum, limit, "", start, end); 
+    const res = await getTransactions(pageNum, limit, selectedCategory, start, end); 
     const fetchedTransactions: TransactionType[] = res.transactions || [];
 
   
@@ -68,6 +69,7 @@ export default function ManagerDashboardTransaction() {
     }));
 
     // ----- NEW: Filter by transactionType if searchCategory is not empty -----
+    
     const filteredTransactions = searchCategory
       ? transactionsCleaned.filter((txn) =>
           txn.transactionType
@@ -76,6 +78,7 @@ export default function ManagerDashboardTransaction() {
             .includes(searchCategory.toLowerCase())
         )
       : transactionsCleaned;
+      
 
     setTransactions(filteredTransactions);
 
@@ -140,13 +143,16 @@ export default function ManagerDashboardTransaction() {
 
   if (!user) return <p>Loading user...</p>;
 
-  const resetFilters = () => {
-    setSearchCategory("");
-    setCategory("");
-    setStartDate("");
-    setEndDate("");
-    fetchTransactions("", "", "", 1).then(() => fetchCategories());
-  };
+
+const resetFilters = () => {
+  setSearchCategory("");
+  setCategory("");
+  setStartDate("");
+  setEndDate("");
+
+  // Explicitly fetch all transactions with empty filters
+  fetchTransactions("", "", "", 1); 
+};
 
   const handleAddCustomCategory = async () => {
     if (!newCustomCategory.trim()) return;
@@ -381,13 +387,22 @@ export default function ManagerDashboardTransaction() {
                       </td>
                       <td>{txn.transactionDescription || "-"}</td>
                       <td>{txn.transactionType || "-"}</td>
-                      <td className="text-right ">{txn.amount || 0}</td>
+                      {/* <td className="text-right ">{txn.amount || 0}</td> */}
+                            <td className="text-right"
+  style={{
+    color: txn.amount < 0 ? "red" : "green",
+    fontVariantNumeric: "tabular-nums"
+  }}
+>
+  {Number(txn.amount).toFixed(2)}
+</td>
                   
 
                       <td className="category-column">
                         <select
                           title="category-dropdown"
-                          value={txn.category || ""}
+                          // value={txn.category || ""}
+                          value={txn.category || txn.transactionType || ""}
                           onChange={(e) => {
                             const newCat = e.target.value;
                             setSelectedTransaction(txn);
