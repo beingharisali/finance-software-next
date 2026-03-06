@@ -5,7 +5,7 @@ import ProtectedRoute from "@/utilies/ProtectedRoute";
 import { useAuthContext } from "@/context/AuthContext";
 import { Chart, registerables } from "chart.js";
 import http from "@/services/http";
-
+import moment from "moment";
 import { fetchCustomCategories } from "@/services/category";
 import CreateUser from "../createusers/page";
 import UploadCSV from "../admin/uploadcsv/page";
@@ -21,8 +21,9 @@ export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   // NEW: for category click modal
-const [clickedCategoryTransactions, setClickedCategoryTransactions] = useState<TransactionType[]>([]);
-const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [clickedCategoryTransactions, setClickedCategoryTransactions] =
+    useState<TransactionType[]>([]);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [recentlyUploadedIds, setRecentlyUploadedIds] = useState<Set<string>>(
     new Set(),
   );
@@ -76,14 +77,16 @@ const [showCategoryModal, setShowCategoryModal] = useState(false);
     // category filter reset
     setGraphCategory("All");
   };
-// NEW: handle click on category card
-const handleCategoryClick = (category: string) => {
-  const filteredTxns = getFilteredTransactions().filter(
-    txn => (txn.transactionType?.trim() || txn.category || "Uncategorized") === category
-  );
-  setClickedCategoryTransactions(filteredTxns);
-  setShowCategoryModal(true);
-};
+  // NEW: handle click on category card
+  const handleCategoryClick = (category: string) => {
+    const filteredTxns = getFilteredTransactions().filter(
+      (txn) =>
+        (txn.transactionType?.trim() || txn.category || "Uncategorized") ===
+        category,
+    );
+    setClickedCategoryTransactions(filteredTxns);
+    setShowCategoryModal(true);
+  };
   const fetchTransactions = async () => {
     try {
       const res = await http.get("/transactions");
@@ -365,14 +368,14 @@ const handleCategoryClick = (category: string) => {
       return true;
     });
   };
-// NEW: calculate totals for selected date range
-const filteredTxns = getFilteredTransactions();
-const totalIncome = filteredTxns
-  .filter(tx => tx.amount >= 0)
-  .reduce((sum, tx) => sum + tx.amount, 0);
-const totalExpense = filteredTxns
-  .filter(tx => tx.amount < 0)
-  .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+  // NEW: calculate totals for selected date range
+  const filteredTxns = getFilteredTransactions();
+  const totalIncome = filteredTxns
+    .filter((tx) => tx.amount >= 0)
+    .reduce((sum, tx) => sum + tx.amount, 0);
+  const totalExpense = filteredTxns
+    .filter((tx) => tx.amount < 0)
+    .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
       <div className="dashboard-container">
@@ -380,9 +383,8 @@ const totalExpense = filteredTxns
 
         <main className="main-content">
           <div className="main-top">
-
             <h1 className="header">Dashboard</h1>
-    
+
             <div className="top-right">
               <span className="profile-name">
                 {user?.fullname || user?.email || "Guest"}
@@ -403,11 +405,11 @@ const totalExpense = filteredTxns
               }
             />
           </div>
-                  {/* NEW: Total Income & Expense */}
-<div className="total-summary bg-white text-black p-4 rounded shadow-md mb-4 flex justify-between w-full max-w-lg">
-  <div>Total Income: £{totalIncome.toLocaleString()}</div>
-  <div>Total Expense: £{totalExpense.toLocaleString()}</div>
-</div>
+          {/* NEW: Total Income & Expense */}
+          <div className="total-summary bg-white text-black p-4 rounded shadow-md mb-4 flex justify-between w-full max-w-lg">
+            <div>Total Income: £{totalIncome.toLocaleString()}</div>
+            <div>Total Expense: £{totalExpense.toLocaleString()}</div>
+          </div>
 
           {showModal && selectedRole && (
             <CreateUser
@@ -419,10 +421,8 @@ const totalExpense = filteredTxns
           {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
 
           <section className="cards text-black w-full h-80 overflow-y-auto flex flex-col gap-4 p-4">
-            {
-            (dateRange.from || dateRange.to
-              ?
-               [
+            {(dateRange.from || dateRange.to
+              ? [
                   ...new Set(
                     getFilteredTransactions().map(
                       (tx) =>
@@ -433,7 +433,8 @@ const totalExpense = filteredTxns
                   ),
                 ]
               : allCategories
-            ).filter((cat) => cat && cat !== "All")  
+            )
+              .filter((cat) => cat && cat !== "All")
               .filter((cat) => graphCategory === "All" || cat === graphCategory)
               .map((cat) => {
                 const txns = getFilteredTransactions().filter(
@@ -463,20 +464,18 @@ const totalExpense = filteredTxns
                     : "";
 
                 return (
-              
-  //                 <div
+                  //                 <div
 
-  //  className={`card ${highlightClass} w-full bg-white rounded-lg shadow-md flex flex-col justify-between p-4`}
-  //                   key={cat}
-  //                 >
-    <div
-    className={`card ${highlightClass} w-full bg-white rounded-lg shadow-md flex flex-col justify-between p-4 cursor-pointer`}
-    key={cat}
-    onClick={() => handleCategoryClick(cat)} // ← ADD THIS
-  >
+                  //  className={`card ${highlightClass} w-full bg-white rounded-lg shadow-md flex flex-col justify-between p-4`}
+                  //                   key={cat}
+                  //                 >
+                  <div
+                    className={`card ${highlightClass} w-full bg-white rounded-lg shadow-md flex flex-col justify-between p-4 cursor-pointer`}
+                    key={cat}
+                    onClick={() => handleCategoryClick(cat)} // ← ADD THIS
+                  >
                     <div className="card-title">{cat}</div>
 
-                
                     <div className="card-value">£{total.toLocaleString()}</div>
                   </div>
                 );
@@ -517,44 +516,51 @@ const totalExpense = filteredTxns
     </div>
   </div>
 )} */}
-{showCategoryModal && (
-  <div className="modal-overlay">
-    <div className="modal-box">
-      <h2 className="modal-title">
-        Transactions for{" "}
-        {clickedCategoryTransactions[0]?.transactionType ||
-          clickedCategoryTransactions[0]?.category ||
-          "Uncategorized"}
-      </h2>
-      <table className="modal-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody className="text-black">
-          {clickedCategoryTransactions.map((txn, idx) => (
-            <tr key={idx}>
-              <td>{new Date(txn.transactionDate).toLocaleDateString()}</td>
-              <td>{txn.transactionDescription}</td>
-              <td className={txn.amount >= 0 ? "positive" : "negative"}>
-                £{Math.abs(txn.amount).toLocaleString()}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="modal-actions">
-        <button className="modal-close-btn" onClick={() => setShowCategoryModal(false)}>
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-          
+          {showCategoryModal && (
+            <div className="modal-overlay">
+              <div className="modal-box">
+                <h2 className="modal-title text-black">
+                  Transactions for{" "}
+                  {clickedCategoryTransactions[0]?.transactionType ||
+                    clickedCategoryTransactions[0]?.category ||
+                    "Uncategorized"}
+                </h2>
+                <table className="modal-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Description</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-black">
+                    {clickedCategoryTransactions.map((txn, idx) => (
+                      <tr key={idx}>
+                        <td>
+                          {new Date(txn.transactionDate).toLocaleDateString()}
+                        </td>
+                        <td>{txn.transactionDescription}</td>
+                        <td
+                          className={txn.amount >= 0 ? "positive" : "negative"}
+                        >
+                          £{Math.abs(txn.amount).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="modal-actions">
+                  <button
+                    className="modal-close-btn"
+                    onClick={() => setShowCategoryModal(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ===== CASHFLOW CHART (FILTERED) ===== */}
           <section className="charts">
             <div className="chart-card">
@@ -622,21 +628,43 @@ const totalExpense = filteredTxns
                 <tr>
                   <th>Date</th>
                   <th>Description</th>
-                  <th>Amount</th>
+                  <th className="text-right">Amount</th>
                   <th>Category</th>
                 </tr>
               </thead>
+
               <tbody>
                 {transactions.slice(0, 5).map((txn, idx) => (
-                  <tr key={idx}>
-                    <td>
-                      {new Date(txn.transactionDate).toLocaleDateString()}
+                  <tr key={idx} className="border-b last:border-none">
+                    <td className="px-4 py-2 text-left">
+                      {txn.transactionDate
+                        ? moment(txn.transactionDate).format("DD/MM/YYYY")
+                        : "-"}
                     </td>
-                    <td>{txn.transactionDescription}</td>
-                    <td className={txn.amount >= 0 ? "positive" : "negative"}>
-                      £{Math.abs(txn.amount).toLocaleString()}
+
+                    <td className="px-4 py-2 text-left">
+                      {txn.transactionDescription || "-"}
                     </td>
-                    <td>{txn.transactionType || "Uncategorized"}</td>
+
+                    <td
+                      className={`px-4 py-2 text-right ${
+                        Number(txn.amount) >= 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      £
+                      {txn.amount !== undefined && txn.amount !== null
+                        ? Number(txn.amount).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : "0.00"}
+                    </td>
+
+                    <td className="px-4 py-2 text-left">
+                      {txn.category || txn.transactionType || "Uncategorized"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

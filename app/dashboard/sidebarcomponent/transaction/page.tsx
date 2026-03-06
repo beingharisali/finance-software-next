@@ -394,7 +394,7 @@ const resetFilters = () => {
     fontVariantNumeric: "tabular-nums"
   }}
 >
-  {Number(txn.amount).toFixed(2)}
+   £{Number(txn.amount).toFixed(2)}
 </td>
                   
 
