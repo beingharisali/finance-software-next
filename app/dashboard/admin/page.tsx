@@ -394,20 +394,28 @@ export default function AdminDashboard() {
 
           {/* ===== CARDS (ALL transactions, NOT filtered) ===== */}
 
-          <section className="cards text-black w-full h-80 overflow-y-auto flex flex-col gap-4 p-4">
-            {(dateRange.from || dateRange.to
-              ? [
-                  ...new Set(
-                    getFilteredTransactions().map(
-                      (tx) =>
-                        tx.transactionType?.trim() ||
-                        tx.category ||
-                        "Uncategorized",
-                    ),
-                  ),
-                ]
-              : allCategories
-            )
+          <section className="cards bg-gray-50 text-black w-full h-50 overflow-y-auto flex flex-col gap-4 p-4">
+            {
+            // (dateRange.from || dateRange.to
+            //   ?
+            //    [
+            //       ...new Set(
+            //         getFilteredTransactions().map(
+            //           (tx) =>
+            //             tx.transactionType?.trim() ||
+            //             tx.category ||
+            //             "Uncategorized",
+            //         ),
+            //       ),
+            //     ]
+            //   : allCategories
+            // )
+            (dateRange.from || dateRange.to
+  ? [...new Set(getFilteredTransactions().map(
+      (tx) => tx.transactionType?.trim() || tx.category || "Uncategorized"
+    ))]
+  : allCategories.filter(cat => cat !== "All")
+)
               .filter((cat) => graphCategory === "All" || cat === graphCategory)
               .map((cat) => {
                 const txns = getFilteredTransactions().filter(
@@ -443,16 +451,8 @@ export default function AdminDashboard() {
                   >
                     <div className="card-title">{cat}</div>
 
-                    {/* <div className="card-value">£{categoryTotals[cat]?.toLocaleString() || 0}</div> */}
-                    {/* <div className="card-value">£{total.toLocaleString()}</div> */}
-                    <div className="card-value">
-                      £
-                      {dateRange.from ||
-                      dateRange.to ||
-                      graphFilter !== "thisYear"
-                        ? total.toLocaleString()
-                        : categoryTotals[cat]?.toLocaleString() || 0}
-                    </div>
+                  
+                    <div className="card-value">£{total.toLocaleString()}</div>
                   </div>
                 );
               })}
