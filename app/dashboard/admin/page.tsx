@@ -366,7 +366,17 @@ const getFilteredTransactions = () => {
 
 
 <section className="cards text-black">
-  {allCategories
+  {(dateRange.from || dateRange.to
+    ? [...new Set(
+        getFilteredTransactions().map(
+          (tx) =>
+            tx.transactionType?.trim() ||
+            tx.category ||
+            "Uncategorized"
+        )
+      )]
+    : allCategories
+  )
     .filter((cat) => graphCategory === "All" || cat === graphCategory)
     .map((cat) => {
       const txns = getFilteredTransactions().filter(
@@ -378,7 +388,7 @@ const getFilteredTransactions = () => {
 
       const hasRecentlyUploaded = txns.some((tx) =>
         recentlyUploadedIds.has(
-          `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.category || "none"}`
+          `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.transactionType || "none"}`
         )
       );
 
@@ -405,8 +415,6 @@ const getFilteredTransactions = () => {
                 <h2 className="text-black text-2xl font-bold">Cashflow</h2>
 
 <div className="filters">             
-
-
 <select
   title="category-filter"
   className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
