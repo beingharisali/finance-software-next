@@ -33,19 +33,38 @@ export default function UploadCSV({ onUploadSuccess }: UploadCSVProps) {
       });
 
       // Duplicate-aware alert
+      // if (res.data.duplicates > 0) {
+      //   alert(`Saved: ${res.data.totalSaved}, Duplicates skipped: ${res.data.duplicates}`);
+      // } else {
+      //   alert(`CSV uploaded successfully! Total saved: ${res.data.totalSaved}`);
+      // }
       if (res.data.duplicates > 0) {
-        alert(`Saved: ${res.data.totalSaved}, Duplicates skipped: ${res.data.duplicates}`);
-      } else {
-        alert(`CSV uploaded successfully! Total saved: ${res.data.totalSaved}`);
-      }
+  alert(
+    `Message: ${res.data.message}\nSaved: ${res.data.totalSaved}\nDuplicates skipped: ${res.data.duplicates}`
+  );
+} else {
+  alert(
+    `Message: ${res.data.message}\nTotal saved: ${res.data.totalSaved}`
+  );
+}
 
       setFile(null); // Reset file input
       if (onUploadSuccess) onUploadSuccess();
 
-    } catch (err) {
-      console.error(err);
-      alert("CSV upload failed. Please try again.");
-    } finally {
+    }
+    //  catch (err) {
+    //   console.error(err);
+    //   alert("CSV upload failed. Please try again.");
+    // } 
+    catch (err: any) {
+  console.error("CSV upload error:", err.response?.data || err.message);
+  alert(
+    `CSV upload failed: ${
+      err.response?.data?.message || err.message || "Unknown error"
+    }`
+  );
+}
+    finally {
       setLoading(false);
     }
   };
