@@ -20,6 +20,9 @@ Chart.register(...registerables);
 export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
+  // NEW: for category click modal
+const [clickedCategoryTransactions, setClickedCategoryTransactions] = useState<TransactionType[]>([]);
+const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [recentlyUploadedIds, setRecentlyUploadedIds] = useState<Set<string>>(
     new Set(),
   );
@@ -73,7 +76,14 @@ export default function AdminDashboard() {
     // category filter reset
     setGraphCategory("All");
   };
-
+// NEW: handle click on category card
+const handleCategoryClick = (category: string) => {
+  const filteredTxns = getFilteredTransactions().filter(
+    txn => (txn.transactionType?.trim() || txn.category || "Uncategorized") === category
+  );
+  setClickedCategoryTransactions(filteredTxns);
+  setShowCategoryModal(true);
+};
   const fetchTransactions = async () => {
     try {
       const res = await http.get("/transactions");
@@ -355,7 +365,14 @@ export default function AdminDashboard() {
       return true;
     });
   };
-
+// NEW: calculate totals for selected date range
+const filteredTxns = getFilteredTransactions();
+const totalIncome = filteredTxns
+  .filter(tx => tx.amount >= 0)
+  .reduce((sum, tx) => sum + tx.amount, 0);
+const totalExpense = filteredTxns
+  .filter(tx => tx.amount < 0)
+  .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
       <div className="dashboard-container">
@@ -363,7 +380,9 @@ export default function AdminDashboard() {
 
         <main className="main-content">
           <div className="main-top">
+
             <h1 className="header">Dashboard</h1>
+    
             <div className="top-right">
               <span className="profile-name">
                 {user?.fullname || user?.email || "Guest"}
@@ -384,6 +403,11 @@ export default function AdminDashboard() {
               }
             />
           </div>
+                  {/* NEW: Total Income & Expense */}
+<div className="total-summary bg-white text-black p-4 rounded shadow-md mb-4 flex justify-between w-full max-w-lg">
+  <div>Total Income: £{totalIncome.toLocaleString()}</div>
+  <div>Total Expense: £{totalExpense.toLocaleString()}</div>
+</div>
 
           {showModal && selectedRole && (
             <CreateUser
@@ -439,25 +463,98 @@ export default function AdminDashboard() {
                     : "";
 
                 return (
-                  <div
-                    className={`card ${highlightClass} w-full bg-white rounded-lg shadow-md flex flex-col justify-between p-4`}
-                    key={cat}
-                  >
+              
+  //                 <div
+
+  //  className={`card ${highlightClass} w-full bg-white rounded-lg shadow-md flex flex-col justify-between p-4`}
+  //                   key={cat}
+  //                 >
+    <div
+    className={`card ${highlightClass} w-full bg-white rounded-lg shadow-md flex flex-col justify-between p-4 cursor-pointer`}
+    key={cat}
+    onClick={() => handleCategoryClick(cat)} // ← ADD THIS
+  >
                     <div className="card-title">{cat}</div>
 
-                    {/* <div className="card-value">
-                      £
-                      {dateRange.from ||
-                      dateRange.to ||
-                      graphFilter !== "thisYear"
-                        ? total.toLocaleString()
-                        : categoryTotals[cat]?.toLocaleString() || 0}
-                    </div> */}
+                
                     <div className="card-value">£{total.toLocaleString()}</div>
                   </div>
                 );
               })}
           </section>
+          {/* {showCategoryModal && (
+  <div className="modal-overlay">
+    <div className="modal-content bg-white p-6 rounded shadow-lg max-w-2xl mx-auto">
+      <h2 className="text-xl font-bold mb-4">
+        Transactions for {clickedCategoryTransactions[0]?.transactionType || clickedCategoryTransactions[0]?.category || "Uncategorized"}
+      </h2>
+      <table className="w-full text-black">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {clickedCategoryTransactions.map((txn, idx) => (
+            <tr key={idx}>
+              <td>{new Date(txn.transactionDate).toLocaleDateString()}</td>
+              <td>{txn.transactionDescription}</td>
+              <td className={txn.amount >= 0 ? "positive" : "negative"}>
+                £{Math.abs(txn.amount).toLocaleString()}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <button
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        onClick={() => setShowCategoryModal(false)}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)} */}
+{showCategoryModal && (
+  <div className="modal-overlay">
+    <div className="modal-box">
+      <h2 className="modal-title">
+        Transactions for{" "}
+        {clickedCategoryTransactions[0]?.transactionType ||
+          clickedCategoryTransactions[0]?.category ||
+          "Uncategorized"}
+      </h2>
+      <table className="modal-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody className="text-black">
+          {clickedCategoryTransactions.map((txn, idx) => (
+            <tr key={idx}>
+              <td>{new Date(txn.transactionDate).toLocaleDateString()}</td>
+              <td>{txn.transactionDescription}</td>
+              <td className={txn.amount >= 0 ? "positive" : "negative"}>
+                £{Math.abs(txn.amount).toLocaleString()}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="modal-actions">
+        <button className="modal-close-btn" onClick={() => setShowCategoryModal(false)}>
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+          
           {/* ===== CASHFLOW CHART (FILTERED) ===== */}
           <section className="charts">
             <div className="chart-card">
