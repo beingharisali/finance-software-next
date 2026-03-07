@@ -19,12 +19,16 @@ import {
 } from "@/services/category";
 import Sidebar from "@/app/dashboard/components/Sidebar";
 import ProtectedRoute from "@/utilies/ProtectedRoute";
+import { FaBell } from "react-icons/fa";
 
 export default function ManagerDashboardTransaction() {
   const { user, logoutUser } = useAuthContext();
-
+// New state for notification dropdown
+const [notificationOpen, setNotificationOpen] = useState(false);
+const [uncategorizedCounts, setUncategorizedCounts] = useState<{ [key: string]: number }>({});
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalUnassigned, setTotalUnassigned] = useState(0);
   const [category, setCategory] = useState("");
   const [allCategories, setAllCategories] = useState<string[]>([]);
   const [searchCategory, setSearchCategory] = useState("");
@@ -121,8 +125,17 @@ export default function ManagerDashboardTransaction() {
     console.error("Failed to fetch custom categories", error);
   }
 };
-
-
+// notifications
+useEffect(() => {
+  const counts: { [key: string]: number } = {};
+  transactions.forEach((txn) => {
+    if (!txn.category || txn.category.trim().toLowerCase() === "uncategorized") {
+      const type = txn.transactionType || "Uncategorized";
+      counts[type] = (counts[type] || 0) + 1;
+    }
+  });
+  setUncategorizedCounts(counts);
+}, [transactions]);
   useEffect(() => {
     if (user) {
       fetchTransactions().then(() => fetchCategories());
@@ -193,6 +206,7 @@ const resetFilters = () => {
       alert("Error deleting category");
     }
   };
+ 
 
   return (
     <ProtectedRoute allowedRoles={["admin", "manager"]}>
@@ -209,6 +223,55 @@ const resetFilters = () => {
               <button className="logout-btn" onClick={logoutUser}>
                 Logout
               </button>
+            {/* notification */}
+            <div className="relative inline-block">
+  <button
+    onClick={() => setNotificationOpen(!notificationOpen)}
+    className="bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg shadow flex items-center gap-2"
+  >
+    <FaBell /> Notifications
+  </button>
+
+  {notificationOpen && (
+    <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl z-50">
+      <div className="p-3 border-b font-semibold text-gray-700">
+        Uncategorized Transactions:{totalUnassigned} 
+      </div>
+
+      <div className="max-h-64 overflow-y-auto p-2">
+        {Object.keys(uncategorizedCounts).length > 0 ? (
+          Object.entries(uncategorizedCounts).map(([type, count], index) => (
+            <div
+              key={index}
+              className="flex justify-between items-center px-3 py-2 rounded-md hover:bg-gray-100 cursor-pointer"
+              onClick={() => {
+                // Click → filter transactions of this type that are uncategorized
+                setSearchCategory(type);
+                fetchTransactions("", startDate, endDate, 1, type); 
+                setNotificationOpen(false);
+              }}
+            >
+              {/* Serial number */}
+              <span className="text-gray-500 mr-2">{index + 1}.</span>
+
+              {/* Type name */}
+              <span className="text-gray-700 font-medium flex-1">{type}</span>
+
+              {/* Count of uncategorized transactions */}
+              <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">
+                {count}
+              </span>
+            </div>
+          ))
+        ) : (
+          <div className="text-black text-center py-3">
+            All Transaction categorized 
+          </div>
+        )}
+      </div>
+    </div>
+  )}
+</div>
             </div>
           </div>
 
