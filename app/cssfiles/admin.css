@@ -312,6 +312,7 @@ margin-bottom: 20px;
 .modal-close-btn:hover {
   background-color: #0f556d;
 }
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .filters {
