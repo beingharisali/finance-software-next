@@ -25,6 +25,7 @@ export default function ManagerDashboardTransaction() {
   const { user, logoutUser } = useAuthContext();
 // New state for notification dropdown
 const [notificationOpen, setNotificationOpen] = useState(false);
+
 const [uncategorizedCounts, setUncategorizedCounts] = useState<{ [key: string]: number }>({});
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +48,32 @@ const [uncategorizedCounts, setUncategorizedCounts] = useState<{ [key: string]: 
   const [showPopup, setShowPopup] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
   const [selectedNewCategory, setSelectedNewCategory] = useState("");
+const fetchAllTransactionsForNotifications = async () => {
+  try {
+    // Fetch all transactions without pagination (use a large limit)
+    const res = await getTransactions(1, 1000000); // page=1, limit=1 million
+    const allTxns: TransactionType[] = res.transactions || [];
 
+    const counts: { [key: string]: number } = {};
+    let total = 0;
+
+    allTxns.forEach((txn) => {
+      if (
+        txn.category?.toLowerCase().includes("uncategorized") ||
+        txn.transactionType?.toLowerCase().includes("uncategorized")
+      ) {
+        const type = txn.transactionType || "Uncategorized";
+        counts[type] = (counts[type] || 0) + 1;
+        total++;
+      }
+    });
+
+    setUncategorizedCounts(counts);
+    setTotalUnassigned(total);
+  } catch (error) {
+    console.error("Failed to fetch all transactions for notifications", error);
+  }
+};
   // ---------------------- FETCH TRANSACTIONS ----------------------
   const fetchTransactions = async (
   selectedCategory = "",
@@ -73,15 +99,14 @@ const [uncategorizedCounts, setUncategorizedCounts] = useState<{ [key: string]: 
     }));
 
     // ----- NEW: Filter by transactionType if searchCategory is not empty -----
-    
-    const filteredTransactions = searchCategory
-      ? transactionsCleaned.filter((txn) =>
-          txn.transactionType
-            ?.trim()
-            .toLowerCase()
-            .includes(searchCategory.toLowerCase())
-        )
-      : transactionsCleaned;
+  
+const filteredTransactions = searchCategory
+  ? transactionsCleaned.filter((txn) =>
+      txn.transactionType
+        ?.toLowerCase()
+        .includes(searchCategory.toLowerCase())
+    )
+  : transactionsCleaned;
       
 
     setTransactions(filteredTransactions);
@@ -125,17 +150,15 @@ const [uncategorizedCounts, setUncategorizedCounts] = useState<{ [key: string]: 
     console.error("Failed to fetch custom categories", error);
   }
 };
-// notifications
+
 useEffect(() => {
-  const counts: { [key: string]: number } = {};
-  transactions.forEach((txn) => {
-    if (!txn.category || txn.category.trim().toLowerCase() === "uncategorized") {
-      const type = txn.transactionType || "Uncategorized";
-      counts[type] = (counts[type] || 0) + 1;
-    }
-  });
-  setUncategorizedCounts(counts);
-}, [transactions]);
+  if (user) {
+    fetchAllTransactionsForNotifications(); 
+  }
+}, [user]);
+
+
+
   useEffect(() => {
     if (user) {
       fetchTransactions().then(() => fetchCategories());
@@ -234,9 +257,12 @@ const resetFilters = () => {
 
   {notificationOpen && (
     <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl z-50">
-      <div className="p-3 border-b font-semibold text-gray-700">
+      {/* <div className="p-3 border-b font-semibold text-gray-700">
         Uncategorized Transactions:{totalUnassigned} 
-      </div>
+      </div> */}
+      <div className="p-3 border-b font-semibold text-gray-700">
+  Uncategorized Transactions: {totalUnassigned}
+</div>
 
       <div className="max-h-64 overflow-y-auto p-2">
         {Object.keys(uncategorizedCounts).length > 0 ? (
@@ -244,12 +270,12 @@ const resetFilters = () => {
             <div
               key={index}
               className="flex justify-between items-center px-3 py-2 rounded-md hover:bg-gray-100 cursor-pointer"
+
               onClick={() => {
-                // Click → filter transactions of this type that are uncategorized
-                setSearchCategory(type);
-                fetchTransactions("", startDate, endDate, 1, type); 
-                setNotificationOpen(false);
-              }}
+  setCategory("Uncategorized");
+  fetchTransactions("Uncategorized", startDate, endDate, 1);
+  setNotificationOpen(false);
+}}
             >
               {/* Serial number */}
               <span className="text-gray-500 mr-2">{index + 1}.</span>
