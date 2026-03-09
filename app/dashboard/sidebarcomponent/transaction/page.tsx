@@ -51,27 +51,14 @@ const [uncategorizedCounts, setUncategorizedCounts] = useState<{ [key: string]: 
 const fetchAllTransactionsForNotifications = async () => {
   try {
     // Fetch all transactions without pagination (use a large limit)
-    const res = await getTransactions(1, 1000000); // page=1, limit=1 million
+    const res = await getTransactions(1, 1000000); 
     const allTxns: TransactionType[] = res.transactions || [];
 
     const counts: { [key: string]: number } = {};
     let total = 0;
-
-    // allTxns.forEach((txn) => {
-    //   // if (
-    //   //   txn.category?.toLowerCase().includes("uncategorized") ||
-    //   //   txn.transactionType?.toLowerCase().includes("uncategorized")
-    //   // ) 
-    //   if (!txn.category || txn.category.toLowerCase() === "uncategorized")
-    //   {
-    //     const type = txn.transactionType || "Uncategorized";
-    //     counts[type] = (counts[type] || 0) + 1;
-    //     total++;
-    //   }
-    // });
     allTxns.forEach((txn) => {
-  if (!txn.category || txn.category.toLowerCase() === "uncategorized") {
-    const type = txn.transactionType || "Uncategorized";
+  if (!txn.category || txn.category.toLowerCase() === "uncategorised") {
+    const type = txn.transactionType || "Uncategorised";
     counts[type] = (counts[type] || 0) + 1;
     total++;
   }
@@ -102,7 +89,7 @@ const fetchAllTransactionsForNotifications = async () => {
       category:
         txn.category &&
         txn.category.trim() !== "" &&
-        txn.category.trim().toLowerCase() !== "uncategorized"
+        txn.category.trim().toLowerCase() !== "uncategorised"
           ? txn.category
           : "",
     }));
@@ -194,8 +181,6 @@ const resetFilters = () => {
   setCategory("");
   setStartDate("");
   setEndDate("");
-
-  // Explicitly fetch all transactions with empty filters
   fetchTransactions("", "", "", 1); 
 };
 
@@ -266,11 +251,9 @@ const resetFilters = () => {
 
   {notificationOpen && (
     <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl z-50">
-      {/* <div className="p-3 border-b font-semibold text-gray-700">
-        Uncategorized Transactions:{totalUnassigned} 
-      </div> */}
+
       <div className="p-3 border-b font-semibold text-gray-700">
-  Uncategorized Transactions: {totalUnassigned}
+  Uncategorised Transactions: {totalUnassigned}
 </div>
 
       <div className="max-h-64 overflow-y-auto p-2">
@@ -281,8 +264,8 @@ const resetFilters = () => {
               className="flex justify-between items-center px-3 py-2 rounded-md hover:bg-gray-100 cursor-pointer"
 
               onClick={() => {
-  setCategory("Uncategorized");
-  fetchTransactions("Uncategorized", startDate, endDate, 1);
+  setCategory("Uncategorised");
+  fetchTransactions("Uncategorised", startDate, endDate, 1);
   setNotificationOpen(false);
 }}
             >
@@ -300,7 +283,7 @@ const resetFilters = () => {
           ))
         ) : (
           <div className="text-black text-center py-3">
-            All Transaction categorized 
+            All Transaction categorised 
           </div>
         )}
       </div>
