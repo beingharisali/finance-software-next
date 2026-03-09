@@ -57,16 +57,25 @@ const fetchAllTransactionsForNotifications = async () => {
     const counts: { [key: string]: number } = {};
     let total = 0;
 
+    // allTxns.forEach((txn) => {
+    //   // if (
+    //   //   txn.category?.toLowerCase().includes("uncategorized") ||
+    //   //   txn.transactionType?.toLowerCase().includes("uncategorized")
+    //   // ) 
+    //   if (!txn.category || txn.category.toLowerCase() === "uncategorized")
+    //   {
+    //     const type = txn.transactionType || "Uncategorized";
+    //     counts[type] = (counts[type] || 0) + 1;
+    //     total++;
+    //   }
+    // });
     allTxns.forEach((txn) => {
-      if (
-        txn.category?.toLowerCase().includes("uncategorized") ||
-        txn.transactionType?.toLowerCase().includes("uncategorized")
-      ) {
-        const type = txn.transactionType || "Uncategorized";
-        counts[type] = (counts[type] || 0) + 1;
-        total++;
-      }
-    });
+  if (!txn.category || txn.category.toLowerCase() === "uncategorized") {
+    const type = txn.transactionType || "Uncategorized";
+    counts[type] = (counts[type] || 0) + 1;
+    total++;
+  }
+});
 
     setUncategorizedCounts(counts);
     setTotalUnassigned(total);
@@ -491,7 +500,8 @@ const resetFilters = () => {
                         <select
                           title="category-dropdown"
                           // value={txn.category || ""}
-                          value={txn.category || txn.transactionType || ""}
+                          // value={txn.category || txn.transactionType || ""}
+                          value={txn.category || ""}
                           onChange={(e) => {
                             const newCat = e.target.value;
                             setSelectedTransaction(txn);
@@ -613,6 +623,7 @@ const resetFilters = () => {
                       : t
                   )
                 );
+                fetchAllTransactionsForNotifications(); 
                 alert("Category updated for this transaction.");
               }
             } catch (error) {
@@ -643,6 +654,7 @@ const resetFilters = () => {
                       : t
                   )
                 );
+                fetchAllTransactionsForNotifications();
                 alert(
                   "Category updated for all future transactions with same description."
                 );
