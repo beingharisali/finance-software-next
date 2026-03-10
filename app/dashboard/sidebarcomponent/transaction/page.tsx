@@ -57,7 +57,12 @@ const fetchAllTransactionsForNotifications = async () => {
     const counts: { [key: string]: number } = {};
     let total = 0;
     allTxns.forEach((txn) => {
-  if (!txn.category || txn.category.toLowerCase() === "uncategorised") {
+  // if (!txn.category || txn.category.toLowerCase() === "uncategorised") {
+  if (
+  !txn.category ||
+  txn.category.toLowerCase() === "uncategorised" ||
+  txn.category.toLowerCase() === "uncategorized"
+) {
     const type = txn.transactionType || "Uncategorised";
     counts[type] = (counts[type] || 0) + 1;
     total++;
@@ -84,16 +89,34 @@ const fetchAllTransactionsForNotifications = async () => {
     const fetchedTransactions: TransactionType[] = res.transactions || [];
 
   
-    const transactionsCleaned = fetchedTransactions.map((txn) => ({
-      ...txn,
-      category:
-        txn.category &&
-        txn.category.trim() !== "" &&
-        txn.category.trim().toLowerCase() !== "uncategorised"
-          ? txn.category
-          : "",
-    }));
+    // const transactionsCleaned = fetchedTransactions.map((txn) => ({
+    //   ...txn,
+    //   category:
+    //     txn.category &&
+    //     txn.category.trim() !== "" &&
+    //     txn.category.trim().toLowerCase() !== "uncategorised"
+    //       ? txn.category
+    //       : "",
+    // }));
 
+    const transactionsCleaned = fetchedTransactions.map((txn) => {
+  const txnType = txn.transactionType?.trim().toLowerCase();
+
+  const isUncategorizedType =
+    txnType === "uncategorised" || txnType === "uncategorized";
+
+  return {
+    ...txn,
+    category:
+      txn.category &&
+      txn.category.trim() !== "" &&
+      txn.category.trim().toLowerCase() !== "uncategorised" &&
+      txn.category.trim().toLowerCase() !== "uncategorized" &&
+      !isUncategorizedType
+        ? txn.category
+        : "",
+  };
+});
     // ----- NEW: Filter by transactionType if searchCategory is not empty -----
   
 const filteredTransactions = searchCategory
