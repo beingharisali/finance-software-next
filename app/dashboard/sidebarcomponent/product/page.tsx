@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuthContext } from "@/context/AuthContext";
 import Sidebar from "@/app/dashboard/components/Sidebar";
-
+import http from "@/services/http"; 
 import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
 import "../../../cssfiles/transactionfilters.css";
@@ -27,7 +27,8 @@ export default function ProductPage() {
     try {
       setLoading(true);
      
-      const res = await axios.get("http://localhost:5000/api/v1/productRoute/all");
+      // const res = await axios.get("http://localhost:5000/api/v1/productRoute/all");
+      const res = await http.get("/productRoute/all");
 let data = Array.isArray(res.data) ? res.data : res.data.data || [];
 setProducts(data);
 
@@ -74,7 +75,8 @@ setProducts(data);
 
   try {
     setLoading(true);
-    const res = await axios.get("http://localhost:5000/api/v1/productRoute/all");
+    // const res = await axios.get("http://localhost:5000/api/v1/productRoute/all");
+    const res = await http.get("/productRoute/all");
     let data = Array.isArray(res.data) ? res.data : res.data.data || [];
     setProducts(data);
   } catch (error) {
@@ -117,11 +119,14 @@ setProducts(data);
             formData.append("file", input.files[0]);
 
             try {
-              const res = await axios.post(
-                "http://localhost:5000/api/v1/productRoute/importProduct",
-                formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
-              );
+              // const res = await axios.post(
+              //   "http://localhost:5000/api/v1/productRoute/importProduct",
+              //   formData,
+              //   { headers: { "Content-Type": "multipart/form-data" } }
+              // );
+              const res = await http.post("/productRoute/importProduct", formData, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
               alert(res.data.msg);
       input.value = ""; 
 
