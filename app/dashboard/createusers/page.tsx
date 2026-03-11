@@ -134,7 +134,7 @@ export default function CreateUser({
             onChange={handleChange}
             placeholder="Full Name"
             required
-            className="register-input"
+            className="register-input text-black"
           />
           <input
             type="email"
@@ -143,7 +143,7 @@ export default function CreateUser({
             onChange={handleChange}
             placeholder="Email"
             required
-            className="register-input"
+            className="register-input text-black"
           />
           {!editUser && (
             <input
@@ -153,7 +153,7 @@ export default function CreateUser({
               onChange={handleChange}
               placeholder="Password"
               required
-              className="register-input"
+              className="register-input text-black"
             />
           )}
           <input
@@ -163,14 +163,14 @@ export default function CreateUser({
             value={formData.phone}
             onChange={handleChange}
             placeholder="Phone (optional)"
-            className="register-input"
+            className="register-input text-black"
           />
           <select
           title="role"
             name="role"
             value={formData.role}
             onChange={handleChange}
-            className="register-input"
+            className="register-input text-black"
           >
             {allowedRolesToCreate().map((r) => (
               <option key={r} value={r}>
