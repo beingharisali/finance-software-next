@@ -32,12 +32,6 @@ export default function UploadCSV({ onUploadSuccess }: UploadCSVProps) {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Duplicate-aware alert
-      // if (res.data.duplicates > 0) {
-      //   alert(`Saved: ${res.data.totalSaved}, Duplicates skipped: ${res.data.duplicates}`);
-      // } else {
-      //   alert(`CSV uploaded successfully! Total saved: ${res.data.totalSaved}`);
-      // }
       if (res.data.duplicates > 0) {
   alert(
     `Message: ${res.data.message}\nSaved: ${res.data.totalSaved}\nDuplicates skipped: ${res.data.duplicates}`
@@ -52,10 +46,7 @@ export default function UploadCSV({ onUploadSuccess }: UploadCSVProps) {
       if (onUploadSuccess) onUploadSuccess();
 
     }
-    //  catch (err) {
-    //   console.error(err);
-    //   alert("CSV upload failed. Please try again.");
-    // } 
+ 
     catch (err: any) {
   console.error("CSV upload error:", err.response?.data || err.message);
   alert(
