@@ -11,6 +11,7 @@ import "../../../cssfiles/sidebarcomponents.css";
 import Sidebar from "@/app/dashboard/components/Sidebar";
 import "../../../cssfiles/usermanagement.css";
 
+
 export default function UserManagement() {
   const { user, logoutUser } = useAuthContext();
   const [users, setUsers] = useState<User[]>([]);
