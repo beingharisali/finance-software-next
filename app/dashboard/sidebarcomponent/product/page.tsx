@@ -265,8 +265,18 @@ export default function ProductPage() {
                         ? `£${Number(item.costPrice).toFixed(2)}`
                         : ""}
                     </td>
-                    <td className="text-right">{item.supplierPrice}</td>
-                    <td className="text-right">{item.finalPrice}</td>
+                    {/* <td className="text-right">{item.supplierPrice}</td>
+                    <td className="text-right">{item.finalPrice}</td> */}
+                    <td>
+  {item.supplierPrice !== undefined
+    ? `£${Number(item.supplierPrice).toFixed(2)}`
+    : ""}
+</td>
+<td>
+  {item.finalPrice !== undefined
+    ? `£${Number(item.finalPrice).toFixed(2)}`
+    : ""}
+</td>
                     <td>
                      
                       {/* dropdwon */}
