@@ -18,6 +18,7 @@ import { TransactionType } from "@/services/transactionService";
 Chart.register(...registerables);
 
 export default function AdminDashboard() {
+  // date
   const [showModal, setShowModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   // NEW: for category click modal
@@ -63,7 +64,7 @@ export default function AdminDashboard() {
 
   const applyDateRange = () => {
     setDateRange({ ...tempDateRange });
-    setGraphFilter("none"); // prioritize calendar range
+    setGraphFilter("none");
   };
 
   const resetDateRange = () => {
@@ -77,7 +78,7 @@ export default function AdminDashboard() {
     // category filter reset
     setGraphCategory("All");
   };
-  // NEW: handle click on category card
+  //  handle click on category card
   const handleCategoryClick = (category: string) => {
     const filteredTxns = getFilteredTransactions().filter(
       (txn) =>
@@ -91,24 +92,21 @@ export default function AdminDashboard() {
     try {
       const res = await http.get("/transactions");
       const data: TransactionType[] = res.data.transactions || [];
-
-      // Sort transactions by date
       data.sort(
         (a, b) =>
-          new Date(a.transactionDate).getTime() -
-          new Date(b.transactionDate).getTime(),
+          moment(b.transactionDate, "DD/MM/YYYY").valueOf() -
+          moment(a.transactionDate, "DD/MM/YYYY").valueOf(),
       );
 
       // Set all categories (category + transactionType)
       const txnCategories = data.map((t) => t.category).filter(Boolean);
       const txnTypes = data.map((t) => t.transactionType).filter(Boolean);
-      // setAllCategories([...new Set([...txnCategories, ...txnTypes])]);
       setAllCategories((prev) =>
         Array.from(new Set([...prev, ...txnCategories, ...txnTypes])),
       );
 
       // Detect newly uploaded transactions
-      const oldTransactions = transactions; // current state
+      const oldTransactions = transactions;
       const newIds = new Set<string>();
       data.forEach((tx) => {
         const id = `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.transactionType || "none"}`;
@@ -167,22 +165,76 @@ export default function AdminDashboard() {
     fetchTransactions().then(fetchAllCategories);
   }, []); // sirf component mount pe fetch hoga
 
+  // const calculateCategoryTotals = () => {
+  //   const totals: Record<string, number> = {};
+
+  //   // Initialize all categories to 0 first
+  //   allCategories.forEach((cat) => {
+  //     if (cat !== "All") totals[cat] = 0;
+  //   });
+
+  //   // Add amounts for transactions
+  //   transactions.forEach((txn) => {
+  //     const cat =
+  //       txn.transactionType?.trim() || txn.category || "Uncategorized";
+  //     totals[cat] = (totals[cat] || 0) + Math.abs(txn.amount);
+  //   });
+  //   //  Add total for "All" category
+  //   totals["All"] = transactions.reduce(
+  //     (sum, tx) => sum + Math.abs(tx.amount),
+  //     0,
+  //   );
+
+  //   setCategoryTotals(totals);
+  // };
+  //   const calculateCategoryTotals = () => {
+  //   const totals: Record<string, number> = {};
+
+  //   // Initialize all categories & types to 0
+  //   allCategories.forEach((cat) => {
+  //     if (cat !== "All") totals[cat] = 0;
+  //   });
+
+  //   transactions.forEach((txn) => {
+  //     // Add to category if exists
+  //     if (txn.category && txn.category.trim() !== "") {
+  //       totals[txn.category] = (totals[txn.category] || 0) + Math.abs(txn.amount);
+  //     }
+
+  //     // Add to transactionType if exists
+  //     if (txn.transactionType && txn.transactionType.trim() !== "") {
+  //       totals[txn.transactionType] = (totals[txn.transactionType] || 0) + Math.abs(txn.amount);
+  //     }
+  //   });
+
+  //   // All category total
+  //   totals["All"] = transactions.reduce(
+  //     (sum, tx) => sum + Math.abs(tx.amount),
+  //     0
+  //   );
+
+  //   setCategoryTotals(totals);
+  // };
   const calculateCategoryTotals = () => {
     const totals: Record<string, number> = {};
 
-    // Initialize all categories to 0 first
+    // Initialize all categories
     allCategories.forEach((cat) => {
       if (cat !== "All") totals[cat] = 0;
     });
 
-    // Add amounts for transactions
-    transactions.forEach((txn) => {
-      const cat =
-        txn.transactionType?.trim() || txn.category || "Uncategorized";
-      totals[cat] = (totals[cat] || 0) + Math.abs(txn.amount);
+    const filteredTxns = getFilteredTransactions();
+
+    filteredTxns.forEach((txn) => {
+      const cats = [txn.transactionType?.trim(), txn.category?.trim()].filter(
+        Boolean,
+      );
+      cats.forEach((cat) => {
+        totals[cat] = (totals[cat] || 0) + Math.abs(txn.amount);
+      });
     });
-    //  Add total for "All" category
-    totals["All"] = transactions.reduce(
+
+    totals["All"] = filteredTxns.reduce(
       (sum, tx) => sum + Math.abs(tx.amount),
       0,
     );
@@ -200,24 +252,25 @@ export default function AdminDashboard() {
     calculateCategoryTotals();
   }, [transactions]);
 
-  // Render cashflow chart (applies filters)
   useEffect(() => {
     let chart: Chart | null = null;
     const nowYear = new Date().getFullYear();
 
     const filtered = transactions.filter((txn) => {
       const txnDate = new Date(txn.transactionDate);
-      // Category filter
+     
       if (graphCategory !== "All") {
-        const cat =
-          txn.transactionType?.trim() || txn.category || "Uncategorized";
-        if (cat !== graphCategory) return false;
+        const cats = [txn.transactionType?.trim(), txn.category?.trim()].filter(
+          Boolean,
+        );
+        if (!cats.includes(graphCategory)) return false;
       }
       // Calendar filter
       if (dateRange.from && txnDate < new Date(dateRange.from)) return false;
       if (dateRange.to && txnDate > new Date(dateRange.to)) return false;
 
       // Graph filter
+
       if (!dateRange.from && !dateRange.to && graphFilter !== "none") {
         switch (graphFilter) {
           case "thisYear":
@@ -226,6 +279,8 @@ export default function AdminDashboard() {
 
           case "lastYear":
             if (txnDate.getFullYear() >= nowYear) return false;
+            //         case "lastYear":
+            // if (txnDate.getFullYear() !== nowYear - 1) return false;
             break;
           case "month":
           case "week":
@@ -335,13 +390,20 @@ export default function AdminDashboard() {
   const getFilteredTransactions = () => {
     const nowYear = new Date().getFullYear();
     return transactions.filter((txn) => {
-      const txnDate = new Date(txn.transactionDate);
+      // const txnDate = new Date(txn.transactionDate);
+      const txnMoment = moment(txn.transactionDate, "DD/MM/YYYY");
+      const txnDate = txnMoment.toDate();
+      const txnYear = txnMoment.year();
 
       // Category filter (graphCategory dropdown)
       if (graphCategory !== "All") {
-        const cat =
-          txn.transactionType?.trim() || txn.category || "Uncategorized";
-        if (cat !== graphCategory) return false;
+        // const cat =
+        //   txn.transactionType?.trim() || txn.category || "Uncategorized";
+        // if (cat !== graphCategory) return false;
+        const cats = [txn.transactionType?.trim(), txn.category?.trim()].filter(
+          Boolean,
+        );
+        if (!cats.includes(graphCategory)) return false;
       }
 
       // Date range filter
@@ -360,7 +422,6 @@ export default function AdminDashboard() {
             break;
           case "month":
           case "week":
-            // Month/week filters can stay for chart only
             break;
         }
       }
@@ -395,9 +456,6 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* <div className="upload-csv-section">
-            <UploadCSV onUploadSuccess={fetchTransactions} />
-          </div> */}
           <div className="upload-csv-section">
             <UploadCSV
               onUploadSuccess={() =>
@@ -437,12 +495,14 @@ export default function AdminDashboard() {
               .filter((cat) => cat && cat !== "All")
               .filter((cat) => graphCategory === "All" || cat === graphCategory)
               .map((cat) => {
-                const txns = getFilteredTransactions().filter(
-                  (tx) =>
-                    (tx.transactionType?.trim() ||
-                      tx.category ||
-                      "Uncategorized") === cat,
-                );
+              
+                const txns = getFilteredTransactions().filter((tx) => {
+                  const cats = [
+                    tx.transactionType?.trim(),
+                    tx.category?.trim(),
+                  ].filter(Boolean);
+                  return cats.includes(cat);
+                });
 
                 const total = txns.reduce(
                   (sum, tx) => sum + Math.abs(tx.amount),
@@ -464,15 +524,10 @@ export default function AdminDashboard() {
                     : "";
 
                 return (
-                  //                 <div
-
-                  //  className={`card ${highlightClass} w-full bg-white rounded-lg shadow-md flex flex-col justify-between p-4`}
-                  //                   key={cat}
-                  //                 >
                   <div
                     className={`card ${highlightClass} w-full bg-white rounded-lg shadow-md flex flex-col justify-between p-4 cursor-pointer`}
                     key={cat}
-                    onClick={() => handleCategoryClick(cat)} // ← ADD THIS
+                    onClick={() => handleCategoryClick(cat)}
                   >
                     <div className="card-title">{cat}</div>
 
@@ -481,41 +536,7 @@ export default function AdminDashboard() {
                 );
               })}
           </section>
-          {/* {showCategoryModal && (
-  <div className="modal-overlay">
-    <div className="modal-content bg-white p-6 rounded shadow-lg max-w-2xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">
-        Transactions for {clickedCategoryTransactions[0]?.transactionType || clickedCategoryTransactions[0]?.category || "Uncategorized"}
-      </h2>
-      <table className="w-full text-black">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {clickedCategoryTransactions.map((txn, idx) => (
-            <tr key={idx}>
-              <td>{new Date(txn.transactionDate).toLocaleDateString()}</td>
-              <td>{txn.transactionDescription}</td>
-              <td className={txn.amount >= 0 ? "positive" : "negative"}>
-                £{Math.abs(txn.amount).toLocaleString()}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-        onClick={() => setShowCategoryModal(false)}
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)} */}
+
           {showCategoryModal && (
             <div className="modal-overlay">
               <div className="modal-box">
@@ -562,6 +583,7 @@ export default function AdminDashboard() {
           )}
 
           {/* ===== CASHFLOW CHART (FILTERED) ===== */}
+
           <section className="charts">
             <div className="chart-card">
               <div className="chart-header">
@@ -579,6 +601,51 @@ export default function AdminDashboard() {
                         {cat}
                       </option>
                     ))}
+                    {allCategories
+                      .filter((cat) => cat && cat !== "All")
+                      .filter(
+                        (cat) =>
+                          graphCategory === "All" || cat === graphCategory,
+                      )
+                      .map((cat) => {
+                        const txns = getFilteredTransactions().filter((tx) =>
+                          [tx.transactionType?.trim(), tx.category].includes(
+                            cat,
+                          ),
+                        );
+
+                        const total = txns.reduce(
+                          (sum, tx) => sum + Math.abs(tx.amount),
+                          0,
+                        );
+
+                        const hasRecentlyUploaded = txns.some((tx) =>
+                          recentlyUploadedIds.has(
+                            `${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.transactionType || "none"}`,
+                          ),
+                        );
+
+                        const isUncategorized = cat === "Uncategorized";
+
+                        const highlightClass = isUncategorized
+                          ? "highlight-uncategorized-card"
+                          : hasRecentlyUploaded
+                            ? "highlight-uploaded-card"
+                            : "";
+
+                        return (
+                          <div
+                            className={`card ${highlightClass} w-full bg-white rounded-lg shadow-md flex flex-col justify-between p-4 cursor-pointer`}
+                            key={cat}
+                            onClick={() => handleCategoryClick(cat)}
+                          >
+                            <div className="card-title">{cat}</div>
+                            <div className="card-value">
+                              £{total.toLocaleString()}
+                            </div>
+                          </div>
+                        );
+                      })}
                   </select>
                   <select
                     title="dropdown"
