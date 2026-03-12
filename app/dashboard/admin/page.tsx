@@ -18,7 +18,8 @@ import { TransactionType } from "@/services/transactionService";
 Chart.register(...registerables);
 
 export default function AdminDashboard() {
-  // date
+  // date month
+  const [selectedMonth, setSelectedMonth] = useState<number | "all">("all");
   const [showModal, setShowModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
   // NEW: for category click modal
@@ -77,6 +78,7 @@ export default function AdminDashboard() {
 
     // category filter reset
     setGraphCategory("All");
+     setSelectedMonth("all");
   };
   //  handle click on category card
   const handleCategoryClick = (category: string) => {
@@ -165,56 +167,6 @@ export default function AdminDashboard() {
     fetchTransactions().then(fetchAllCategories);
   }, []); // sirf component mount pe fetch hoga
 
-  // const calculateCategoryTotals = () => {
-  //   const totals: Record<string, number> = {};
-
-  //   // Initialize all categories to 0 first
-  //   allCategories.forEach((cat) => {
-  //     if (cat !== "All") totals[cat] = 0;
-  //   });
-
-  //   // Add amounts for transactions
-  //   transactions.forEach((txn) => {
-  //     const cat =
-  //       txn.transactionType?.trim() || txn.category || "Uncategorized";
-  //     totals[cat] = (totals[cat] || 0) + Math.abs(txn.amount);
-  //   });
-  //   //  Add total for "All" category
-  //   totals["All"] = transactions.reduce(
-  //     (sum, tx) => sum + Math.abs(tx.amount),
-  //     0,
-  //   );
-
-  //   setCategoryTotals(totals);
-  // };
-  //   const calculateCategoryTotals = () => {
-  //   const totals: Record<string, number> = {};
-
-  //   // Initialize all categories & types to 0
-  //   allCategories.forEach((cat) => {
-  //     if (cat !== "All") totals[cat] = 0;
-  //   });
-
-  //   transactions.forEach((txn) => {
-  //     // Add to category if exists
-  //     if (txn.category && txn.category.trim() !== "") {
-  //       totals[txn.category] = (totals[txn.category] || 0) + Math.abs(txn.amount);
-  //     }
-
-  //     // Add to transactionType if exists
-  //     if (txn.transactionType && txn.transactionType.trim() !== "") {
-  //       totals[txn.transactionType] = (totals[txn.transactionType] || 0) + Math.abs(txn.amount);
-  //     }
-  //   });
-
-  //   // All category total
-  //   totals["All"] = transactions.reduce(
-  //     (sum, tx) => sum + Math.abs(tx.amount),
-  //     0
-  //   );
-
-  //   setCategoryTotals(totals);
-  // };
   const calculateCategoryTotals = () => {
     const totals: Record<string, number> = {};
 
@@ -286,6 +238,10 @@ export default function AdminDashboard() {
           case "week":
             break;
         }
+        // MONTH FILTER
+if (selectedMonth !== "all") {
+  if (txnDate.getMonth() !== selectedMonth) return false;
+}
       }
       return true;
     });
@@ -386,7 +342,7 @@ export default function AdminDashboard() {
     }
 
     return () => chart?.destroy();
-  }, [transactions, dateRange, graphFilter, graphCategory]);
+  }, [transactions, dateRange, graphFilter, graphCategory, selectedMonth]);
   const getFilteredTransactions = () => {
     const nowYear = new Date().getFullYear();
     return transactions.filter((txn) => {
@@ -429,6 +385,7 @@ export default function AdminDashboard() {
       return true;
     });
   };
+
   // NEW: calculate totals for selected date range
   const filteredTxns = getFilteredTransactions();
   const totalIncome = filteredTxns
@@ -658,6 +615,30 @@ export default function AdminDashboard() {
                     <option value="month">Month-wise</option>
                     <option value="week">Week-wise</option>
                   </select>
+                   {/* MONTH DROPDOWN (NEW) */}
+  <select
+    className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
+    value={selectedMonth}
+    onChange={(e) =>
+      setSelectedMonth(
+        e.target.value === "all" ? "all" : Number(e.target.value)
+      )
+    }
+  >
+    <option value="all">All Months</option>
+    <option value="0">Jan</option>
+    <option value="1">Feb</option>
+    <option value="2">Mar</option>
+    <option value="3">Apr</option>
+    <option value="4">May</option>
+    <option value="5">Jun</option>
+    <option value="6">Jul</option>
+    <option value="7">Aug</option>
+    <option value="8">Sep</option>
+    <option value="9">Oct</option>
+    <option value="10">Nov</option>
+    <option value="11">Dec</option>
+  </select>
 
                   <label>
                     From:{" "}
