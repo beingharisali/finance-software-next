@@ -78,7 +78,7 @@ export default function AdminDashboard() {
 
     // category filter reset
     setGraphCategory("All");
-     setSelectedMonth("all");
+    setSelectedMonth("all");
   };
   //  handle click on category card
   const handleCategoryClick = (category: string) => {
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
 
     const filtered = transactions.filter((txn) => {
       const txnDate = new Date(txn.transactionDate);
-     
+
       if (graphCategory !== "All") {
         const cats = [txn.transactionType?.trim(), txn.category?.trim()].filter(
           Boolean,
@@ -239,9 +239,9 @@ export default function AdminDashboard() {
             break;
         }
         // MONTH FILTER
-if (selectedMonth !== "all") {
-  if (txnDate.getMonth() !== selectedMonth) return false;
-}
+        if (selectedMonth !== "all") {
+          if (txnDate.getMonth() !== selectedMonth) return false;
+        }
       }
       return true;
     });
@@ -452,7 +452,6 @@ if (selectedMonth !== "all") {
               .filter((cat) => cat && cat !== "All")
               .filter((cat) => graphCategory === "All" || cat === graphCategory)
               .map((cat) => {
-              
                 const txns = getFilteredTransactions().filter((tx) => {
                   const cats = [
                     tx.transactionType?.trim(),
@@ -541,15 +540,15 @@ if (selectedMonth !== "all") {
 
           {/* ===== CASHFLOW CHART (FILTERED) ===== */}
 
-          <section className="charts">
-            <div className="chart-card">
-              <div className="chart-header">
-                <h2 className="text-black text-2xl font-bold">Cashflow</h2>
+          <section className="charts w-full px-4 sm:px-6 lg:px-8">
+            <div className="chart-card w-full bg-white rounded-lg shadow-md p-4">
+              <div className="chart-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <h2 className=" text-black text-2xl font-bold">Cashflow</h2>
 
-                <div className="filters">
+                <div className="filters flex flex-wrap gap-2 items-center mb-4">
                   <select
                     title="category-filter"
-                    className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
+                    className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1  min-w-[120px] "
                     value={graphCategory}
                     onChange={(e) => setGraphCategory(e.target.value)}
                   >
@@ -606,7 +605,7 @@ if (selectedMonth !== "all") {
                   </select>
                   <select
                     title="dropdown"
-                    className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
+                    className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1 min-w-[120px] flex-1 sm:flex-auto "
                     value={graphFilter}
                     onChange={(e) => setGraphFilter(e.target.value as any)}
                   >
@@ -615,51 +614,65 @@ if (selectedMonth !== "all") {
                     <option value="month">Month-wise</option>
                     <option value="week">Week-wise</option>
                   </select>
-                   {/* MONTH DROPDOWN (NEW) */}
-  <select
-    className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1"
-    value={selectedMonth}
-    onChange={(e) =>
-      setSelectedMonth(
-        e.target.value === "all" ? "all" : Number(e.target.value)
-      )
-    }
-  >
-    <option value="all">All Months</option>
-    <option value="0">Jan</option>
-    <option value="1">Feb</option>
-    <option value="2">Mar</option>
-    <option value="3">Apr</option>
-    <option value="4">May</option>
-    <option value="5">Jun</option>
-    <option value="6">Jul</option>
-    <option value="7">Aug</option>
-    <option value="8">Sep</option>
-    <option value="9">Oct</option>
-    <option value="10">Nov</option>
-    <option value="11">Dec</option>
-  </select>
+                  {/* MONTH DROPDOWN (NEW) */}
+                  <select
+                    className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1 min-w-[120px] flex-1 sm:flex-auto"
+                    value={selectedMonth}
+                    onChange={(e) =>
+                      setSelectedMonth(
+                        e.target.value === "all"
+                          ? "all"
+                          : Number(e.target.value),
+                      )
+                    }
+                  >
+                    <option value="all">All Months</option>
+                    <option value="0">Jan</option>
+                    <option value="1">Feb</option>
+                    <option value="2">Mar</option>
+                    <option value="3">Apr</option>
+                    <option value="4">May</option>
+                    <option value="5">Jun</option>
+                    <option value="6">Jul</option>
+                    <option value="7">Aug</option>
+                    <option value="8">Sep</option>
+                    <option value="9">Oct</option>
+                    <option value="10">Nov</option>
+                    <option value="11">Dec</option>
+                  </select>
 
-                  <label>
+                  <label className="flex flex-col text-sm flex-1 sm:flex-auto">
                     From:{" "}
                     <input
                       type="date"
                       name="from"
                       value={tempDateRange.from}
                       onChange={handleTempDateChange}
+                      className="border border-gray-400 rounded-md px-2 py-1 w-full sm:w-auto"
                     />
                   </label>
-                  <label>
+                  <label className="flex flex-col text-sm flex-1 sm:flex-auto">
                     To:{" "}
                     <input
                       type="date"
                       name="to"
                       value={tempDateRange.to}
                       onChange={handleTempDateChange}
+                      className="border border-gray-400 rounded-md px-2 py-1 w-full sm:w-auto"
                     />
                   </label>
-                  <button onClick={applyDateRange}>Apply</button>
-                  <button onClick={resetDateRange}>Reset</button>
+                  <button
+                    className="bg-blue-600 text-white rounded-md px-3 py-1 hover:bg-blue-700"
+                    onClick={applyDateRange}
+                  >
+                    Apply
+                  </button>
+                  <button
+                    className="bg-gray-300 text-black rounded-md px-3 py-1 hover:bg-gray-400"
+                    onClick={resetDateRange}
+                  >
+                    Reset
+                  </button>
                 </div>
               </div>
               <canvas id="cashflowChart"></canvas>
