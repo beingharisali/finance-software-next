@@ -75,6 +75,30 @@ const fetchAllTransactionsForNotifications = async () => {
     console.error("Failed to fetch all transactions for notifications", error);
   }
 };
+// ---------------- HELPER FUNCTION ----------------
+// function swapDayMonth(date: string | Date | undefined) {
+//   if (!date) return "-";
+//   const d = new Date(date);
+//   if (isNaN(d.getTime())) return "-"; // invalid date check
+
+//   const day = d.getDate();        // original day
+//   const month = d.getMonth() + 1; // original month (0-indexed)
+//   const year = d.getFullYear();
+
+//   // Swap day and month
+//   return `${day.toString().padStart(2, "0")}/${month
+//     .toString()
+//     .padStart(2, "0")}/${year}`;
+// }
+function swapDayMonth(date: string | Date | undefined) {
+  if (!date) return "-";
+
+  // moment will parse correctly and format as DD/MM/YYYY
+  const m = moment(date);
+  if (!m.isValid()) return "-";
+
+  return m.format("DD/MM/YYYY");
+}
   // ---------------------- FETCH TRANSACTIONS ----------------------
   const fetchTransactions = async (
   selectedCategory = "",
@@ -99,24 +123,6 @@ const fetchAllTransactionsForNotifications = async () => {
           : "",
     }));
 
-//     const transactionsCleaned = fetchedTransactions.map((txn) => {
-//   const txnType = txn.transactionType?.trim().toLowerCase();
-
-//   const isUncategorizedType =
-//     txnType === "uncategorised" || txnType === "uncategorized";
-
-//   return {
-//     ...txn,
-//     category:
-//       txn.category &&
-//       txn.category.trim() !== "" &&
-//       txn.category.trim().toLowerCase() !== "uncategorised" &&
-//       txn.category.trim().toLowerCase() !== "uncategorized" &&
-//       !isUncategorizedType
-//         ? txn.category
-//         : "",
-//   };
-// });
     // ----- NEW: Filter by transactionType if searchCategory is not empty -----
   
 const filteredTransactions = searchCategory
@@ -484,11 +490,12 @@ const resetFilters = () => {
       }}
       style={{ cursor: "pointer" }}
     >
-                      <td>
+                      {/* <td>
                         {txn.transactionDate
                           ? moment(txn.transactionDate).format("DD/MM/YYYY")
                           : "-"}
-                      </td>
+                      </td> */}
+                      <td>{swapDayMonth(txn.transactionDate)}</td>
                       <td>{txn.transactionDescription || "-"}</td>
                       <td>{txn.transactionType || "-"}</td>
                       {/* <td className="text-right ">{txn.amount || 0}</td> */}
@@ -578,12 +585,15 @@ const resetFilters = () => {
     <div className="transaction-detail-page">
       <h2>Transaction Details</h2>
 
-      <p>
+      {/* <p>
         <b>Date:</b>{" "}
         {selectedTransaction.transactionDate
           ? moment(selectedTransaction.transactionDate).format("DD/MM/YYYY")
           : "-"}
-      </p>
+      </p> */}
+      <p>
+  <b>Date:</b> {swapDayMonth(selectedTransaction.transactionDate)}
+</p>
       <p>
         <b>Description:</b> {selectedTransaction.transactionDescription || "-"}
       </p>

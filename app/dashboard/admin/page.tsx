@@ -346,10 +346,9 @@ export default function AdminDashboard() {
   const getFilteredTransactions = () => {
     const nowYear = new Date().getFullYear();
     return transactions.filter((txn) => {
-      // const txnDate = new Date(txn.transactionDate);
-      const txnMoment = moment(txn.transactionDate, "DD/MM/YYYY");
-      const txnDate = txnMoment.toDate();
-      const txnYear = txnMoment.year();
+  
+      const txnDate = new Date(txn.transactionDate); 
+
 
       // Category filter (graphCategory dropdown)
       if (graphCategory !== "All") {
@@ -381,6 +380,10 @@ export default function AdminDashboard() {
             break;
         }
       }
+      // month filter 
+      if (selectedMonth !== "all") {
+  if (txnDate.getMonth() !== selectedMonth) return false;
+}
 
       return true;
     });
