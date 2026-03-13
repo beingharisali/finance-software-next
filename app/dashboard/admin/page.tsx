@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+
 import ProtectedRoute from "@/utilies/ProtectedRoute";
 import { useAuthContext } from "@/context/AuthContext";
 import { Chart, registerables } from "chart.js";

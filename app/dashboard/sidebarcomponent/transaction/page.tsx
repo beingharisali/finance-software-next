@@ -1,7 +1,8 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import { useAuthContext } from "@/context/AuthContext";
-import moment from "moment";
+import { format, parse } from 'date-fns';
+// import moment from "moment";
 import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
 import "../../../cssfiles/transactionfilters.css";
@@ -76,28 +77,36 @@ const fetchAllTransactionsForNotifications = async () => {
   }
 };
 // ---------------- HELPER FUNCTION ----------------
-// function swapDayMonth(date: string | Date | undefined) {
-//   if (!date) return "-";
-//   const d = new Date(date);
-//   if (isNaN(d.getTime())) return "-"; // invalid date check
 
-//   const day = d.getDate();        // original day
-//   const month = d.getMonth() + 1; // original month (0-indexed)
-//   const year = d.getFullYear();
-
-//   // Swap day and month
-//   return `${day.toString().padStart(2, "0")}/${month
-//     .toString()
-//     .padStart(2, "0")}/${year}`;
-// }
-function swapDayMonth(date: string | Date | undefined) {
+function swapDayMonth(date: string | Date | number | undefined) {
   if (!date) return "-";
 
-  // moment will parse correctly and format as DD/MM/YYYY
-  const m = moment(date);
-  if (!m.isValid()) return "-";
+  try {
+    let d: Date;
 
-  return m.format("DD/MM/YYYY");
+    if (typeof date === "string") {
+      // ISO string
+      d = parse(date, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", new Date());
+      if (isNaN(d.getTime())) {
+        // Try d/M/yyyy format
+        d = parse(date, "d/M/yyyy", new Date());
+      }
+    } else if (typeof date === "number") {
+      // Excel serial number to JS Date
+      // Excel date 1 = 1900-01-01, but Excel mistakenly considers 1900 as leap year
+      const excelStartDate = new Date(1899, 11, 30);
+      d = new Date(excelStartDate.getTime() + date * 24 * 60 * 60 * 1000);
+    } else {
+      // Already a Date object
+      d = date;
+    }
+
+    if (isNaN(d.getTime())) return "-"; // still invalid
+
+    return format(d, "dd/MM/yyyy"); // Output: 02/01/2026
+  } catch (error) {
+    return "-";
+  }
 }
   // ---------------------- FETCH TRANSACTIONS ----------------------
   const fetchTransactions = async (
@@ -495,7 +504,7 @@ const resetFilters = () => {
                           ? moment(txn.transactionDate).format("DD/MM/YYYY")
                           : "-"}
                       </td> */}
-                      <td>{swapDayMonth(txn.transactionDate)}</td>
+                     <td>{swapDayMonth(txn.transactionDate)}</td>
                       <td>{txn.transactionDescription || "-"}</td>
                       <td>{txn.transactionType || "-"}</td>
                       {/* <td className="text-right ">{txn.amount || 0}</td> */}
@@ -591,7 +600,10 @@ const resetFilters = () => {
           ? moment(selectedTransaction.transactionDate).format("DD/MM/YYYY")
           : "-"}
       </p> */}
-      <p>
+      {/* <p> */}
+  {/* <b>Date:</b> {swapDayMonth(selectedTransaction.transactionDate)}
+</p> */}
+<p>
   <b>Date:</b> {swapDayMonth(selectedTransaction.transactionDate)}
 </p>
       <p>
