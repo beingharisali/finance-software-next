@@ -347,9 +347,7 @@ export default function AdminDashboard() {
   const getFilteredTransactions = () => {
     const nowYear = new Date().getFullYear();
     return transactions.filter((txn) => {
-  
-      const txnDate = new Date(txn.transactionDate); 
-
+      const txnDate = new Date(txn.transactionDate);
 
       // Category filter (graphCategory dropdown)
       if (graphCategory !== "All") {
@@ -381,10 +379,10 @@ export default function AdminDashboard() {
             break;
         }
       }
-      // month filter 
+      // month filter
       if (selectedMonth !== "all") {
-  if (txnDate.getMonth() !== selectedMonth) return false;
-}
+        if (txnDate.getMonth() !== selectedMonth) return false;
+      }
 
       return true;
     });
@@ -703,7 +701,7 @@ export default function AdminDashboard() {
                   <tr key={idx} className="border-b last:border-none">
                     <td className="px-4 py-2 text-left">
                       {txn.transactionDate
-                        ? moment(txn.transactionDate).format("DD/MM/YYYY")
+                        ? moment(txn.transactionDate).format("DD/MMM/YYYY")
                         : "-"}
                     </td>
 
