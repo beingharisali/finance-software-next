@@ -126,7 +126,18 @@ export default function AdminDashboard() {
       setRecentlyUploadedIds(newIds);
 
       // Update state
-      setTransactions(data);
+     
+      setTransactions((prev) => {
+  const allTxns = [...prev, ...data];
+  const uniqueTxns = Array.from(new Map(
+    allTxns.map(tx => [`${tx.transactionDate}-${tx.transactionDescription}-${tx.amount}-${tx.transactionType || 'none'}`, tx])
+  ).values());
+
+  return uniqueTxns.sort((a,b) =>
+    new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime()
+  );
+});
+
     } catch (err) {
       console.error("Failed to fetch transactions", err);
       setTransactions([]);
