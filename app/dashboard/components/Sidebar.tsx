@@ -26,6 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
       { name: "Sale", path: "/dashboard/sidebarcomponent/sale" },
       { name: "Company Cost", path: "/dashboard/sidebarcomponent/companycost" },
       { name: "Product", path: "/dashboard/sidebarcomponent/product" },
+      { name: "Clients", path: "/dashboard/sidebarcomponent/clients" },
       { name: "Deals", path: "/dashboard/sidebarcomponent/deals" },
 
     ],
