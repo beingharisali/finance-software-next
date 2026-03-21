@@ -82,15 +82,24 @@ export default function AdminDashboard() {
     setSelectedMonth("all");
   };
   //  handle click on category card
+  // const handleCategoryClick = (category: string) => {
+  //   const filteredTxns = getFilteredTransactions().filter(
+  //     (txn) =>
+  //       (txn.transactionType?.trim() || txn.category || "Uncategorized") ===
+  //       category,
+  //   );
+  //   setClickedCategoryTransactions(filteredTxns);
+  //   setShowCategoryModal(true);
+  // };
   const handleCategoryClick = (category: string) => {
-    const filteredTxns = getFilteredTransactions().filter(
-      (txn) =>
-        (txn.transactionType?.trim() || txn.category || "Uncategorized") ===
-        category,
-    );
-    setClickedCategoryTransactions(filteredTxns);
-    setShowCategoryModal(true);
-  };
+  const filteredTxns = getFilteredTransactions().filter((txn) => {
+    const cats = [txn.transactionType?.trim(), txn.category?.trim()].filter(Boolean);
+    return cats.includes(category);
+  });
+
+  setClickedCategoryTransactions(filteredTxns);
+  setShowCategoryModal(true);
+};
   const fetchTransactions = async () => {
     try {
       const res = await http.get("/transactions");
@@ -629,6 +638,7 @@ export default function AdminDashboard() {
                   </select>
                   {/* MONTH DROPDOWN (NEW) */}
                   <select
+                  title="month"
                     className="years-dropdown text-black border border-gray-400 rounded-md px-2 py-1 min-w-[120px] flex-1 sm:flex-auto"
                     value={selectedMonth}
                     onChange={(e) =>

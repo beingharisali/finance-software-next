@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import CreateUser from "@/app/dashboard/createusers/page";
 import { fetchUsers } from "@/services/user.api";
 export default function ProductPage() {
-  const [showCreateBrokerModal, setShowCreateBrokerModal] = useState(false);
+const [showCreateBrokerModal, setShowCreateBrokerModal] = useState(false);
   // new dropdown update 
   
 
@@ -212,7 +212,7 @@ export default function ProductPage() {
         </div>
 
         {/* TABLE */}
-        <div className="record-wrapper overflow-x-auto   max-w-screen-xl mx-auto ">
+        <div className="record-wrapper overflow-x-auto   =..=.=.=mx-auto ">
           {loading ? (
             <p className="loading-text">Loading products...</p>
           ) : products.length === 0 ? (

@@ -514,11 +514,7 @@ export default function ManagerDashboardTransaction() {
                         }}
                         style={{ cursor: "pointer" }}
                       >
-                        {/* <td>
-                        {txn.transactionDate
-                          ? moment(txn.transactionDate).format("DD/MM/YYYY")
-                          : "-"}
-                      </td> */}
+                      
                         <td>{swapDayMonth(txn.transactionDate)}</td>
                         <td>{txn.transactionDescription || "-"}</td>
                         <td>{txn.transactionType || "-"}</td>
