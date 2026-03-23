@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -27,7 +29,7 @@ export default function CompanyCostPage() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [selectedBroker, setSelectedBroker] = useState("");
   const [selectedClient, setSelectedClient] = useState("");
-  const [status, setStatus] = useState("Pending");
+  const [status, setStatus] = useState("document sent");
   const [editingDealId, setEditingDealId] = useState<string | null>(null);
   // Deals table state
   const [deals, setDeals] = useState<Deal[]>([]);
@@ -43,6 +45,8 @@ export default function CompanyCostPage() {
   // search
   const [searchClient, setSearchClient] = useState("");
   if (!user) return <p>Loading...</p>;
+  // column product
+  const [open, setOpen] = useState(false);
 
   // Fetch brokers
   useEffect(() => {
@@ -102,88 +106,60 @@ export default function CompanyCostPage() {
     };
     fetchDeals();
   }, []);
-
   const handleSaveDeal = async () => {
     if (!selectedBroker || !selectedClient || selectedProducts.length === 0) {
       alert("Please fill all fields!");
       return;
     }
 
-    const clientObj = clients.find(
-      (c) => c.clientNumber === Number(selectedClient),
-    );
+    const payload = {
+      broker: selectedBroker,
+      client: selectedClient,
+      products: selectedProducts,
+      status,
+    };
 
-    const brokerName =
-      brokers.find((b) => b._id === selectedBroker)?.fullname || "";
-    const clientName = clientObj
-      ? `${clientObj.firstName} ${clientObj.lastName}`
-      : "";
-    if (editingDealId) {
-      // Make sure valid broker, client, products are selected
-      if (!selectedBroker || !selectedClient || selectedProducts.length === 0) {
-        alert("Please select a valid Broker, Client, and Products");
-        return;
-      }
-
-      try {
-        // Send IDs to backend instead of names
-        const res = await http.put(`/deals/${editingDealId}`, {
-          broker: selectedBroker, // broker _id
-          client: selectedClient, // clientNumber or _id
-          products: selectedProducts, // array of product _id
-        });
-
-        // Update frontend state
+    try {
+      if (editingDealId) {
+        // Edit mode
+        const res = await http.put(`/deals/${editingDealId}`, payload);
         setDeals(deals.map((d) => (d._id === editingDealId ? res.data : d)));
-
-        // Reset form
-        setEditingDealId(null);
-        setShowForm(false);
-        setSelectedBroker("");
-        setSelectedClient("");
-        setSelectedProducts([]);
-      } catch (err) {
-        console.error("Failed to update deal", err);
-        alert("Failed to update deal");
-      }
-    } else {
-      // Create new deal (existing code)
-      const newRef = String(deals.length + 1).padStart(3, "0");
-      const newDeal: Deal = {
-        ref: newRef,
-        date: new Date().toLocaleDateString(),
-        broker: brokerName,
-        client: clientName,
-        products: [...selectedProducts],
-        status,
-      };
-      try {
-        const res = await http.post("/deals", newDeal);
+        setEditingDealId(null); // Reset edit mode
+      } else {
+        // New deal
+        const res = await http.post("/deals", payload);
         setDeals([...deals, res.data]);
-
-        // Reset form
-        setSelectedBroker("");
-        setSelectedClient("");
-        setSelectedProducts([]);
-        setShowForm(false);
-      } catch (err) {
-        console.error("Failed to save deal", err);
-        alert("Failed to save deal to database!");
       }
+
+      // Reset form
+      setSelectedBroker("");
+      setSelectedClient("");
+      setSelectedProducts([]);
+      setStatus("document sent");
+      setShowForm(false);
+    } catch (err: any) {
+      console.error("Failed to save deal", err.response?.data || err.message);
+      alert("Failed to save deal! Check console.");
     }
   };
-  
+
   // hadeledit
   const handleEditDeal = (deal: Deal) => {
     // Set broker
-    const brokerObj = brokers.find((b) => b.fullname === deal.broker);
+    const brokerObj = brokers.find((b) => b._id === deal.broker);
     setSelectedBroker(brokerObj?._id || "");
+    // const brokerObj = brokers.find((b) => b.fullname === deal.broker);
+    // setSelectedBroker(brokerObj?._id || "");
 
     // Set client
     const clientObj = clients.find(
-      (c) => `${c.firstName} ${c.lastName}` === deal.client,
+      (c) => c.clientNumber.toString() === deal.client.toString(),
     );
     setSelectedClient(clientObj?.clientNumber?.toString() || "");
+    // const clientObj = clients.find(
+    //   (c) => `${c.firstName} ${c.lastName}` === deal.client,
+    // );
+    // setSelectedClient(clientObj?.clientNumber?.toString() || "");
 
     // Set products and status
     setSelectedProducts(deal.products);
@@ -214,32 +190,27 @@ export default function CompanyCostPage() {
     setEndDate(""); // Clear end date
   };
   // save
-  // Update deal status in DB
-  const handleStatusChange = async (
-    dealId: string,
-    newStatus: string,
-    idx: number,
-  ) => {
-    const updatedDeals = [...deals];
-    updatedDeals[idx].status = newStatus;
-    setDeals(updatedDeals);
-
-    try {
-      await http.put(`/deals/${dealId}`, { status: newStatus });
-    } catch (err) {
-      console.error("Failed to update deal status", err);
-    }
-  };
-  // Filter deals by client + date
   const filteredDeals = deals.filter((deal) => {
-    const dealDate = new Date(deal.date);
-    const matchesClient = deal.client
-      .toLowerCase()
-      .includes(searchClient.toLowerCase());
+    // Deal date in yyyy-mm-dd format
+    const dealDateStr = new Date(deal.date).toISOString().slice(0, 10); // "2026-03-23"
+
+    const startStr = startDate || null; // input from
+    const endStr = endDate || null; // input to
 
     let inDateRange = true;
-    if (startDate) inDateRange = inDateRange && dealDate >= new Date(startDate);
-    if (endDate) inDateRange = inDateRange && dealDate <= new Date(endDate);
+    if (startStr) inDateRange = dealDateStr >= startStr;
+    if (endStr) inDateRange = inDateRange && dealDateStr <= endStr;
+
+    // Client filter
+    const clientObj = clients.find(
+      (c) => c.clientNumber.toString() === deal.client.toString(),
+    );
+    const clientName = clientObj
+      ? `${clientObj.firstName} ${clientObj.lastName}`
+      : deal.client;
+    const matchesClient = clientName
+      .toLowerCase()
+      .includes(searchClient.toLowerCase());
 
     return matchesClient && inDateRange;
   });
@@ -313,55 +284,90 @@ export default function CompanyCostPage() {
             </div>
 
             {/* Product Dropdown */}
-            <div className="mb-3">
+            <div className="mb-3 relative">
               <label className="block mb-1">Products</label>
-              <select
-                className="w-full border p-2 rounded"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value && !selectedProducts.includes(value)) {
-                    setSelectedProducts([...selectedProducts, value]);
-                  }
-                  e.target.value = "";
-                }}
-              >
-                <option value="">Select Product</option>
 
-                {products.map((p) => {
-                  // Check if this product is already assigned in any deal
-                  const isAssigned = deals.some((d) =>
-                    d.products.includes(p._id),
-                  );
+              {/* Dropdown container */}
+              <div className="border rounded w-full relative cursor-pointer">
+                {/* Selected / Placeholder */}
+                <div
+                  className="p-2 bg-white flex justify-between items-center"
+                  onClick={() => setOpen(!open)}
+                >
+                  <span>
+                    {selectedProducts.length > 0
+                      ? `${selectedProducts.length} product(s) selected`
+                      : "Select Product"}
+                  </span>
+                  <span className="text-gray-500">{open ? "▲" : "▼"}</span>
+                </div>
 
-                  return (
-                    <option
-                      key={p._id}
-                      value={p._id}
-                      disabled={isAssigned} // disable if assigned
-                      style={{
-                        backgroundColor: isAssigned ? "orange" : "white", // yellow if assigned
-                        color: isAssigned ? "black" : "blue", // text color
-                      }}
-                    >
-                      {p.liquidMake}
-                    </option>
-                  );
-                })}
-              </select>
+                {/* Dropdown list */}
+                {open && (
+                  <div className="absolute z-50 bg-white border w-full max-h-60 overflow-y-auto mt-1 shadow-lg rounded">
+                    {/* Table header */}
+                    <div className="grid grid-cols-3 font-bold p-2 border-b bg-gray-100 sticky top-0">
+                      <span>ID</span>
+                      <span>Date</span>
+                      <span>Price</span>
+                    </div>
+
+                    {/* Table rows */}
+                    {products.map((p) => {
+                      const isAssigned = deals.some((d) =>
+                        d.products.includes(p._id),
+                      );
+                      const isSelected = selectedProducts.includes(p._id);
+
+                      return (
+                        <div
+                          key={p._id}
+                          className={`grid grid-cols-3 p-2 cursor-pointer hover:bg-gray-200 ${
+                            isAssigned
+                              ? "bg-orange-100 text-gray-700 cursor-not-allowed"
+                              : ""
+                          }`}
+                          onClick={() => {
+                            if (!isAssigned && !isSelected) {
+                              setSelectedProducts([...selectedProducts, p._id]);
+                              setOpen(false);
+                            }
+                          }}
+                        >
+                          <span>{p.productId}</span>
+
+                          <span>
+                            {p.product
+                              ? new Date(p.product).toLocaleDateString()
+                              : "-"}
+                          </span>
+
+                          <span>{p.finalPrice}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
               {/* Selected Products List */}
               <div className="mt-3">
                 {selectedProducts.map((id, index) => {
                   const product = products.find((p) => p._id === id);
-
                   return (
                     <div
                       key={index}
-                      className="flex justify-between items-center bg-gray-100 p-2 rounded mb-2"
+                      className="grid grid-cols-3 gap-2 items-center bg-gray-100 p-2 rounded mb-2"
                     >
-                      <span>{product ? product.liquidMake : id}</span>
+                      <span>{product?.productId || id}</span>
+                      {/* <span>{product?.product || "-"}</span> */}
+                      <span>
+                        {product?.product ? product.product.split("T")[0] : "-"}
+                      </span>
+
+                      <span>{product?.finalPrice}</span>
                       <button
-                        className="text-red-500 font-bold"
+                        className="text-red-500 font-bold col-span-1"
                         onClick={() =>
                           setSelectedProducts(
                             selectedProducts.filter((p) => p !== id),
@@ -374,6 +380,27 @@ export default function CompanyCostPage() {
                   );
                 })}
               </div>
+            </div>
+
+            {/* Status Dropdown */}
+            <div className="mb-3">
+              <label className="block mb-1">Status</label>
+              <select
+                className="w-full border p-2 rounded"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option value="document sent">document sent</option>
+                <option value="escrow check">escrow check</option>
+                <option value="escrow source of funds">
+                  escrow source of funds
+                </option>
+                <option value="IR + INV">IR + INV</option>
+                <option value="Paid">Paid</option>
+                <option value="Certificate">Certificate</option>
+                <option value="Delivery">Delivery</option>
+                <option value="Completed">Completed</option>
+              </select>
             </div>
 
             {/* Save & Cancel */}
@@ -394,15 +421,7 @@ export default function CompanyCostPage() {
           </div>
         )}
         {/* search */}
-        {/* <div className="mb-4 text-black mt-2">
-  <input
-    type="text"
-    placeholder="Search by Client Name..."
-    className="border p-2 rounded w-64"
-    value={searchClient}
-    onChange={(e) => setSearchClient(e.target.value)}
-  />
-</div> */}
+
         <div className="flex items-center gap-3 mt-4 mb-4 text-black">
           <input
             type="text"
@@ -411,20 +430,22 @@ export default function CompanyCostPage() {
             value={searchClient}
             onChange={(e) => setSearchClient(e.target.value)}
           />
-          <span>From:</span>
-          <input
-            type="date"
-            className="border p-2 rounded"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-          <span>To:</span>
-          <input
-            type="date"
-            className="border p-2 rounded"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
+          <div>
+            <span>From:</span>
+            <input
+              type="date"
+              className="border p-2 rounded"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <span>To:</span>
+            <input
+              type="date"
+              className="border p-2 rounded"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
           <button className="reset-btn" onClick={resetFilters}>
             Reset
           </button>
@@ -433,7 +454,6 @@ export default function CompanyCostPage() {
         {/* Deals Table */}
         {filteredDeals.length > 0 && (
           // {/* Deals Table */}
-          // {deals.length > 0 && (
           <div className="mt-6 overflow-x-auto">
             <table className="record-table  min-w-[1200px] border-collapse text-sm  ">
               <thead className="">
@@ -448,84 +468,98 @@ export default function CompanyCostPage() {
               </thead>
 
               <tbody>
-                {/* {deals.map((deal, idx) => ( */}
-                {deals
-                  .filter((deal) =>
-                    deal.client
-                      .toLowerCase()
-                      .includes(searchClient.toLowerCase()),
-                  )
-                  .map((deal, idx) => (
-                    <tr key={deal._id || idx} className="relative">
-                      {/* Ref # with colored status bar */}
-                      <td className="border px-4 py-2">
-                        <div className="flex items-center">
-                          {/* Colored bar */}
-                          <div
-                            className="w-2 h-6 rounded mr-2"
-                            style={{
-                              backgroundColor:
-                                deal.status.trim().toLowerCase() === "completed"
-                                  ? "green"
-                                  : "orange",
-                            }}
-                          ></div>
-                          <span>{deal.ref}</span>
-                        </div>
-                      </td>
+                {filteredDeals.map((deal, idx) => (
+                  <tr key={deal._id || idx} className="relative">
+                    <td className="border px-4 py-2">
+                      <div className="flex items-center">
+                        {/* Colored bar */}
+                        <div
+                          className="w-2 h-6 rounded mr-2"
+                          style={{
+                            backgroundColor:
+                              deal.status.trim().toLowerCase() === "completed"
+                                ? "green"
+                                : "orange",
+                          }}
+                        ></div>
+                        <span>{deal.ref}</span>
+                      </div>
+                    </td>
+                    <td className="border px-4 py-2">
+                      {new Date(deal.date).toLocaleDateString("en-GB")}{" "}
+                    </td>
 
-                      {/* <td className="border px-4 py-2">{deal.date}</td> */}
-                      {/* <td className="border px-4 py-2">
-  {new Date(deal.date).toLocaleDateString("en-GB")}
-</td> */}
-                      <td className="border px-4 py-2">
-                        {new Date(deal.date).toLocaleDateString("en-GB")}
-                      </td>
-                      <td className="border px-4 py-2">
-                        <select
-                          value={deal.status}
-                          onChange={(e) =>
-                            deal._id &&
-                            handleStatusChange(deal._id, e.target.value, idx)
-                          }
-                          className="border p-1 rounded"
-                        >
-                          <option>document sent</option>
-                          <option>escrow check</option>
-                          <option>escrow source of funds</option>
-                          <option>IR + INV</option>
-                          <option>Paid</option>
-                          <option>Certificate</option>
-                          <option>Delivery</option>
-                          <option>Completed</option>
-                        </select>
-                      </td>
-                      <td className="border px-4 py-2">{deal.client}</td>
-                      <td className="border px-4 py-2">
-                        {/* {deal.products.join(", ")} */}
-                        {deal.products
-                          .map((id) => {
-                            const product = products.find((p) => p._id === id);
-                            return product ? product.liquidMake : id;
-                          })
-                          .join(", ")}
-                      </td>
-                      <td className="border px-4 py-2 flex gap-2">
-                        <button
-                          className="text-blue-600 underline"
-                          onClick={() => handleEditDeal(deal)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="text-red-600 underline"
-                          onClick={() => handleDeleteDeal(deal._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                    <td className="border px-4 py-2">
+                      <select
+                        value={deal.status}
+                        onChange={(e) =>
+                          deal._id &&
+                          handleStatusChange(deal._id, e.target.value, idx)
+                        }
+                        className="border p-1 rounded"
+                      >
+                        <option>document sent</option>
+                        <option>escrow check</option>
+                        <option>escrow source of funds</option>
+                        <option>IR + INV</option>
+                        <option>Paid</option>
+                        <option>Certificate</option>
+                        <option>Delivery</option>
+                        <option>Completed</option>
+                      </select>
+                    </td>
+
+                    <td className="border px-4 py-2">
+                      {
+                        clients.find(
+                          (c) => c.clientNumber.toString() === deal.client,
+                        )?.firstName
+                      }{" "}
+                      {clients.find(
+                        (c) => c.clientNumber.toString() === deal.client,
+                      )?.lastName || deal.client}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {deal.products.map((id) => {
+                        const product = products.find((p) => p._id === id);
+                        if (!product) return id;
+
+                        return (
+                          <div
+                            key={id}
+                            className="flex justify-between items-center mb-1"
+                          >
+                            <span>
+                              {product.productId} |{" "}
+                              {product.product
+                                ? product.product.split("T")[0]
+                                : "-"}
+                            </span>
+
+                            <td className="border-l border-gray px-4 py-2">
+                              {product?.finalPrice || product?.liquidMake}
+                            </td>
+                          </div>
+                        );
+                      })}
+                    </td>
+
+                    <td className="border px-4 py-2 flex gap-2">
+                      <button
+                        className="text-blue-600 underline"
+                        onClick={() => handleEditDeal(deal)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="text-red-600 underline"
+                        onClick={() => handleDeleteDeal(deal._id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
