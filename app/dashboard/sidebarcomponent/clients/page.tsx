@@ -27,7 +27,7 @@ export default function CompanyCostPage() {
 
   const [showForm, setShowForm] = useState(false);
 
-  // ✅ FIX: form state added
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -35,6 +35,7 @@ export default function CompanyCostPage() {
     phoneNumber: "",
     address: "",
     dateOfBirth: "",
+      extraInfo: "", 
   });
 
   // Fetch client list
@@ -47,6 +48,8 @@ export default function CompanyCostPage() {
       alert("Failed to fetch clients");
     }
   };
+  // Track if we are editing a client
+const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   useEffect(() => {
     fetchClients();
@@ -82,42 +85,66 @@ export default function CompanyCostPage() {
     }
   };
 
-  // ✅ FIX: Create client function
-  const handleCreateClient = async () => {
-    try {
-      if (
-        !formData.firstName ||
-        !formData.lastName ||
-        !formData.email ||
-        !formData.phoneNumber ||
-        !formData.address ||
-        !formData.dateOfBirth
-      ) {
-        return alert("Please fill all fields");
-      }
-
-      await http.post("/clients", formData);
-
-      alert("Client created successfully");
-
-      setShowForm(false);
-
-      // reset form
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phoneNumber: "",
-        address: "",
-        dateOfBirth: "",
-      });
-
-      fetchClients();
-    } catch (err: any) {
-      console.error(err);
-      alert(err.response?.data?.msg || "Error creating client");
+  
+  const handleSaveClient = async () => {
+  try {
+    const { firstName, lastName, email, phoneNumber, address, dateOfBirth } = formData;
+    if (!firstName || !lastName || !email || !phoneNumber || !address || !dateOfBirth) {
+      return alert("Please fill all fields");
     }
-  };
+
+    if (editingClient) {
+      // Update existing client
+      await http.put(`/clients/${editingClient.clientNumber}`, formData);
+      alert("Client updated successfully");
+    } else {
+      // Create new client
+      await http.post("/clients", formData);
+      alert("Client created successfully");
+    }
+
+    setShowForm(false);
+    setEditingClient(null);
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      address: "",
+      dateOfBirth: "",
+      extraInfo: "",
+    });
+    fetchClients();
+  } catch (err: any) {
+    console.error(err);
+    alert(err.response?.data?.msg || "Error saving client");
+  }
+};
+const handleEditClient = (client: Client) => {
+  setFormData({
+    firstName: client.firstName,
+    lastName: client.lastName,
+    email: client.email,
+    phoneNumber: client.phoneNumber,
+    address: client.address,
+    dateOfBirth: client.dateOfBirth,
+    extraInfo: client.extraInfo || "",
+  });
+  setEditingClient(client);
+  setShowForm(true);
+};
+const handleDeleteClient = async (clientNumber: number) => {
+  if (!confirm("Are you sure you want to delete this client?")) return;
+
+  try {
+    await http.delete(`/clients/${clientNumber}`);
+    alert("Client deleted successfully");
+    fetchClients();
+  } catch (err: any) {
+    console.error(err);
+    alert(err.response?.data?.msg || "Error deleting client");
+  }
+};
 
   return (
     <div className="dashboard-container flex">
@@ -225,23 +252,34 @@ export default function CompanyCostPage() {
                 }
                 className="border p-2 col-span-2"
               />
+              <textarea
+  placeholder="Extra Info / Notes"
+  value={formData.extraInfo}
+  onChange={(e) =>
+    setFormData({ ...formData, extraInfo: e.target.value })
+  }
+  className="border p-2 col-span-2"
+/>
             </div>
 
+         
             <div className="mt-4 flex gap-3">
-              <button
-                onClick={handleCreateClient}
-                className="bg-green-600 text-white px-4 py-2 rounded"
-              >
-                Save
-              </button>
-
-              <button
-                onClick={() => setShowForm(false)}
-                className="bg-gray-400 text-white px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-            </div>
+  <button
+    onClick={handleSaveClient}  
+    className="bg-green-600 text-white px-4 py-2 rounded"
+  >
+    Save
+  </button>
+  <button
+    onClick={() => {
+      setShowForm(false);
+      setEditingClient(null);
+    }}
+    className="bg-gray-400 text-white px-4 py-2 rounded"
+  >
+    Cancel
+  </button>
+</div>
           </div>
         )}
 
@@ -249,12 +287,15 @@ export default function CompanyCostPage() {
         <table className=" record-table min-w-[1200px] w-full border-collapse text-sm">
           <thead>
             <tr className="bg-gray-100">
-              <th className="p-2 border">#</th>
+              <th className="p-2 border">Client Number</th>
+              
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Email</th>
               <th className="p-2 border">DOB</th>
               <th className="p-2 border">Phone</th>
               <th className="p-2 border">Address</th>
+              <th className="p-2 border">Notes</th>
+              <th className="p-2 border">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -275,6 +316,21 @@ export default function CompanyCostPage() {
                 </td>
                 <td className="p-2 border">{c.phoneNumber}</td>
                 <td className="p-2 border">{c.address}</td>
+                <td className="p-2 border">{c.extraInfo}</td>
+           <td className="p-2 border flex gap-2">
+  <button
+    className="bg-blue-600 text-white px-3 py-1 rounded"
+    onClick={() => handleEditClient(c)}
+  >
+    Edit
+  </button>
+  <button
+    className="bg-red-600 text-white px-3 py-1 rounded"
+    onClick={() => handleDeleteClient(c.clientNumber)}
+  >
+    Delete
+  </button>
+</td>
               </tr>
             ))}
           </tbody>
