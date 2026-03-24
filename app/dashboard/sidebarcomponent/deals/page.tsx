@@ -346,9 +346,14 @@ export default function CompanyCostPage() {
 
                     {/* Table rows */}
                     {products.map((p) => {
+                      // const isAssigned = deals.some((d) =>
+                      //   d.products.includes(p._id),
+                      // );
                       const isAssigned = deals.some((d) =>
-                        d.products.includes(p._id),
-                      );
+  d.products.some((prod: any) =>
+    (typeof prod === "object" ? prod.productId : prod) === p._id
+  )
+);
                       const isSelected = selectedProducts.includes(p._id);
 
                       return (
@@ -601,7 +606,8 @@ export default function CompanyCostPage() {
                         const product = products.find(
                           (p) => p._id === productId,
                         );
-                        if (!product) return productId;
+                        // if (!product) return productId;
+                        if (!product) return String(productId);
 
                         return (
                           <p

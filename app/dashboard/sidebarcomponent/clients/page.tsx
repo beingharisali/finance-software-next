@@ -194,18 +194,30 @@ const handleDeleteClient = async (clientNumber: number) => {
         </form>
 
         {/*  Form  this is field*/}
-        {showForm && (
-          <div className="bg-white p-4 border rounded mb-6 text-black">
+        {/* {showForm && (
+          <div className="bg-white p-4 border rounded mb-6 text-black"> */}
+      {showForm && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+    onClick={() => {
+      setShowForm(false);
+      setEditingClient(null);
+    }}
+  >
+    <div
+      className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] relative text-black"
+      onClick={(e) => e.stopPropagation()}
+    >
             <h2 className="text-xl mb-4">Add New Client  </h2>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <input
                 placeholder="First Name"
                 value={formData.firstName}
                 onChange={(e) =>
                   setFormData({ ...formData, firstName: e.target.value })
                 }
-                className="border p-2"
+                className="border border-gray-300 p-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f526a] focus:border-[#0f526a] transition"
               />
 
               <input
@@ -214,7 +226,7 @@ const handleDeleteClient = async (clientNumber: number) => {
                 onChange={(e) =>
                   setFormData({ ...formData, lastName: e.target.value })
                 }
-                className="border p-2"
+                className="border border-gray-300 p-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f526a] focus:border-[#0f526a] transition"
               />
 
               <input
@@ -223,7 +235,7 @@ const handleDeleteClient = async (clientNumber: number) => {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="border p-2"
+                className="border border-gray-300 p-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f526a] focus:border-[#0f526a] transition"
               />
 
               <input
@@ -232,7 +244,7 @@ const handleDeleteClient = async (clientNumber: number) => {
                 onChange={(e) =>
                   setFormData({ ...formData, phoneNumber: e.target.value })
                 }
-                className="border p-2"
+                className="border border-gray-300 p-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f526a] focus:border-[#0f526a] transition"
               />
 
               <input
@@ -241,7 +253,7 @@ const handleDeleteClient = async (clientNumber: number) => {
                 onChange={(e) =>
                   setFormData({ ...formData, address: e.target.value })
                 }
-                className="border p-2 col-span-2"
+                className="border border-gray-300 p-2.5 rounded-md col-span-2"
               />
 
               <input
@@ -250,7 +262,7 @@ const handleDeleteClient = async (clientNumber: number) => {
                 onChange={(e) =>
                   setFormData({ ...formData, dateOfBirth: e.target.value })
                 }
-                className="border p-2 col-span-2"
+                className="border border-gray-300 p-2.5 rounded-md col-span-2"
               />
               <textarea
   placeholder="Extra Info / Notes"
@@ -258,7 +270,7 @@ const handleDeleteClient = async (clientNumber: number) => {
   onChange={(e) =>
     setFormData({ ...formData, extraInfo: e.target.value })
   }
-  className="border p-2 col-span-2"
+  className="border border-gray-300 p-2.5 rounded-md col-span-2"
 />
             </div>
 
@@ -266,7 +278,7 @@ const handleDeleteClient = async (clientNumber: number) => {
             <div className="mt-4 flex gap-3">
   <button
     onClick={handleSaveClient}  
-    className="bg-green-600 text-white px-4 py-2 rounded"
+    className="bg-[#0f526a] text-white px-4 py-2 rounded"
   >
     Save
   </button>
@@ -279,6 +291,7 @@ const handleDeleteClient = async (clientNumber: number) => {
   >
     Cancel
   </button>
+</div>
 </div>
           </div>
         )}
