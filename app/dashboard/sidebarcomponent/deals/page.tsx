@@ -45,7 +45,7 @@ export default function CompanyCostPage() {
   const [endDate, setEndDate] = useState("");
   const [searchClient, setSearchClient] = useState("");
  
-  if (!user) return <p>Loading...</p>;
+ 
   // column product
 
   useEffect(() => {
@@ -201,17 +201,17 @@ export default function CompanyCostPage() {
   };
   // filers
   const resetFilters = () => {
-    setSearchClient(""); // Clear client search
-    setStartDate(""); // Clear start date
-    setEndDate(""); // Clear end date
+    setSearchClient(""); 
+    setStartDate("");
+    setEndDate(""); 
   };
   // save
   const filteredDeals = deals.filter((deal) => {
-    // Deal date in yyyy-mm-dd format
-    const dealDateStr = new Date(deal.date).toISOString().slice(0, 10); // "2026-03-23"
+   
+    const dealDateStr = new Date(deal.date).toISOString().slice(0, 10); 
 
-    const startStr = startDate || null; // input from
-    const endStr = endDate || null; // input to
+    const startStr = startDate || null;
+    const endStr = endDate || null;
 
     let inDateRange = true;
     if (startStr) inDateRange = dealDateStr >= startStr;
@@ -244,7 +244,7 @@ export default function CompanyCostPage() {
       alert("Status update failed!");
     }
   };
-
+ if (!user) return <p>Loading...</p>;
   return (
     <div className="dashboard-container flex">
       <Sidebar activePage="Deals" />
@@ -568,7 +568,7 @@ export default function CompanyCostPage() {
                         value={deal.status}
                         onChange={(e) =>
                           deal._id &&
-                          handleStatusChange(deal._id, e.target.value, idx)
+                          handleStatusChange(deal._id, e.target.value)
                         }
                         className="border p-1 rounded"
                       >
