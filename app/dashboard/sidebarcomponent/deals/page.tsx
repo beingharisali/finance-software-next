@@ -1,5 +1,6 @@
 
 
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -11,6 +12,7 @@ import "../../../cssfiles/transactionfilters.css";
 import { fetchUsers } from "@/services/user.api";
 import http from "@/services/http";
 
+
 interface Deal {
   _id?: string;
   ref: string;
@@ -21,34 +23,31 @@ interface Deal {
   status: string;
 }
 
+// export default function CompanyCostPage() {
 export default function CompanyCostPage() {
   const { user, logoutUser } = useAuthContext();
 
-  // Form state
+ 
+  const [open, setOpen] = useState(false);
+  const [productPrices, setProductPrices] = useState<{ [key: string]: number }>({});
+  const [brokers, setBrokers] = useState<any[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [selectedBroker, setSelectedBroker] = useState("");
   const [selectedClient, setSelectedClient] = useState("");
   const [status, setStatus] = useState("document sent");
   const [editingDealId, setEditingDealId] = useState<string | null>(null);
-  // Deals table state
   const [deals, setDeals] = useState<Deal[]>([]);
   const [dealCounter, setDealCounter] = useState(1);
-
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-
-  // Brokers, Clients & Products from DB
-  const [brokers, setBrokers] = useState<any[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
-  // search
   const [searchClient, setSearchClient] = useState("");
+ 
   if (!user) return <p>Loading...</p>;
   // column product
-  const [open, setOpen] = useState(false);
 
-  // Fetch brokers
   useEffect(() => {
     const fetchBrokers = async () => {
       try {
@@ -115,7 +114,11 @@ export default function CompanyCostPage() {
     const payload = {
       broker: selectedBroker,
       client: selectedClient,
-      products: selectedProducts,
+      // products: selectedProducts,
+      products: selectedProducts.map((id) => ({
+        productId: id,
+        price: productPrices[id],
+      })),
       status,
     };
 
@@ -136,6 +139,7 @@ export default function CompanyCostPage() {
       setSelectedClient("");
       setSelectedProducts([]);
       setStatus("document sent");
+      setProductPrices({});
       setShowForm(false);
     } catch (err: any) {
       console.error("Failed to save deal", err.response?.data || err.message);
@@ -162,7 +166,19 @@ export default function CompanyCostPage() {
     // setSelectedClient(clientObj?.clientNumber?.toString() || "");
 
     // Set products and status
-    setSelectedProducts(deal.products);
+    // setSelectedProducts(deal.products);
+    setSelectedProducts(
+      deal.products.map((p: any) => (typeof p === "object" ? p.productId : p)),
+    );
+    // price mapping
+    const priceMap: any = {};
+    deal.products.forEach((p: any) => {
+      if (typeof p === "object") {
+        priceMap[p.productId] = p.price;
+      }
+    });
+
+    setProductPrices(priceMap);
     setStatus(deal.status);
 
     // Show form and store editing deal ID
@@ -214,6 +230,20 @@ export default function CompanyCostPage() {
 
     return matchesClient && inDateRange;
   });
+  const handleStatusChange = async (dealId: string, newStatus: string) => {
+    try {
+      const res = await http.put(`/deals/${dealId}`, {
+        status: newStatus,
+      });
+
+      setDeals((prevDeals) =>
+        prevDeals.map((deal) => (deal._id === dealId ? res.data : deal)),
+      );
+    } catch (err) {
+      console.error("Failed to update status", err);
+      alert("Status update failed!");
+    }
+  };
 
   return (
     <div className="dashboard-container flex">
@@ -253,6 +283,7 @@ export default function CompanyCostPage() {
             <div className="mb-3">
               <label className="block mb-1">Brokers</label>
               <select
+              title="broker"
                 className="w-full border p-2 rounded"
                 value={selectedBroker}
                 onChange={(e) => setSelectedBroker(e.target.value)}
@@ -270,6 +301,7 @@ export default function CompanyCostPage() {
             <div className="mb-3">
               <label className="block mb-1">Clients</label>
               <select
+              title="client"
                 className="w-full border p-2 rounded"
                 value={selectedClient}
                 onChange={(e) => setSelectedClient(e.target.value)}
@@ -330,6 +362,10 @@ export default function CompanyCostPage() {
                           onClick={() => {
                             if (!isAssigned && !isSelected) {
                               setSelectedProducts([...selectedProducts, p._id]);
+                              setProductPrices((prev) => ({
+                                ...prev,
+                                [p._id]: p.finalPrice,
+                              }));
                               setOpen(false);
                             }
                           }}
@@ -365,14 +401,50 @@ export default function CompanyCostPage() {
                         {product?.product ? product.product.split("T")[0] : "-"}
                       </span>
 
-                      <span>{product?.finalPrice}</span>
+                      {/* <span>{product?.finalPrice}</span> */}
+                      <input
+                      title="nimber"
+                        type="number"
+                        // value={productPrices[id] || product?.finalPrice || 0}
+                        value={
+                          productPrices[id] !== undefined
+                            ? productPrices[id]
+                            : product?.finalPrice || 0
+                        }
+                        className="border p-1 w-24"
+                        onChange={(e) => {
+                          const value = Number(e.target.value);
+                          setProductPrices((prev) => ({
+                            ...prev,
+                            [id]: value,
+                          }));
+                        }}
+                      />
                       <button
                         className="text-red-500 font-bold col-span-1"
-                        onClick={() =>
+                        //                         onClick={() =>
+                        //                           // setSelectedProducts(
+                        //                           //   selectedProducts.filter((p) => p !== id),
+                        //                           // )
+                        //                           setSelectedProducts(selectedProducts.filter((p) => p !== id));
+
+                        // setProductPrices((prev) => {
+                        //   const updated = { ...prev };
+                        //   delete updated[id];
+                        //   return updated;
+                        // });
+                        //                         }
+                        onClick={() => {
                           setSelectedProducts(
                             selectedProducts.filter((p) => p !== id),
-                          )
-                        }
+                          );
+
+                          setProductPrices((prev) => {
+                            const updated = { ...prev };
+                            delete updated[id];
+                            return updated;
+                          });
+                        }}
                       >
                         ✕
                       </button>
@@ -386,6 +458,7 @@ export default function CompanyCostPage() {
             <div className="mb-3">
               <label className="block mb-1">Status</label>
               <select
+              title="status"
                 className="w-full border p-2 rounded"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
@@ -491,6 +564,7 @@ export default function CompanyCostPage() {
 
                     <td className="border px-4 py-2">
                       <select
+                      title="status"
                         value={deal.status}
                         onChange={(e) =>
                           deal._id &&
@@ -519,14 +593,19 @@ export default function CompanyCostPage() {
                         (c) => c.clientNumber.toString() === deal.client,
                       )?.lastName || deal.client}
                     </td>
+                  
                     <td className="border px-4 py-2">
-                      {deal.products.map((id) => {
-                        const product = products.find((p) => p._id === id);
-                        if (!product) return id;
+                      {deal.products.map((item: any) => {
+                        const productId = item.productId || item;
+                        const price = item.price;
+                        const product = products.find(
+                          (p) => p._id === productId,
+                        );
+                        if (!product) return productId;
 
                         return (
-                          <div
-                            key={id}
+                          <p
+                            key={productId}
                             className="flex justify-between items-center mb-1"
                           >
                             <span>
@@ -535,11 +614,10 @@ export default function CompanyCostPage() {
                                 ? product.product.split("T")[0]
                                 : "-"}
                             </span>
-
-                            <td className="border-l border-gray px-4 py-2">
-                              {product?.finalPrice || product?.liquidMake}
-                            </td>
-                          </div>
+                            <span className="border-l px-4">
+                              {price || product.finalPrice}
+                            </span>
+                          </p>
                         );
                       })}
                     </td>
