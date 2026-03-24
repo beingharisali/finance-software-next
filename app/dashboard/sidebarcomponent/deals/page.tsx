@@ -346,14 +346,14 @@ export default function CompanyCostPage() {
 
                     {/* Table rows */}
                     {products.map((p) => {
-                      // const isAssigned = deals.some((d) =>
-                      //   d.products.includes(p._id),
-                      // );
                       const isAssigned = deals.some((d) =>
-  d.products.some((prod: any) =>
-    (typeof prod === "object" ? prod.productId : prod) === p._id
-  )
-);
+                        d.products.includes(p._id),
+                      );
+//                       const isAssigned = deals.some((d) =>
+//   d.products.some((prod: any) =>
+//     (typeof prod === "object" ? prod.productId : prod) === p._id
+//   )
+// );
                       const isSelected = selectedProducts.includes(p._id);
 
                       return (
@@ -601,6 +601,21 @@ export default function CompanyCostPage() {
                   
                     <td className="border px-4 py-2">
                       {deal.products.map((item: any) => {
+  const productId = item.productId || item;
+  const price = item.price;
+  const product = products.find((p) => p._id === productId);
+  if (!product) return String(productId);
+
+  return (
+    <p key={productId} className="flex justify-between items-center mb-1">
+      <span>
+        {product.productId} | {product.product ? product.product.split("T")[0] : "-"}
+      </span>
+      <span className="border-l px-4">{price || product.finalPrice}</span>
+    </p>
+  );
+})}
+                      {/* {deal.products.map((item: any) => {
                         const productId = item.productId || item;
                         const price = item.price;
                         const product = products.find(
@@ -625,7 +640,7 @@ export default function CompanyCostPage() {
                             </span>
                           </p>
                         );
-                      })}
+                      })} */}
                     </td>
 
                     <td className="border px-4 py-2 flex gap-2">
