@@ -63,11 +63,32 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
    
   };
 
-  const links = roleBasedLinks[user.role] || [];
+  // const links = roleBasedLinks[user.role] || [];
+  const links = roleBasedLinks[user?.role] || [];
 
+  // return (
+  //   <nav className="sidebar">
+  //     <h1>Finance</h1>
+  //     <div className="nav-list">
+  //       {links.map((link) => (
+  //         <Link
+  //           key={link.name}
+  //           href={link.path}
+  //           className={`nav-item ${activePage === link.name ? "active" : ""}`}
+  //         >
+  //           {link.name}
+  //         </Link>
+  //       ))}
+  //     </div>
+  //   </nav>
+  // );
   return (
-    <nav className="sidebar">
-      <h1>Finance</h1>
+  <nav className="sidebar">
+    <h1>Finance</h1>
+
+    {!user ? (
+      <p>Loading...</p>
+    ) : (
       <div className="nav-list">
         {links.map((link) => (
           <Link
@@ -79,8 +100,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
           </Link>
         ))}
       </div>
-    </nav>
-  );
+    )}
+  </nav>
+);
 };
 
 export default Sidebar;

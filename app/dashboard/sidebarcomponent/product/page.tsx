@@ -11,13 +11,13 @@ import { useRouter } from "next/navigation";
 import CreateUser from "@/app/dashboard/createusers/page";
 import { fetchUsers } from "@/services/user.api";
 export default function ProductPage() {
-const [showCreateBrokerModal, setShowCreateBrokerModal] = useState(false);
-  // new dropdown update 
-  
+  const [showCreateBrokerModal, setShowCreateBrokerModal] = useState(false);
+  // new dropdown update
 
   const [brokers, setBrokers] = useState<any[]>([]);
   const { user, logoutUser } = useAuthContext();
-
+  // filter
+  const [brokerFilter, setBrokerFilter] = useState("");
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -73,7 +73,9 @@ const [showCreateBrokerModal, setShowCreateBrokerModal] = useState(false);
           return date >= start && date <= end;
         });
       }
-
+      if (brokerFilter) {
+        data = data.filter((p: any) => p.allocatedBroker === brokerFilter);
+      }
       setProducts(data);
     } catch (error) {
       console.log("Fetch error", error);
@@ -87,6 +89,7 @@ const [showCreateBrokerModal, setShowCreateBrokerModal] = useState(false);
     setSearch("");
     setStartDate("");
     setEndDate("");
+    setBrokerFilter("");
 
     try {
       setLoading(true);
@@ -210,6 +213,37 @@ const [showCreateBrokerModal, setShowCreateBrokerModal] = useState(false);
             </button>
           </div>
         </div>
+        {/* broker filter */}
+        <div className="w-full flex justify-end mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-black">Filter by Broker:</span>
+
+            <select
+              className="border p-1 rounded text-black"
+              value={brokerFilter}
+              onChange={(e) => setBrokerFilter(e.target.value)}
+            >
+              <option value="">select broker</option>
+              {[
+                "Joe Coombes",
+                "Alex Presley",
+                "George Chapman",
+                "Lochlainn",
+                ...brokers.map((b) => b.fullname || b.email),
+              ].map((name, idx) => (
+                <option key={idx} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <button
+              className="bg-[#033055] text-white px-3 py-1 rounded"
+              onClick={fetchProducts}
+            >
+              Apply
+            </button>
+          </div>
+        </div>
 
         {/* TABLE */}
         <div className="record-wrapper overflow-x-auto   =..=.=.=mx-auto ">
@@ -223,7 +257,7 @@ const [showCreateBrokerModal, setShowCreateBrokerModal] = useState(false);
                 <tr>
                   <th>ID</th>
                   <th>Liquid/Make</th>
-                  {/* <th>Product</th> */}
+
                   <th>A.Y.S</th>
                   <th>Cask No</th>
                   <th>Vessel</th>
@@ -232,6 +266,7 @@ const [showCreateBrokerModal, setShowCreateBrokerModal] = useState(false);
                   <th>Cost Price</th>
                   <th>Supplier Price</th>
                   <th>Final Price</th>
+                  <th>Status</th>
                   <th>Allocate To</th>
                 </tr>
               </thead>
@@ -268,63 +303,156 @@ const [showCreateBrokerModal, setShowCreateBrokerModal] = useState(false);
                     {/* <td className="text-right">{item.supplierPrice}</td>
                     <td className="text-right">{item.finalPrice}</td> */}
                     <td>
-  {item.supplierPrice !== undefined
-    ? `£${Number(item.supplierPrice).toFixed(2)}`
-    : ""}
-</td>
-<td>
-  {item.finalPrice !== undefined
-    ? `£${Number(item.finalPrice).toFixed(2)}`
-    : ""}
-</td>
+                      {item.supplierPrice !== undefined
+                        ? `£${Number(item.supplierPrice).toFixed(2)}`
+                        : ""}
+                    </td>
                     <td>
-                     
-                      {/* dropdwon */}
+                      {item.finalPrice !== undefined
+                        ? `£${Number(item.finalPrice).toFixed(2)}`
+                        : ""}
+                    </td>
+                    {/* status */}
+
+                    <td className="flex flex-col items-start gap-1">
+                      <span
+                        className={`px-2 py-1 rounded text-white font-semibold text-sm ${
+                          item.status === "Available"
+                            ? "bg-green-500"
+                            : item.status === "On Hold"
+                              ? "bg-yellow-500"
+                              : item.status === "Sold"
+                                ? "bg-red-500"
+                                : "bg-gray-500"
+                        }`}
+                      >
+                        {item.status || "Available"}
+                      </span>
+
+                      <small className="text-gray-700 text-xs">
+                        {item.statusDate
+                          ? new Date(item.statusDate).toLocaleDateString()
+                          : ""}
+                      </small>
+
                       <select
-  className="border p-1 rounded text-black"
-  value={item.allocatedBroker || ""} // show currently allocated broker
-  
-  onChange={async (e) => {
+                        className="border p-1 rounded text-black text-sm"
+                        value={item.status || "Available"}
+                        onChange={async (e) => {
   const selectedBrokerId = e.target.value;
+
   if (selectedBrokerId === "add-new") {
     setShowCreateBrokerModal(true);
     return;
   }
 
   try {
-    // Patch selected broker to backend for this product
-    await http.patch(`/productRoute/${item._id}/allocate`, {
-      brokerId: selectedBrokerId,
-    });
+    const res = await http.patch(
+      `/productRoute/${item._id}/allocate`,
+      { brokerId: selectedBrokerId || "" }
+    );
+
+    const updatedProduct = res.data.data; 
 
     setProducts((prev) =>
-      prev.map((p) =>
-        p._id === item._id ? { ...p, allocatedBroker: selectedBrokerId } : p
-      )
+      prev.map((p) => (p._id === item._id ? updatedProduct : p))
     );
   } catch (err) {
     console.error("Failed to allocate broker:", err);
     alert("Allocation failed, try again.");
   }
 }}
->
-  <option value="">Select</option>
-  <option>Joe Coombes</option>
-  <option>Alex Presley</option>
-  <option>George Chapman</option>
-  <option>Lochlainn</option>
-  {brokers.map((b) => (
-    <option key={b._id} value={b._id}>
-      {b.fullname || b.email}
-    </option>
-  ))}
-  <option
-    value="add-new"
-    className="font-semibold border-t border-blue-950 bg-blue-950 text-white"
-  >
-    Add New Broker +
-  </option>
-</select>
+                        // onChange={async (e) => {
+                        //   const newStatus = e.target.value;
+                        //   try {
+                        //     await http.patch(
+                        //       `/productRoute/${item._id}/status`,
+                        //       {
+                        //         status: newStatus,
+                        //       },
+                        //     );
+
+                        //     setProducts((prev) =>
+                        //       prev.map((p) =>
+                        //         p._id === item._id
+                        //           ? { ...p, status: newStatus }
+                        //           : p,
+                        //       ),
+                        //     );
+                        //   } catch (err) {
+                        //     console.error("Failed to update status:", err);
+                        //     alert("Status update failed");
+                        //   }
+                        // }}
+                      >
+                        <option>Available</option>
+                        <option>On Hold</option>
+                        <option>Sold</option>
+                        <option>Unavailable</option>
+                      </select>
+                    </td>
+                    {/* allocate broker */}
+                    <td>
+                      <select
+                        className="border p-1 rounded text-black"
+                        value={item.allocatedBroker || ""} // show currently allocated broker
+                        onChange={async (e) => {
+                          const selectedBrokerId = e.target.value;
+                          if (selectedBrokerId === "add-new") {
+                            setShowCreateBrokerModal(true);
+                            return;
+                          }
+
+                          try {
+                            // Patch selected broker to backend for this product
+                            await http.patch(
+                              `/productRoute/${item._id}/allocate`,
+                              {
+                                brokerId: selectedBrokerId,
+                              },
+                            );
+
+                            // setProducts((prev) =>
+                            //   prev.map((p) =>
+                            //     p._id === item._id ? { ...p, allocatedBroker: selectedBrokerId } : p
+                            //   )
+                            // );
+                            setProducts((prev) =>
+                              prev.map((p) =>
+                                p._id === item._id
+                                  ? {
+                                      ...p,
+                                      allocatedBroker: selectedBrokerId,
+                                      status: selectedBrokerId
+                                        ? "On Hold"
+                                        : "Available",
+                                    }
+                                  : p,
+                              ),
+                            );
+                          } catch (err) {
+                            console.error("Failed to allocate broker:", err);
+                            alert("Allocation failed, try again.");
+                          }
+                        }}
+                      >
+                        <option value="">Select</option>
+                        <option>Joe Coombes</option>
+                        <option>Alex Presley</option>
+                        <option>George Chapman</option>
+                        <option>Lochlainn</option>
+                        {brokers.map((b) => (
+                          <option key={b._id} value={b._id}>
+                            {b.fullname || b.email}
+                          </option>
+                        ))}
+                        <option
+                          value="add-new"
+                          className="font-semibold border-t border-blue-950 bg-blue-950 text-white"
+                        >
+                          Add New Broker +
+                        </option>
+                      </select>
                     </td>
                   </tr>
                 ))}
