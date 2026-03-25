@@ -335,61 +335,6 @@ export default function CompanyCostPage() {
                 </div>
 
                 {/* Dropdown list */}
-                {/* {open && (
-                  <div className="absolute z-50 bg-white border w-full max-h-60 overflow-y-auto mt-1 shadow-lg rounded">
-                    {/* Table header */}
-                    {/* <div className="grid grid-cols-3 font-bold p-2 border-b bg-gray-100 sticky top-0">
-                      <span>ID</span>
-                      <span>Date</span>
-                      <span>Price</span>
-                    </div>
-
-                    {/* Table rows */}
-                    {/* {products.map((p) => {
-                      const isAssigned = deals.some((d) =>
-                        d.products.includes(p._id),
-                      ); *
-//                       const isAssigned = deals.some((d) =>
-//   d.products.some((prod: any) =>
-//     (typeof prod === "object" ? prod.productId : prod) === p._id
-//   )
-// );
-                //       const isSelected = selectedProducts.includes(p._id);
-
-                //       return (
-                //         <div
-                //           key={p._id}
-                //           className={`grid grid-cols-3 p-2 cursor-pointer hover:bg-gray-200 ${
-                //             isAssigned
-                //               ? "bg-orange-100 text-gray-700 cursor-not-allowed"
-                //               : ""
-                //           }`}
-                //           onClick={() => {
-                //             if (!isAssigned && !isSelected) {
-                //               setSelectedProducts([...selectedProducts, p._id]);
-                //               setProductPrices((prev) => ({
-                //                 ...prev,
-                //                 [p._id]: p.finalPrice,
-                //               }));
-                //               setOpen(false);
-                //             }
-                //           }}
-                //         >
-                //           <span>{p.productId}</span>
-
-                //           <span>
-                //             {p.product
-                //               ? new Date(p.product).toLocaleDateString()
-                //               : "-"}
-                //           </span>
-
-                //           <span>{p.finalPrice}</span>
-                //         </div>
-                //       );
-                //     })}
-                //   </div>
-                // )} */}
-                {/* Dropdown list */}
 {open && (
   <div className="absolute z-50 bg-white border w-full max-h-60 overflow-y-auto mt-1 shadow-lg rounded">
     {/* Table header */}

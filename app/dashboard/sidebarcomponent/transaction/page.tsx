@@ -62,11 +62,7 @@ export default function ManagerDashboardTransaction() {
       let total = 0;
       allTxns.forEach((txn) => {
         if (!txn.category || txn.category.toLowerCase() === "uncategorised") {
-          //   if (
-          //   !txn.category ||
-          //   txn.category.toLowerCase() === "uncategorised" ||
-          //   txn.category.toLowerCase() === "uncategorized"
-          // ) {
+      
           const type = txn.transactionType || "Uncategorised";
           counts[type] = (counts[type] || 0) + 1;
           total++;
@@ -94,7 +90,6 @@ export default function ManagerDashboardTransaction() {
         // ISO string
         d = parse(date, "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", new Date());
         if (isNaN(d.getTime())) {
-          // Try d/M/yyyy format
           d = parse(date, "d/M/yyyy", new Date());
         }
       } else if (typeof date === "number") {
@@ -107,9 +102,9 @@ export default function ManagerDashboardTransaction() {
         d = date;
       }
 
-      if (isNaN(d.getTime())) return "-"; // still invalid
+      if (isNaN(d.getTime())) return "-"; 
 
-      return format(d, "dd/MM/yyyy"); // Output: 02/01/2026
+      return format(d, "dd/MM/yyyy"); 
     } catch (error) {
       return "-";
     }
@@ -130,6 +125,7 @@ export default function ManagerDashboardTransaction() {
         selectedCategory,
         start,
         end,
+        
       );
       const fetchedTransactions: TransactionType[] = res.transactions || [];
 
@@ -143,15 +139,22 @@ export default function ManagerDashboardTransaction() {
             : "",
       }));
 
-      // ----- NEW: Filter by transactionType if searchCategory is not empty -----
+      // ----- Filter by transactionType if searchCategory is not empty -----
 
+      // const filteredTransactions = searchCategory
+      //   ? transactionsCleaned.filter((txn) =>
+      //       txn.transactionType
+      //         ?.toLowerCase()
+      //         .includes(searchCategory.toLowerCase()),
+      //     )
+      //   : transactionsCleaned;
       const filteredTransactions = searchCategory
-        ? transactionsCleaned.filter((txn) =>
-            txn.transactionType
-              ?.toLowerCase()
-              .includes(searchCategory.toLowerCase()),
-          )
-        : transactionsCleaned;
+  ? transactionsCleaned.filter((txn) =>
+      txn.transactionDescription
+        ?.toLowerCase()
+        .includes(searchCategory.toLowerCase()),
+    )
+  : transactionsCleaned;
 
       setTransactions(filteredTransactions);
 
@@ -350,16 +353,19 @@ export default function ManagerDashboardTransaction() {
             <div className="search-container search-center">
               <input
                 type="text"
-                placeholder="Search by Transaction Type"
+                placeholder="Search by Transaction Description"
                 className="search-input"
                 value={searchCategory}
                 onChange={(e) => setSearchCategory(e.target.value)}
               />
               <button
                 className="search-btn"
+                // onClick={() =>
+                //   fetchTransactions(searchCategory, startDate, endDate, 1)
+                // }
                 onClick={() =>
-                  fetchTransactions(searchCategory, startDate, endDate, 1)
-                }
+  fetchTransactions(category, startDate, endDate, 1, searchCategory)
+}
               >
                 Search
               </button>
@@ -495,9 +501,6 @@ export default function ManagerDashboardTransaction() {
                     <th>Description</th>
                     <th>Transaction Type</th>
                     <th className="text-right">Amount</th>
-                    {/* <th>Sort Code</th>
-                    <th>Account Number</th>
-                    <th>Balance</th> */}
                     <th>Category</th>
                   </tr>
                 </thead>
