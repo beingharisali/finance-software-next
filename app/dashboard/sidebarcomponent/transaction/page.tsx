@@ -140,14 +140,14 @@ export default function ManagerDashboardTransaction() {
       // }));
       // only new add
       
-      const transactionsCleaned = fetchedTransactions.map((txn) => ({
+   const transactionsCleaned = fetchedTransactions.map((txn) => ({
   ...txn,
   category:
-    txn.category && txn.category.trim() !== "" && txn.category.trim().toLowerCase() !== "uncategorised"
+    txn.category &&
+    txn.category.trim() !== "" &&
+    txn.category.trim().toLowerCase() !== "uncategorised"
       ? txn.category
-      : !txn.transactionDescription || txn.transactionDescription.trim().toLowerCase() === "no description"
-      ? "Uncategorised" // auto-assign if empty or 'No Description'
-      : "", // otherwise leave blank for user to select
+      : txn.transactionType || "",
 }));
 
       // ----- Filter by transactionType if searchCategory is not empty -----
