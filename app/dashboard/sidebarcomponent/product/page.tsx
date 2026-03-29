@@ -395,7 +395,7 @@ export default function ProductPage() {
                     <td>
                       <select
                         className="border p-1 rounded text-black"
-                        value={item.allocatedBroker || ""} // show currently allocated broker
+                        value={item.allocatedBroker || ""} 
                         onChange={async (e) => {
                           const selectedBrokerId = e.target.value;
                           if (selectedBrokerId === "add-new") {
