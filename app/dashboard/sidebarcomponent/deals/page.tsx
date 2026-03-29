@@ -1,6 +1,3 @@
-
-
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -12,7 +9,6 @@ import "../../../cssfiles/transactionfilters.css";
 import { fetchUsers } from "@/services/user.api";
 import http from "@/services/http";
 
-
 interface Deal {
   _id?: string;
   ref: string;
@@ -21,15 +17,17 @@ interface Deal {
   client: string;
   products: string[];
   status: string;
+  commission?: number;
 }
 
 // export default function CompanyCostPage() {
 export default function CompanyCostPage() {
   const { user, logoutUser } = useAuthContext();
 
- 
   const [open, setOpen] = useState(false);
-  const [productPrices, setProductPrices] = useState<{ [key: string]: number }>({});
+  const [productPrices, setProductPrices] = useState<{ [key: string]: number }>(
+    {},
+  );
   const [brokers, setBrokers] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -44,8 +42,12 @@ export default function CompanyCostPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [searchClient, setSearchClient] = useState("");
- 
- 
+  const [commission, setCommission] = useState(0);
+  
+  // falto kaam test
+  const [showDealsDropdown, setShowDealsDropdown] = useState(false);
+  const [showClientDeals, setShowClientDeals] = useState(false);
+  const [selectedClientDealsList, setSelectedClientDealsList] = useState<Deal[]>([]);
   // column product
 
   useEffect(() => {
@@ -105,6 +107,21 @@ export default function CompanyCostPage() {
     };
     fetchDeals();
   }, []);
+  // commission
+
+  const calculateTotal = (products: any[], commission = 0) => {
+    const totalProducts = products.reduce((sum, p) => {
+      const price = typeof p === "object" ? p.price || 0 : 0;
+      return sum + price;
+    }, 0);
+    const commissionAmount = (totalProducts * commission) / 100;
+    return totalProducts + commissionAmount;
+  };
+
+  // total
+  const totalDealsAmount = deals.reduce((sum, deal) => {
+    return sum + calculateTotal(deal.products, deal.commission);
+  }, 0);
   const handleSaveDeal = async () => {
     if (!selectedBroker || !selectedClient || selectedProducts.length === 0) {
       alert("Please fill all fields!");
@@ -120,6 +137,7 @@ export default function CompanyCostPage() {
         price: productPrices[id],
       })),
       status,
+      commission,
     };
 
     try {
@@ -180,6 +198,8 @@ export default function CompanyCostPage() {
 
     setProductPrices(priceMap);
     setStatus(deal.status);
+    // commision
+    setCommission(deal.commission || 0);
 
     // Show form and store editing deal ID
     setShowForm(true);
@@ -201,14 +221,13 @@ export default function CompanyCostPage() {
   };
   // filers
   const resetFilters = () => {
-    setSearchClient(""); 
+    setSearchClient("");
     setStartDate("");
-    setEndDate(""); 
+    setEndDate("");
   };
   // save
   const filteredDeals = deals.filter((deal) => {
-   
-    const dealDateStr = new Date(deal.date).toISOString().slice(0, 10); 
+    const dealDateStr = new Date(deal.date).toISOString().slice(0, 10);
 
     const startStr = startDate || null;
     const endStr = endDate || null;
@@ -244,7 +263,7 @@ export default function CompanyCostPage() {
       alert("Status update failed!");
     }
   };
- if (!user) return <p>Loading...</p>;
+  if (!user) return <p>Loading...</p>;
   return (
     <div className="dashboard-container flex">
       <Sidebar activePage="Deals" />
@@ -254,6 +273,90 @@ export default function CompanyCostPage() {
         <div className="main-top flex justify-between items-center mb-6 text-black">
           <h1 className="header text-2xl font-bold">Deals Page</h1>
           <div className="top-right flex items-center gap-4">
+        
+
+              {/* falto kaam */}
+            <div 
+  className="relative bg-[#0f526a] text-white px-4 py-2 rounded flex items-center gap-3 cursor-pointer"
+  onClick={() => setShowClientDeals(!showClientDeals)}
+>
+  <span className="font-semibold">Deals</span>
+  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                {deals.length}
+              </span>
+</div>
+
+{showClientDeals && (
+  <div className="absolute top-16 right-44 bg-white text-black shadow-lg rounded w-[350px] z-50">
+    <div className="p-3 border-b font-semibold text-lg">
+      Clients Deals Summary
+    </div>
+
+    <div className="max-h-80 overflow-y-auto p-2 space-y-2">
+      {clients.map((client) => {
+        const dealCount = deals.filter(
+          (d) => d.client.toString() === client.clientNumber.toString()
+        ).length;
+
+        const isExpanded =
+          selectedClientDealsList.length > 0 &&
+          selectedClientDealsList[0]?.client.toString() ===
+            client.clientNumber.toString();
+
+        return (
+          <div
+            key={client.clientNumber}
+            className="border rounded shadow-sm bg-gray-50 hover:bg-gray-100 transition"
+          >
+            {/* Client header */}
+            <div
+              className="flex justify-between items-center p-3 cursor-pointer"
+              onClick={() => {
+                const clientDeals = deals.filter(
+                  (d) => d.client.toString() === client.clientNumber.toString()
+                );
+                setSelectedClientDealsList(
+                  isExpanded ? [] : clientDeals
+                );
+              }}
+            >
+              <span className="font-medium">
+                {client.firstName} {client.lastName}
+              </span>
+              <span className="bg-green-200 text-green-800 text-xs px-2 py-1 rounded-full font-semibold">
+                {dealCount}
+              </span>
+            </div>
+
+            {/* Expanded deals */}
+            {isExpanded && selectedClientDealsList.length > 0 && (
+              <div className="border-t bg-white p-2">
+                {/* Table header */}
+                <div className="grid grid-cols-3 font-semibold text-sm mb-1">
+                  <span>Reference No</span>
+                  <span>Date</span>
+                  <span>Status</span>
+                </div>
+
+                {/* Deals list */}
+                {selectedClientDealsList.map((deal) => (
+                  <div
+                    key={deal._id}
+                    className="grid grid-cols-3 text-sm p-1 border-b hover:bg-gray-50 transition"
+                  >
+                    <span>{deal.ref}</span>
+                    <span>{new Date(deal.date).toLocaleDateString("en-GB")}</span>
+                    <span>{deal.status}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
             <span className="profile-name">
               {user.fullname || user.email || "Guest"}
             </span>
@@ -283,7 +386,7 @@ export default function CompanyCostPage() {
             <div className="mb-3">
               <label className="block mb-1">Brokers</label>
               <select
-              title="broker"
+                title="broker"
                 className="w-full border p-2 rounded"
                 value={selectedBroker}
                 onChange={(e) => setSelectedBroker(e.target.value)}
@@ -301,7 +404,7 @@ export default function CompanyCostPage() {
             <div className="mb-3">
               <label className="block mb-1">Clients</label>
               <select
-              title="client"
+                title="client"
                 className="w-full border p-2 rounded"
                 value={selectedClient}
                 onChange={(e) => setSelectedClient(e.target.value)}
@@ -335,55 +438,63 @@ export default function CompanyCostPage() {
                 </div>
 
                 {/* Dropdown list */}
-{open && (
-  <div className="absolute z-50 bg-white border w-full max-h-60 overflow-y-auto mt-1 shadow-lg rounded">
-    {/* Table header */}
-    <div className="grid grid-cols-3 font-bold p-2 border-b bg-gray-100 sticky top-0">
-      <span>ID</span>
-      <span>Date</span>
-      <span>Price</span>
-    </div>
+                {open && (
+                  <div className="absolute z-50 bg-white border w-full max-h-60 overflow-y-auto mt-1 shadow-lg rounded">
+                    {/* Table header */}
+                    <div className="grid grid-cols-3 font-bold p-2 border-b bg-gray-100 sticky top-0">
+                      <span>ID</span>
+                      <span>Date</span>
+                      <span>Price</span>
+                    </div>
 
-    {/* Table rows */}
-    {products.map((p) => {
-      // Check if product is assigned to another deal (excluding current editing deal)
-      const isAssigned = deals.some((d) =>
-        d._id !== editingDealId &&
-        d.products.some((prod: any) =>
-          (typeof prod === "object" ? prod.productId : prod) === p._id
-        )
-      );
+                    {/* Table rows */}
+                    {products.map((p) => {
+                      // Check if product is assigned to another deal (excluding current editing deal)
+                      const isAssigned = deals.some(
+                        (d) =>
+                          d._id !== editingDealId &&
+                          d.products.some(
+                            (prod: any) =>
+                              (typeof prod === "object"
+                                ? prod.productId
+                                : prod) === p._id,
+                          ),
+                      );
 
-      // Check if product is selected in current form
-      const isSelected = selectedProducts.includes(p._id);
+                      // Check if product is selected in current form
+                      const isSelected = selectedProducts.includes(p._id);
 
-      return (
-        <div
-          key={p._id}
-          className={`grid grid-cols-3 p-2 cursor-pointer hover:bg-gray-200 ${
-            isAssigned
-              ? "bg-yellow-200 text-gray-700 cursor-not-allowed"
-              : ""
-          }`}
-          onClick={() => {
-            if (!isAssigned && !isSelected) {
-              setSelectedProducts([...selectedProducts, p._id]);
-              setProductPrices((prev) => ({
-                ...prev,
-                [p._id]: p.finalPrice,
-              }));
-              setOpen(false);
-            }
-          }}
-        >
-          <span>{p.productId}</span>
-          <span>{p.product ? new Date(p.product).toLocaleDateString() : "-"}</span>
-          <span>{p.finalPrice}</span>
-        </div>
-      );
-    })}
-  </div>
-)}
+                      return (
+                        <div
+                          key={p._id}
+                          className={`grid grid-cols-3 p-2 cursor-pointer hover:bg-gray-200 ${
+                            isAssigned
+                              ? "bg-yellow-200 text-gray-700 cursor-not-allowed"
+                              : ""
+                          }`}
+                          onClick={() => {
+                            if (!isAssigned && !isSelected) {
+                              setSelectedProducts([...selectedProducts, p._id]);
+                              setProductPrices((prev) => ({
+                                ...prev,
+                                [p._id]: p.finalPrice,
+                              }));
+                              setOpen(false);
+                            }
+                          }}
+                        >
+                          <span>{p.productId}</span>
+                          <span>
+                            {p.product
+                              ? new Date(p.product).toLocaleDateString()
+                              : "-"}
+                          </span>
+                          <span>{p.finalPrice}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Selected Products List */}
@@ -403,7 +514,7 @@ export default function CompanyCostPage() {
 
                       {/* <span>{product?.finalPrice}</span> */}
                       <input
-                      title="nimber"
+                        title="nimber"
                         type="number"
                         // value={productPrices[id] || product?.finalPrice || 0}
                         value={
@@ -458,15 +569,15 @@ export default function CompanyCostPage() {
             <div className="mb-3">
               <label className="block mb-1">Status</label>
               <select
-              title="status"
+                title="status"
                 className="w-full border p-2 rounded"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
-                <option value="document sent">document sent</option>
-                <option value="escrow check">escrow check</option>
+                <option value="document sent">Document sent</option>
+                <option value="escrow check">Escrow check</option>
                 <option value="escrow source of funds">
-                  escrow source of funds
+                  Escrow source of funds
                 </option>
                 <option value="IR + INV">IR + INV</option>
                 <option value="Paid">Paid</option>
@@ -474,6 +585,16 @@ export default function CompanyCostPage() {
                 <option value="Delivery">Delivery</option>
                 <option value="Completed">Completed</option>
               </select>
+            </div>
+            {/* commisiom */}
+            <div className="mb-3">
+              <label className="block mb-1">Commission</label>
+              <input
+                type="number"
+                className="w-full border p-2 rounded"
+                value={commission}
+                onChange={(e) => setCommission(Number(e.target.value))}
+              />
             </div>
 
             {/* Save & Cancel */}
@@ -531,11 +652,14 @@ export default function CompanyCostPage() {
             <table className="record-table  min-w-[1200px] border-collapse text-sm  ">
               <thead className="">
                 <tr>
-                  <th>Ref #</th>
+                  <th>Reference No</th>
                   <th>Date</th>
+                  <th>Broker</th>
                   <th>Status</th>
                   <th>Client</th>
-                  <th>Products</th>
+                  <th>Products Types</th>
+                  <th>Commission</th>
+                  <th>Total Deal Amount</th>
                   <th>Edit/Delete</th>
                 </tr>
               </thead>
@@ -561,10 +685,15 @@ export default function CompanyCostPage() {
                     <td className="border px-4 py-2">
                       {new Date(deal.date).toLocaleDateString("en-GB")}{" "}
                     </td>
+                    <td className="border px-4 py-2">
+                      {brokers.find((b) => b._id === deal.broker)?.fullname ||
+                        brokers.find((b) => b._id === deal.broker)?.email ||
+                        "N/A"}
+                    </td>
 
                     <td className="border px-4 py-2">
                       <select
-                      title="status"
+                        title="status"
                         value={deal.status}
                         onChange={(e) =>
                           deal._id &&
@@ -572,9 +701,9 @@ export default function CompanyCostPage() {
                         }
                         className="border p-1 rounded"
                       >
-                        <option>document sent</option>
-                        <option>escrow check</option>
-                        <option>escrow source of funds</option>
+                        <option>Document sent</option>
+                        <option>Escrow check</option>
+                        <option>Escrow source of funds</option>
                         <option>IR + INV</option>
                         <option>Paid</option>
                         <option>Certificate</option>
@@ -593,24 +722,37 @@ export default function CompanyCostPage() {
                         (c) => c.clientNumber.toString() === deal.client,
                       )?.lastName || deal.client}
                     </td>
-                  
+
                     <td className="border px-4 py-2">
                       {deal.products.map((item: any) => {
-  const productId = item.productId || item;
-  const price = item.price;
-  const product = products.find((p) => p._id === productId);
-  if (!product) return String(productId);
+                        const productId = item.productId || item;
+                        const price = item.price;
+                        const product = products.find(
+                          (p) => p._id === productId,
+                        );
+                        if (!product) return String(productId);
 
-  return (
-    <p key={productId} className="flex justify-between items-center mb-1">
-      <span>
-        {product.productId} | {product.product ? product.product.split("T")[0] : "-"}
-      </span>
-      <span className="border-l px-4">{price || product.finalPrice}</span>
-    </p>
-  );
-})}
-                   
+                        return (
+                          <p
+                            key={productId}
+                            className="flex justify-between items-center mb-1"
+                          >
+                            <span>
+                              {product.productId} |{" "}
+                              {product.product
+                                ? product.product.split("T")[0]
+                                : "-"}
+                            </span>
+                            <span className="border-l px-4">
+                              {price || product.finalPrice}
+                            </span>
+                          </p>
+                        );
+                      })}
+                    </td>
+                    <td className="border px-4 py-2">{deal.commission || 0}</td>
+                    <td className="border px-4 py-2 font-bold text-green-600">
+                      {calculateTotal(deal.products, deal.commission)}
                     </td>
 
                     <td className="border px-4 py-2 flex gap-2">
