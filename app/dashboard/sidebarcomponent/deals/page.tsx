@@ -378,242 +378,241 @@ export default function CompanyCostPage() {
         </button>
 
         {/* Deal Form */}
-        {showForm && (
-          <div className="bg-white shadow-lg p-4 mt-4 w-1/2 rounded text-black">
-            <h2 className="text-lg font-semibold mb-4">Create New Deal</h2>
+       {showForm && (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+    onClick={() => {
+      setShowForm(false);
+      setEditingDealId(null);
+    }}
+  >
+    {/* Modal Box */}
+    <div
+      className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-2xl text-black"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className="text-lg font-semibold mb-4">Create New Deal</h2>
 
-            {/* Broker Dropdown */}
-            <div className="mb-3">
-              <label className="block mb-1">Brokers</label>
-              <select
-                title="broker"
-                className="w-full border p-2 rounded"
-                value={selectedBroker}
-                onChange={(e) => setSelectedBroker(e.target.value)}
-              >
-                <option value="">Select Broker</option>
-                {brokers.map((b) => (
-                  <option key={b._id} value={b._id}>
-                    {b.fullname || b.email}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {/* Broker */}
+      <div className="mb-3">
+        <label className="block mb-1">Brokers</label>
+        <select
+          className="w-full border p-2 rounded"
+          value={selectedBroker}
+          onChange={(e) => setSelectedBroker(e.target.value)}
+        >
+          <option value="">Select Broker</option>
+          {brokers.map((b) => (
+            <option key={b._id} value={b._id}>
+              {b.fullname || b.email}
+            </option>
+          ))}
+        </select>
+      </div>
 
-            {/* Client Dropdown */}
-            <div className="mb-3">
-              <label className="block mb-1">Clients</label>
-              <select
-                title="client"
-                className="w-full border p-2 rounded"
-                value={selectedClient}
-                onChange={(e) => setSelectedClient(e.target.value)}
-              >
-                <option value="">Select Client</option>
-                {clients.map((c) => (
-                  <option key={c.clientNumber} value={c.clientNumber}>
-                    {c.firstName} {c.lastName}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {/* Client */}
+      <div className="mb-3">
+        <label className="block mb-1">Clients</label>
+        <select
+          className="w-full border p-2 rounded"
+          value={selectedClient}
+          onChange={(e) => setSelectedClient(e.target.value)}
+        >
+          <option value="">Select Client</option>
+          {clients.map((c) => (
+            <option key={c.clientNumber} value={c.clientNumber}>
+              {c.firstName} {c.lastName}
+            </option>
+          ))}
+        </select>
+      </div>
 
-            {/* Product Dropdown */}
-            <div className="mb-3 relative">
-              <label className="block mb-1">Products</label>
+      {/* 🔥 Products Dropdown */}
+      <div className="mb-3 relative">
+        <label className="block mb-1">Products</label>
 
-              {/* Dropdown container */}
-              <div className="border rounded w-full relative cursor-pointer">
-                {/* Selected / Placeholder */}
-                <div
-                  className="p-2 bg-white flex justify-between items-center"
-                  onClick={() => setOpen(!open)}
-                >
-                  <span>
-                    {selectedProducts.length > 0
-                      ? `${selectedProducts.length} product(s) selected`
-                      : "Select Product"}
-                  </span>
-                  <span className="text-gray-500">{open ? "▲" : "▼"}</span>
-                </div>
-
-                {/* Dropdown list */}
-                {open && (
-                  <div className="absolute z-50 bg-white border w-full max-h-60 overflow-y-auto mt-1 shadow-lg rounded">
-                    {/* Table header */}
-                    <div className="grid grid-cols-3 font-bold p-2 border-b bg-gray-100 sticky top-0">
-                      <span>ID</span>
-                      <span>Date</span>
-                      <span>Price</span>
-                    </div>
-
-                    {/* Table rows */}
-                    {products.map((p) => {
-                      // Check if product is assigned to another deal (excluding current editing deal)
-                      const isAssigned = deals.some(
-                        (d) =>
-                          d._id !== editingDealId &&
-                          d.products.some(
-                            (prod: any) =>
-                              (typeof prod === "object"
-                                ? prod.productId
-                                : prod) === p._id,
-                          ),
-                      );
-
-                      // Check if product is selected in current form
-                      const isSelected = selectedProducts.includes(p._id);
-
-                      return (
-                        <div
-                          key={p._id}
-                          className={`grid grid-cols-3 p-2 cursor-pointer hover:bg-gray-200 ${
-                            isAssigned
-                              ? "bg-yellow-200 text-gray-700 cursor-not-allowed"
-                              : ""
-                          }`}
-                          onClick={() => {
-                            if (!isAssigned && !isSelected) {
-                              setSelectedProducts([...selectedProducts, p._id]);
-                              setProductPrices((prev) => ({
-                                ...prev,
-                                [p._id]: p.finalPrice,
-                              }));
-                              setOpen(false);
-                            }
-                          }}
-                        >
-                          <span>{p.productId}</span>
-                          <span>
-                            {p.product
-                              ? new Date(p.product).toLocaleDateString()
-                              : "-"}
-                          </span>
-                          <span>{p.finalPrice}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Selected Products List */}
-              <div className="mt-3">
-                {selectedProducts.map((id, index) => {
-                  const product = products.find((p) => p._id === id);
-                  return (
-                    <div
-                      key={index}
-                      className="grid grid-cols-3 gap-2 items-center bg-gray-100 p-2 rounded mb-2"
-                    >
-                      <span>{product?.productId || id}</span>
-                      {/* <span>{product?.product || "-"}</span> */}
-                      <span>
-                        {product?.product ? product.product.split("T")[0] : "-"}
-                      </span>
-
-                      {/* <span>{product?.finalPrice}</span> */}
-                      <input
-                        title="nimber"
-                        type="number"
-                        // value={productPrices[id] || product?.finalPrice || 0}
-                        value={
-                          productPrices[id] !== undefined
-                            ? productPrices[id]
-                            : product?.finalPrice || 0
-                        }
-                        className="border p-1 w-24"
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-                          setProductPrices((prev) => ({
-                            ...prev,
-                            [id]: value,
-                          }));
-                        }}
-                      />
-                      <button
-                        className="text-red-500 font-bold col-span-1"
-                        //                         onClick={() =>
-                        //                           // setSelectedProducts(
-                        //                           //   selectedProducts.filter((p) => p !== id),
-                        //                           // )
-                        //                           setSelectedProducts(selectedProducts.filter((p) => p !== id));
-
-                        // setProductPrices((prev) => {
-                        //   const updated = { ...prev };
-                        //   delete updated[id];
-                        //   return updated;
-                        // });
-                        //                         }
-                        onClick={() => {
-                          setSelectedProducts(
-                            selectedProducts.filter((p) => p !== id),
-                          );
-
-                          setProductPrices((prev) => {
-                            const updated = { ...prev };
-                            delete updated[id];
-                            return updated;
-                          });
-                        }}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Status Dropdown */}
-            <div className="mb-3">
-              <label className="block mb-1">Status</label>
-              <select
-                title="status"
-                className="w-full border p-2 rounded"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option value="document sent">Document sent</option>
-                <option value="escrow check">Escrow check</option>
-                <option value="escrow source of funds">
-                  Escrow source of funds
-                </option>
-                <option value="IR + INV">IR + INV</option>
-                <option value="Paid">Paid</option>
-                <option value="Certificate">Certificate</option>
-                <option value="Delivery">Delivery</option>
-                <option value="Completed">Completed</option>
-              </select>
-            </div>
-            {/* commisiom */}
-            <div className="mb-3">
-              <label className="block mb-1">Commission</label>
-              <input
-                type="number"
-                className="w-full border p-2 rounded"
-                value={commission}
-                onChange={(e) => setCommission(Number(e.target.value))}
-              />
-            </div>
-
-            {/* Save & Cancel */}
-            <div className="flex gap-3 mt-4">
-              <button
-                className="bg-[#0f526a] text-white px-4 py-2 rounded"
-                onClick={handleSaveDeal}
-              >
-                Save Deal
-              </button>
-              <button
-                className="bg-gray-300 text-black px-4 py-2 rounded"
-                onClick={() => setShowForm(false)}
-              >
-                Cancel
-              </button>
-            </div>
+        <div className="border rounded w-full relative cursor-pointer">
+          {/* Selected text */}
+          <div
+            className="p-2 bg-white flex justify-between items-center"
+            onClick={() => setOpen(!open)}
+          >
+            <span>
+              {selectedProducts.length > 0
+                ? `${selectedProducts.length} product(s) selected`
+                : "Select Product"}
+            </span>
+            <span className="text-gray-500">{open ? "▲" : "▼"}</span>
           </div>
-        )}
+
+          {/* Dropdown */}
+          {open && (
+            <div className="absolute z-50 bg-white border w-full max-h-60 overflow-y-auto mt-1 shadow-lg rounded">
+              {/* Header */}
+              <div className="grid grid-cols-3 font-bold p-2 border-b bg-gray-100 sticky top-0">
+                <span>ID</span>
+                <span>Date</span>
+                <span>Price</span>
+              </div>
+
+              {/* Rows */}
+              {products.map((p) => {
+                const isAssigned = deals.some(
+                  (d) =>
+                    d._id !== editingDealId &&
+                    d.products.some(
+                      (prod) =>
+                        (typeof prod === "object"
+                          ? prod.productId
+                          : prod) === p._id
+                    )
+                );
+
+                const isSelected = selectedProducts.includes(p._id);
+
+                return (
+                  <div
+                    key={p._id}
+                    className={`grid grid-cols-3 p-2 cursor-pointer hover:bg-gray-200 ${
+                      isAssigned
+                        ? "bg-yellow-200 text-gray-700 cursor-not-allowed"
+                        : ""
+                    }`}
+                    onClick={() => {
+                      if (!isAssigned && !isSelected) {
+                        setSelectedProducts([
+                          ...selectedProducts,
+                          p._id,
+                        ]);
+                        setProductPrices((prev) => ({
+                          ...prev,
+                          [p._id]: p.finalPrice,
+                        }));
+                        setOpen(false);
+                      }
+                    }}
+                  >
+                    <span>{p.productId}</span>
+                    <span>
+                      {p.product
+                        ? new Date(p.product).toLocaleDateString()
+                        : "-"}
+                    </span>
+                    <span>{p.finalPrice}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Selected Products */}
+        <div className="mt-3">
+          {selectedProducts.map((id, index) => {
+            const product = products.find((p) => p._id === id);
+
+            return (
+              <div
+                key={index}
+                className="grid grid-cols-4 gap-2 items-center bg-gray-100 p-2 rounded mb-2"
+              >
+                <span>{product?.productId || id}</span>
+
+                <span>
+                  {product?.product
+                    ? product.product.split("T")[0]
+                    : "-"}
+                </span>
+
+                <input
+                  type="number"
+                  value={
+                    productPrices[id] !== undefined
+                      ? productPrices[id]
+                      : product?.finalPrice || 0
+                  }
+                  className="border p-1 w-24"
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    setProductPrices((prev) => ({
+                      ...prev,
+                      [id]: value,
+                    }));
+                  }}
+                />
+
+                <button
+                  className="text-red-500 font-bold"
+                  onClick={() => {
+                    setSelectedProducts(
+                      selectedProducts.filter((p) => p !== id)
+                    );
+
+                    setProductPrices((prev) => {
+                      const updated = { ...prev };
+                      delete updated[id];
+                      return updated;
+                    });
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Status */}
+      <div className="mb-3">
+        <label className="block mb-1">Status</label>
+        <select
+          className="w-full border p-2 rounded"
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+        >
+          <option value="document sent">Document sent</option>
+          <option value="escrow check">Escrow check</option>
+          <option value="escrow source of funds">
+            Escrow source of funds
+          </option>
+          <option value="IR + INV">IR + INV</option>
+          <option value="Paid">Paid</option>
+          <option value="Certificate">Certificate</option>
+          <option value="Delivery">Delivery</option>
+          <option value="Completed">Completed</option>
+        </select>
+      </div>
+
+      {/* Commission */}
+      <div className="mb-3">
+        <label className="block mb-1">Commission</label>
+        <input
+          type="number"
+          className="w-full border p-2 rounded"
+          value={commission}
+          onChange={(e) => setCommission(Number(e.target.value))}
+        />
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-3 mt-4">
+        <button
+          className="bg-[#0f526a] text-white px-4 py-2 rounded"
+          onClick={handleSaveDeal}
+        >
+          Save Deal
+        </button>
+        <button
+          className="bg-gray-300 px-4 py-2 rounded"
+          onClick={() => setShowForm(false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
         {/* search */}
 
         <div className="flex items-center gap-3 mt-4 mb-4 text-black">

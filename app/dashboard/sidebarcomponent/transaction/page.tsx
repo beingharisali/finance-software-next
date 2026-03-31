@@ -129,26 +129,26 @@ export default function ManagerDashboardTransaction() {
       );
       const fetchedTransactions: TransactionType[] = res.transactions || [];
 
-      // const transactionsCleaned = fetchedTransactions.map((txn) => ({
-      //   ...txn,
-      //   category:
-      //     txn.category &&
-      //     txn.category.trim() !== "" &&
-      //     txn.category.trim().toLowerCase() !== "uncategorised"
-      //       ? txn.category
-      //       : "",
-      // }));
+      const transactionsCleaned = fetchedTransactions.map((txn) => ({
+        ...txn,
+        category:
+          txn.category &&
+          txn.category.trim() !== "" &&
+          txn.category.trim().toLowerCase() !== "uncategorised"
+            ? txn.category
+            : "",
+      }));
       // only new add
-      
-   const transactionsCleaned = fetchedTransactions.map((txn) => ({
-  ...txn,
-  category:
-    txn.category &&
-    txn.category.trim() !== "" &&
-    txn.category.trim().toLowerCase() !== "uncategorised"
-      ? txn.category
-      : txn.transactionType || "",
-}));
+      // fix
+//    const transactionsCleaned = fetchedTransactions.map((txn) => ({
+//   ...txn,
+//   category:
+//     txn.category &&
+//     txn.category.trim() !== "" &&
+//     txn.category.trim().toLowerCase() !== "uncategorised"
+//       ? txn.category
+//       : txn.transactionType || "",
+// }));
 
       // ----- Filter by transactionType if searchCategory is not empty -----
 

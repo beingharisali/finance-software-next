@@ -379,8 +379,12 @@ export default function CompanyCostPage() {
         )}
 
         {/* Clients Table */}
-        <table className="record-table min-w-[1200px] w-full border-collapse text-sm">
-          <thead>
+        <div className="  ">
+  <div className="max-h-[500px] overflow-y-auto">
+    <table className="record-table min-w-[1200px] w-full border-collapse text-sm">
+      <thead className="sticky top-0 bg-gray-100 z-10">
+        {/* <table className="record-table min-w-[1200px] w-full border-collapse text-sm">
+          <thead> */}
             <tr className="bg-gray-100">
               <th className="p-2 border">Client Number</th>
               <th className="p-2 border">Name</th>
@@ -447,6 +451,8 @@ export default function CompanyCostPage() {
             ))}
           </tbody>
         </table>
+        </div>
+        </div>
       </main>
     </div>
   );
