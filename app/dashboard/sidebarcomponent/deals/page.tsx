@@ -9,16 +9,31 @@ import "../../../cssfiles/transactionfilters.css";
 import { fetchUsers } from "@/services/user.api";
 import http from "@/services/http";
 
+interface ProductItem {
+  productId: string;
+  price: number;
+}
+
 interface Deal {
   _id?: string;
   ref: string;
   date: string;
   broker: string;
   client: string;
-  products: string[];
+  products: (string | ProductItem)[];
   status: string;
   commission?: number;
 }
+// interface Deal {
+//   _id?: string;
+//   ref: string;
+//   date: string;
+//   broker: string;
+//   client: string;
+//   products: string[];
+//   status: string;
+//   commission?: number;
+// }
 
 // export default function CompanyCostPage() {
 export default function CompanyCostPage() {
@@ -109,7 +124,7 @@ export default function CompanyCostPage() {
   }, []);
   // commission
 
-  const calculateTotal = (products: any[], commission = 0) => {
+  const calculateTotal = (products: (string | ProductItem)[], commission = 0) => {
     const totalProducts = products.reduce((sum, p) => {
       const price = typeof p === "object" ? p.price || 0 : 0;
       return sum + price;
@@ -456,17 +471,30 @@ export default function CompanyCostPage() {
               </div>
 
               {/* Rows */}
-              {products.map((p) => {
+              {/* {products.map((p) => {
                 const isAssigned = deals.some(
                   (d) =>
                     d._id !== editingDealId &&
                     d.products.some(
                       (prod) =>
+                        
                         (typeof prod === "object"
                           ? prod.productId
                           : prod) === p._id
                     )
-                );
+                ); */}
+                {products.map((p) => {
+  const isAssigned = deals.some((d) =>
+    d._id !== editingDealId &&
+
+    d.products.some((prod) => {
+  if (typeof prod === "object" && prod !== null) {
+    const productObj = prod as ProductItem;
+    return productObj.productId === p._id;
+  }
+  return prod === p._id;
+})
+  );
 
                 const isSelected = selectedProducts.includes(p._id);
 
