@@ -30,7 +30,7 @@ interface Deal {
   status: string;
   commission?: number;
 }
-
+// ui fixed
 export default function CompanyCostPage() {
   const { user, logoutUser } = useAuthContext();
   const [clients, setClients] = useState<Client[]>([]);
