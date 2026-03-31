@@ -139,7 +139,7 @@ export default function ManagerDashboardTransaction() {
             : "",
       }));
       // only new add
-      
+      // fix
 //    const transactionsCleaned = fetchedTransactions.map((txn) => ({
 //   ...txn,
 //   category:
