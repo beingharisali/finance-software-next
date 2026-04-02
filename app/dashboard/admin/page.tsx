@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
+import { FaBell } from "react-icons/fa";
 import ProtectedRoute from "@/utilies/ProtectedRoute";
 import { useAuthContext } from "@/context/AuthContext";
 import { Chart, registerables } from "chart.js";
@@ -18,11 +18,38 @@ import Sidebar from "@/app/dashboard/components/Sidebar";
 import { TransactionType } from "@/services/transactionService";
 Chart.register(...registerables);
 
+interface Client {
+  clientNumber: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  extraInfo?: string;
+  dateOfBirth: string;
+}
+
+interface Deal {
+  _id?: string;
+  ref: string;
+  date: string;
+  broker: string;
+  client: string;
+  products: string[];
+  status: string;
+  commission?: number;
+}
 export default function AdminDashboard() {
   // date month
+  const [notificationOpen, setNotificationOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<number | "all">("all");
   const [showModal, setShowModal] = useState(false);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
+  
+   // Dropdown for client deals
+    const [showClientDeals, setShowClientDeals] = useState(false);
+    const [selectedClientDealsList, setSelectedClientDealsList] = useState<Deal[]>([]);
+  // nottification
   // NEW: for category click modal
   const [clickedCategoryTransactions, setClickedCategoryTransactions] =
     useState<TransactionType[]>([]);
@@ -53,7 +80,62 @@ export default function AdminDashboard() {
     from: "",
     to: "",
   });
+  // ---------------- POPUP STATES --------------------
+  const [uncategorizedCounts, setUncategorizedCounts] = useState<Record<string, number>>({});
+const [totalUnassigned, setTotalUnassigned] = useState(0);
 
+const fetchAllTransactionsForNotifications = async () => {
+  try {
+    const res = await http.get("/transactions"); // or getTransactions(1, 1000000)
+    const allTxns: TransactionType[] = res.data.transactions || [];
+
+    const counts: { [key: string]: number } = {};
+    let total = 0;
+    allTxns.forEach((txn) => {
+      if (!txn.category || txn.category.toLowerCase() === "uncategorised") {
+        const type = txn.transactionType || "Uncategorised";
+        counts[type] = (counts[type] || 0) + 1;
+        total++;
+      }
+    });
+
+    const [showPopup, setShowPopup] = useState(false);
+    const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+    const [selectedNewCategory, setSelectedNewCategory] = useState("");
+   
+    setUncategorizedCounts(counts);
+    setTotalUnassigned(total);
+  } catch (error) {
+    console.error("Failed to fetch all transactions for notifications", error);
+  }
+};
+ const [clients, setClients] = useState<Client[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
+
+  const fetchClients = async () => {
+    try {
+      const res = await http.get("/clients");
+      setClients(res.data);
+    } catch (err) {
+      console.error("Fetch clients error:", err);
+      alert("Failed to fetch clients");
+    }
+  };
+
+  const fetchDeals = async () => {
+    try {
+      const res = await http.get("/deals");
+      setDeals(res.data);
+    } catch (err) {
+      console.error("Fetch deals error:", err);
+      alert("Failed to fetch deals");
+    }
+  };
+
+  useEffect(() => {
+    fetchClients();
+    fetchDeals();
+  }, []);
   const handleOpenModal = (role: "assistant" | "manager" | "broker") => {
     setSelectedRole(role);
     setShowModal(true);
@@ -116,7 +198,18 @@ export default function AdminDashboard() {
       setAllCategories((prev) =>
         Array.from(new Set([...prev, ...txnCategories, ...txnTypes])),
       );
+// Fetch clients
+  const fetchClients = async () => {
+    try {
+      const res = await http.get("/clients");
+      setClients(res.data);
+    } catch (err) {
+      console.error("Fetch clients error:", err);
+      alert("Failed to fetch clients");
+    }
+  };
 
+  
       // Detect newly uploaded transactions
       const oldTransactions = transactions;
       const newIds = new Set<string>();
@@ -425,13 +518,127 @@ export default function AdminDashboard() {
           <div className="main-top">
             <h1 className="header">Dashboard</h1>
 
-            <div className="top-right">
+            <div className="top-right flex items-center gap-4">
+               <div
+              className="relative bg-[#0f526a] text-white px-4 py-2 rounded flex items-center gap-3 cursor-pointer"
+              onClick={() => setShowClientDeals(!showClientDeals)}
+            >
+              <span className="font-semibold">Client Deals</span>
+            </div>
+
+            {showClientDeals && (
+              <div className="absolute top-16 right-44 bg-white text-black shadow-lg rounded w-[350px] z-50">
+                <div className="p-3 border-b font-semibold text-lg">
+                  Clients Deals Summary
+                </div>
+
+                <div className="max-h-80 overflow-y-auto p-2 space-y-2">
+                  {clients.map((client) => {
+                    const clientDeals = deals.filter(
+                      (d) => d.client.toString() === client.clientNumber.toString()
+                    );
+                    const dealCount = clientDeals.length;
+
+                    const isExpanded =
+                      selectedClientDealsList.length > 0 &&
+                      selectedClientDealsList[0]?.client.toString() ===
+                        client.clientNumber.toString();
+
+                    return (
+                      <div
+                        key={client.clientNumber}
+                        className="border rounded shadow-sm bg-gray-50 hover:bg-gray-100 transition"
+                      >
+                        {/* Client header */}
+                        <div
+                          className="flex justify-between items-center p-3 cursor-pointer"
+                          onClick={() =>
+                            setSelectedClientDealsList(isExpanded ? [] : clientDeals)
+                          }
+                        >
+                          <span className="font-medium">
+                            {client.firstName} {client.lastName}
+                          </span>
+                          <span className="bg-green-200 text-green-800 text-xs px-2 py-1 rounded-full font-semibold">
+                            {dealCount}
+                          </span>
+                        </div>
+
+                        {/* Expanded deals */}
+                        {isExpanded && selectedClientDealsList.length > 0 && (
+                          <div className="border-t bg-white p-2">
+                            <div className="grid grid-cols-3 font-semibold text-sm mb-1">
+                              <span>Reference No</span>
+                              <span>Date</span>
+                              <span>Status</span>
+                            </div>
+
+                            {selectedClientDealsList.map((deal) => (
+                              <div
+                                key={deal._id}
+                                className="grid grid-cols-3 text-sm p-1 border-b hover:bg-gray-50 transition"
+                              >
+                                <span>{deal.ref}</span>
+                                <span>
+                                  {new Date(deal.date).toLocaleDateString("en-GB")}
+                                </span>
+                                <span>{deal.status}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
               <span className="profile-name">
                 {user?.fullname || user?.email || "Guest"}
               </span>
               <button className="logout-btn" onClick={logoutUser}>
                 Logout
               </button>
+             <div className="relative inline-block">
+  <button
+    onClick={() => setNotificationOpen(!notificationOpen)}
+    className="bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg shadow flex items-center gap-2"
+  >
+    <FaBell /> Notifications
+  </button>
+
+  {notificationOpen && (
+    <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-xl z-50">
+      <div className="p-3 border-b font-semibold text-gray-700">
+        Uncategorised Transactions: {totalUnassigned}
+      </div>
+
+      <div className="max-h-64 overflow-y-auto p-2">
+        {Object.keys(uncategorizedCounts).length > 0 ? (
+          Object.entries(uncategorizedCounts).map(([type, count], index) => (
+            <div
+              key={index}
+              className="flex justify-between items-center px-3 py-2 rounded-md hover:bg-gray-100 cursor-pointer"
+              onClick={() => {
+                setGraphCategory("Uncategorised"); // show Uncategorized in graph/cards
+                handleCategoryClick("Uncategorised"); // open modal with transactions
+                setNotificationOpen(false);
+              }}
+            >
+              <span className="text-gray-500 mr-2">{index + 1}.</span>
+              <span className="text-gray-700 font-medium flex-1">{type}</span>
+              <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">{count}</span>
+            </div>
+          ))
+        ) : (
+          <div className="text-black text-center py-3">
+            All Transactions Categorised
+          </div>
+        )}
+      </div>
+    </div>
+  )}
+</div>
             </div>
           </div>
 
