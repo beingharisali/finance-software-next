@@ -264,6 +264,17 @@ export default function CompanyCostPage() {
 
     return matchesClient && inDateRange;
   });
+  const calculateCommission = (
+  products: (string | ProductItem)[],
+  commissionPercent = 0
+) => {
+  const totalProducts = products.reduce((sum, p) => {
+    const price = typeof p === "object" ? p.price || 0 : 0;
+    return sum + price;
+  }, 0);
+
+  return (totalProducts * commissionPercent) / 100;
+};
   const handleStatusChange = async (dealId: string, newStatus: string) => {
     try {
       const res = await http.put(`/deals/${dealId}`, {
@@ -278,6 +289,7 @@ export default function CompanyCostPage() {
       alert("Status update failed!");
     }
   };
+
   if (!user) return <p>Loading...</p>;
   return (
     <div className="dashboard-container flex">
@@ -613,7 +625,7 @@ export default function CompanyCostPage() {
       </div>
 
       {/* Commission */}
-      <div className="mb-3">
+      {/* <div className="mb-3">
         <label className="block mb-1">Commission</label>
         <input
           type="number"
@@ -621,7 +633,22 @@ export default function CompanyCostPage() {
           value={commission}
           onChange={(e) => setCommission(Number(e.target.value))}
         />
-      </div>
+      </div> */}
+      <div className="mb-3">
+  <label className="block mb-1">Commission</label>
+  <select
+    className="w-full border p-2 rounded"
+    value={commission}
+    onChange={(e) => setCommission(Number(e.target.value))}
+  >
+    <option value="">Select Commission</option>
+    <option value={5}>5%</option>
+    <option value={7}>7%</option>
+    <option value={10}>10%</option>
+    <option value={12}>12%</option>
+    <option value={13}>13%</option>
+  </select>
+</div>
 
       {/* Buttons */}
       <div className="flex gap-3 mt-4">
@@ -777,7 +804,10 @@ export default function CompanyCostPage() {
                         );
                       })}
                     </td>
-                    <td className="border px-4 py-2">{deal.commission || 0}</td>
+                    {/* <td className="border px-4 py-2">{deal.commission || 0}</td> */}
+                    <td className="border px-4 py-2">
+  {calculateCommission(deal.products, deal.commission)}
+</td>
                     <td className="border px-4 py-2 font-bold text-green-600">
                       {calculateTotal(deal.products, deal.commission)}
                     </td>
