@@ -10,7 +10,6 @@ import moment from "moment";
 import { fetchCustomCategories } from "@/services/category";
 import CreateUser from "../createusers/page";
 import UploadCSV from "../admin/uploadcsv/page";
-
 import "../../cssfiles/admin.css";
 import "../../cssfiles/sidebarcomponents.css";
 import "../../cssfiles/uploadCSV.css";
