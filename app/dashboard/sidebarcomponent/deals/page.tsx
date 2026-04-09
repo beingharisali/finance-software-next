@@ -24,16 +24,6 @@ interface Deal {
   status: string;
   commission?: number;
 }
-// interface Deal {
-//   _id?: string;
-//   ref: string;
-//   date: string;
-//   broker: string;
-//   client: string;
-//   products: string[];
-//   status: string;
-//   commission?: number;
-// }
 
 // export default function CompanyCostPage() {
 export default function CompanyCostPage() {
@@ -185,8 +175,7 @@ export default function CompanyCostPage() {
     // Set broker
     const brokerObj = brokers.find((b) => b._id === deal.broker);
     setSelectedBroker(brokerObj?._id || "");
-    // const brokerObj = brokers.find((b) => b.fullname === deal.broker);
-    // setSelectedBroker(brokerObj?._id || "");
+
 
     // Set client
     const clientObj = clients.find(
@@ -308,9 +297,12 @@ export default function CompanyCostPage() {
   onClick={() => setShowClientDeals(!showClientDeals)}
 >
   <span className="font-semibold">Deals</span>
-  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+  {/* <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                 {deals.length}
-              </span>
+              </span> */}
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+  {deals.filter(d => d.status.trim().toLowerCase() !== "completed").length}
+</span>
 </div>
 
 {showClientDeals && (
@@ -476,25 +468,15 @@ export default function CompanyCostPage() {
           {open && (
             <div className="absolute z-50 bg-white border w-full max-h-60 overflow-y-auto mt-1 shadow-lg rounded">
               {/* Header */}
-              <div className="grid grid-cols-3 font-bold p-2 border-b bg-gray-100 sticky top-0">
+              <div className="grid grid-cols-4 font-bold p-2 border-b bg-gray-100 sticky top-0">
                 <span>ID</span>
+                <span>Product Name</span>
                 <span>Date</span>
                 <span>Price</span>
               </div>
 
               {/* Rows */}
-              {/* {products.map((p) => {
-                const isAssigned = deals.some(
-                  (d) =>
-                    d._id !== editingDealId &&
-                    d.products.some(
-                      (prod) =>
-                        
-                        (typeof prod === "object"
-                          ? prod.productId
-                          : prod) === p._id
-                    )
-                ); */}
+            
                 {products.map((p) => {
   const isAssigned = deals.some((d) =>
     d._id !== editingDealId &&
@@ -513,7 +495,7 @@ export default function CompanyCostPage() {
                 return (
                   <div
                     key={p._id}
-                    className={`grid grid-cols-3 p-2 cursor-pointer hover:bg-gray-200 ${
+                    className={`grid grid-cols-4 p-2 cursor-pointer hover:bg-gray-200 ${
                       isAssigned
                         ? "bg-yellow-200 text-gray-700 cursor-not-allowed"
                         : ""
@@ -533,6 +515,7 @@ export default function CompanyCostPage() {
                     }}
                   >
                     <span>{p.productId}</span>
+                    <span>{p.liquidMake}</span>
                     <span>
                       {p.product
                         ? new Date(p.product).toLocaleDateString()
@@ -557,6 +540,7 @@ export default function CompanyCostPage() {
                 className="grid grid-cols-4 gap-2 items-center bg-gray-100 p-2 rounded mb-2"
               >
                 <span>{product?.productId || id}</span>
+                <span>{product?.liquidMake}</span>
 
                 <span>
                   {product?.product
@@ -708,10 +692,13 @@ export default function CompanyCostPage() {
                 <tr>
                   <th>Reference No</th>
                   <th>Date</th>
+                   {/* product */}
+                    <th>Product Names</th>
                   <th>Broker</th>
                   <th>Status</th>
                   <th>Client</th>
                   <th>Products Types</th>
+              
                   <th>Commission</th>
                   <th>Total Deal Amount</th>
                   <th>Edit/Delete</th>
@@ -739,6 +726,15 @@ export default function CompanyCostPage() {
                     <td className="border px-4 py-2">
                       {new Date(deal.date).toLocaleDateString("en-GB")}{" "}
                     </td>
+                    <td className="border px-4 py-2">
+        {deal.products
+          .map((item: any) => {
+            const productId = typeof item === "object" ? item.productId : item;
+            const product = products.find((p) => p._id === productId);
+            return product ? product.liquidMake : "N/A";
+          })
+          .join(", ")}
+      </td>
                     <td className="border px-4 py-2">
                       {brokers.find((b) => b._id === deal.broker)?.fullname ||
                         brokers.find((b) => b._id === deal.broker)?.email ||
@@ -804,6 +800,7 @@ export default function CompanyCostPage() {
                         );
                       })}
                     </td>
+                      
                     {/* <td className="border px-4 py-2">{deal.commission || 0}</td> */}
                     <td className="border px-4 py-2">
   {calculateCommission(deal.products, deal.commission)}

@@ -339,29 +339,47 @@ export default function ProductPage() {
                         className="border p-1 rounded text-black text-sm"
                         value={item.status || "Available"}
                         onChange={async (e) => {
-  const selectedBrokerId = e.target.value;
-
-  if (selectedBrokerId === "add-new") {
-    setShowCreateBrokerModal(true);
-    return;
-  }
-
+  const newStatus = e.target.value;
   try {
-    const res = await http.patch(
-      `/productRoute/${item._id}/allocate`,
-      { brokerId: selectedBrokerId || "" }
-    );
+    // Patch the status in backend
+    const res = await http.patch(`/productRoute/${item._id}/status`, { status: newStatus });
 
-    const updatedProduct = res.data.data; 
+    // Use returned product from backend
+    const updatedProduct = res.data.data;
 
+    // Update only this product in local state
     setProducts((prev) =>
       prev.map((p) => (p._id === item._id ? updatedProduct : p))
     );
   } catch (err) {
-    console.error("Failed to allocate broker:", err);
-    alert("Allocation failed, try again.");
+    console.error("Failed to update status:", err);
+    alert("Status update failed");
   }
 }}
+//                         onChange={async (e) => {
+//   const selectedBrokerId = e.target.value;
+
+//   if (selectedBrokerId === "add-new") {
+//     setShowCreateBrokerModal(true);
+//     return;
+//   }
+
+//   try {
+//     const res = await http.patch(
+//       `/productRoute/${item._id}/allocate`,
+//       { brokerId: selectedBrokerId || "" }
+//     );
+
+//     const updatedProduct = res.data.data; 
+
+//     setProducts((prev) =>
+//       prev.map((p) => (p._id === item._id ? updatedProduct : p))
+//     );
+//   } catch (err) {
+//     console.error("Failed to allocate broker:", err);
+//     alert("Allocation failed, try again.");
+//   }
+// }}
                         // onChange={async (e) => {
                         //   const newStatus = e.target.value;
                         //   try {
