@@ -312,10 +312,24 @@ export default function CompanyCostPage() {
     </div>
 
     <div className="max-h-80 overflow-y-auto p-2 space-y-2">
-      {clients.map((client) => {
+      {/* {clients.map((client) => { */}
+      {clients
+  .filter((client) =>
+    deals.some(
+      (d) =>
+        d.client.toString() === client.clientNumber.toString() &&
+        d.status.trim().toLowerCase() !== "completed"
+    )
+  )
+  .map((client) => {
+        // const dealCount = deals.filter(
+        //   (d) => d.client.toString() === client.clientNumber.toString()
+        // ).length;
         const dealCount = deals.filter(
-          (d) => d.client.toString() === client.clientNumber.toString()
-        ).length;
+  (d) =>
+    d.client.toString() === client.clientNumber.toString() &&
+    d.status.trim().toLowerCase() !== "completed"
+).length;
 
         const isExpanded =
           selectedClientDealsList.length > 0 &&
@@ -331,9 +345,14 @@ export default function CompanyCostPage() {
             <div
               className="flex justify-between items-center p-3 cursor-pointer"
               onClick={() => {
+                // const clientDeals = deals.filter(
+                //   (d) => d.client.toString() === client.clientNumber.toString()
+                // );
                 const clientDeals = deals.filter(
-                  (d) => d.client.toString() === client.clientNumber.toString()
-                );
+  (d) =>
+    d.client.toString() === client.clientNumber.toString() &&
+    d.status.trim().toLowerCase() !== "completed"
+);
                 setSelectedClientDealsList(
                   isExpanded ? [] : clientDeals
                 );
@@ -446,7 +465,7 @@ export default function CompanyCostPage() {
         </select>
       </div>
 
-      {/* 🔥 Products Dropdown */}
+      {/*  Products Dropdown */}
       <div className="mb-3 relative">
         <label className="block mb-1">Products</label>
 
@@ -693,7 +712,7 @@ export default function CompanyCostPage() {
                   <th>Reference No</th>
                   <th>Date</th>
                    {/* product */}
-                    <th>Product Names</th>
+                    {/* <th>Product Names</th> */}
                   <th>Broker</th>
                   <th>Status</th>
                   <th>Client</th>
@@ -726,7 +745,7 @@ export default function CompanyCostPage() {
                     <td className="border px-4 py-2">
                       {new Date(deal.date).toLocaleDateString("en-GB")}{" "}
                     </td>
-                    <td className="border px-4 py-2">
+                    {/* <td className="border px-4 py-2">
         {deal.products
           .map((item: any) => {
             const productId = typeof item === "object" ? item.productId : item;
@@ -734,7 +753,7 @@ export default function CompanyCostPage() {
             return product ? product.liquidMake : "N/A";
           })
           .join(", ")}
-      </td>
+      </td> */}
                     <td className="border px-4 py-2">
                       {brokers.find((b) => b._id === deal.broker)?.fullname ||
                         brokers.find((b) => b._id === deal.broker)?.email ||
@@ -773,7 +792,7 @@ export default function CompanyCostPage() {
                       )?.lastName || deal.client}
                     </td>
 
-                    <td className="border px-4 py-2">
+                    <td className="border px-2 py-2">
                       {deal.products.map((item: any) => {
                         const productId = item.productId || item;
                         const price = item.price;
@@ -784,19 +803,45 @@ export default function CompanyCostPage() {
 
                         return (
                           <p
-                            key={productId}
-                            className="flex justify-between items-center mb-1"
-                          >
-                            <span>
-                              {product.productId} |{" "}
-                              {product.product
-                                ? product.product.split("T")[0]
-                                : "-"}
-                            </span>
-                            <span className="border-l px-4">
-                              {price || product.finalPrice}
-                            </span>
-                          </p>
+  key={productId}
+  className="grid grid-cols-[120px_160px_auto] items-center mb-1 text-xs"
+>
+  {/* Name */}
+  <span className="px-2 truncate whitespace-nowrap overflow-hidden">
+    {product.liquidMake}
+  </span>
+
+  {/* ID + Date */}
+  <span className="border-l px-2 truncate whitespace-nowrap overflow-hidden">
+    {product.productId} |{" "}
+    {product.product
+      ? new Date(product.product).toLocaleDateString("en-GB")
+      : "-"}
+  </span>
+
+  {/* Price */}
+  <span className="border-l px-2 text-right whitespace-nowrap">
+    {price || product.finalPrice}
+  </span>
+</p>
+  //                         <p
+  //                           key={productId}
+  //                           className="flex justify-between items-center mb-1 "
+  //                         >
+  //                           <span  className=" px-2">{product.liquidMake}</span>
+  //                           <span className="border-l px-2">
+  //                             {product.productId} |{" "}
+  //                             {/* {product.product
+  //                               ? product.product.split("T")[0]
+  //                               : "-"} */}
+  //                               {product.product
+  // ? new Date(product.product).toLocaleDateString("en-GB")
+  // : "-"}
+  //                           </span>
+  //                           <span className="border-l px-2">
+  //                             {price || product.finalPrice}
+  //                           </span>
+  //                         </p>
                         );
                       })}
                     </td>
