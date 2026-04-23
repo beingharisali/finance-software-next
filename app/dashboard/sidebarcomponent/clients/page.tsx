@@ -51,7 +51,9 @@ export default function CompanyCostPage() {
   // Dropdown for client deals
   const [showClientDeals, setShowClientDeals] = useState(false);
   const [selectedClientDealsList, setSelectedClientDealsList] = useState<Deal[]>([]);
-
+const formatClientNumber = (num: number) => {
+  return `SC${String(num).padStart(3, "0")}`;
+};
   // Fetch clients
   const fetchClients = async () => {
     try {
@@ -387,10 +389,12 @@ export default function CompanyCostPage() {
           <thead> */}
             <tr className="bg-gray-100">
               <th className="p-2 border">Client Number</th>
-              <th className="p-2 border">Name</th>
+              <th className="p-2 border">First Name</th>
+              <th className="p-2 border">Last Name</th>
               <th className="p-2 border">Email</th>
               <th className="p-2 border">DOB</th>
               <th className="p-2 border">Phone</th>
+              <th className="p-2 border">Broker</th>
               <th className="p-2 border">Address</th>
               <th className="p-2 border">Notes</th>
               <th className="p-2 border">Deals</th>
@@ -401,8 +405,10 @@ export default function CompanyCostPage() {
           <tbody>
             {clients.map((c) => (
               <tr key={c.clientNumber}>
-                <td className="p-2 border">{c.clientNumber}</td>
-                <td className="p-2 border">{c.firstName} {c.lastName}</td>
+              
+                <td className="p-2 border">{formatClientNumber(c.clientNumber)}</td>
+                <td className="p-2 border">{c.firstName}</td>
+                <td className="p-2 border"> {c.lastName}</td>
                 <td className="p-2 border">{c.email}</td>
                 <td className="p-2 border">
                   {(() => {
@@ -413,6 +419,7 @@ export default function CompanyCostPage() {
                   })()}
                 </td>
                 <td className="p-2 border">{c.phoneNumber}</td>
+                <td className="p-2 border">{c.broker}</td>
                 <td className="p-2 border">{c.address}</td>
                 <td className="p-2 border">{c.extraInfo}</td>
                 <td className="p-2 border">

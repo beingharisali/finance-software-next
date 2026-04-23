@@ -254,25 +254,31 @@ export default function ProductPage() {
           ) : (
             <table className="record-table min-w-[1200px] w-full border-collapse text-sm ">
               <thead>
+               
                 <tr>
-                  <th>ID</th>
-                  <th>Liquid/Make</th>
+  <th>ID</th>
+
+
+                   <th>Liquid/Make</th>
 
                   <th>A.Y.S</th>
                   <th>Cask No</th>
                   <th>Vessel</th>
                   <th>L/ALC</th>
                   <th>%VOL</th>
-                  <th>Cost Price</th>
-                  <th>Supplier Price</th>
-                  <th>Final Price</th>
+                  <th>Sell Price</th>
+                  <th>Location</th>
+                  <th>Bottles</th>
+                  <th> Price</th>
+                  <th>Elliiot</th>
                   <th>Status</th>
                   <th>Allocate To</th>
-                </tr>
+</tr>
               </thead>
 
               <tbody>
                 {products.map((item) => (
+                  
                   <tr key={item.productId || item.id}>
                     <td>{item.productId || item.id}</td>
                     <td>{item.liquorMake || item.liquidMake}</td>
@@ -300,8 +306,9 @@ export default function ProductPage() {
                         ? `£${Number(item.costPrice).toFixed(2)}`
                         : ""}
                     </td>
-                    {/* <td className="text-right">{item.supplierPrice}</td>
-                    <td className="text-right">{item.finalPrice}</td> */}
+                    <td>{item.location || ""}</td>   
+<td>{item.bottles || ""}</td>    
+                   
                     <td>
                       {item.supplierPrice !== undefined
                         ? `£${Number(item.supplierPrice).toFixed(2)}`
@@ -312,6 +319,8 @@ export default function ProductPage() {
                         ? `£${Number(item.finalPrice).toFixed(2)}`
                         : ""}
                     </td>
+
+
                     {/* status */}
 
                     <td className="flex flex-col items-start gap-1">
@@ -356,52 +365,7 @@ export default function ProductPage() {
     alert("Status update failed");
   }
 }}
-//                         onChange={async (e) => {
-//   const selectedBrokerId = e.target.value;
 
-//   if (selectedBrokerId === "add-new") {
-//     setShowCreateBrokerModal(true);
-//     return;
-//   }
-
-//   try {
-//     const res = await http.patch(
-//       `/productRoute/${item._id}/allocate`,
-//       { brokerId: selectedBrokerId || "" }
-//     );
-
-//     const updatedProduct = res.data.data; 
-
-//     setProducts((prev) =>
-//       prev.map((p) => (p._id === item._id ? updatedProduct : p))
-//     );
-//   } catch (err) {
-//     console.error("Failed to allocate broker:", err);
-//     alert("Allocation failed, try again.");
-//   }
-// }}
-                        // onChange={async (e) => {
-                        //   const newStatus = e.target.value;
-                        //   try {
-                        //     await http.patch(
-                        //       `/productRoute/${item._id}/status`,
-                        //       {
-                        //         status: newStatus,
-                        //       },
-                        //     );
-
-                        //     setProducts((prev) =>
-                        //       prev.map((p) =>
-                        //         p._id === item._id
-                        //           ? { ...p, status: newStatus }
-                        //           : p,
-                        //       ),
-                        //     );
-                        //   } catch (err) {
-                        //     console.error("Failed to update status:", err);
-                        //     alert("Status update failed");
-                        //   }
-                        // }}
                       >
                         <option>Available</option>
                         <option>On Hold</option>
@@ -422,7 +386,7 @@ export default function ProductPage() {
                           }
 
                           try {
-                            // Patch selected broker to backend for this product
+                         
                             await http.patch(
                               `/productRoute/${item._id}/allocate`,
                               {
@@ -430,11 +394,7 @@ export default function ProductPage() {
                               },
                             );
 
-                            // setProducts((prev) =>
-                            //   prev.map((p) =>
-                            //     p._id === item._id ? { ...p, allocatedBroker: selectedBrokerId } : p
-                            //   )
-                            // );
+                          
                             setProducts((prev) =>
                               prev.map((p) =>
                                 p._id === item._id
