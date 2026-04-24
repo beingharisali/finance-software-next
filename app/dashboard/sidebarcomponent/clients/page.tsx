@@ -11,6 +11,7 @@ import http from "@/services/http";
 
 interface Client {
   clientNumber: number;
+  broker:string;
   firstName: string;
   lastName: string;
   email: string;
@@ -135,6 +136,7 @@ const formatClientNumber = (num: number) => {
         address: "",
         dateOfBirth: "",
         extraInfo: "",
+        
       });
       fetchClients();
     } catch (err: any) {
@@ -433,7 +435,7 @@ const formatClientNumber = (num: number) => {
         className="bg-green-600 text-white px-2 py-1 rounded"
         onClick={() => setSelectedClientDealsList(clientDeals)}
       >
-        {clientDeals.length} {/* number of deals */}
+        {clientDeals.length} 
       </button>
     );
   })()}
