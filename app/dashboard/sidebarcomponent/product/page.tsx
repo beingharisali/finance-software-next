@@ -14,7 +14,8 @@ import { fetchUsers } from "@/services/user.api";
 export default function ProductPage() {
   const [showCreateBrokerModal, setShowCreateBrokerModal] = useState(false);
   // Tab state
-  const [activeTab, setActiveTab] = useState<"whisky" | "gold">("whisky");
+  const [activeTab, setActiveTab] = useState<"whisky" | "gold" | "all">("whisky");
+
 
   // new dropdown update
 
@@ -148,42 +149,63 @@ export default function ProductPage() {
         </div>
 
         {/* TABS */}
-        <div style={{ display: "flex", gap: "0", marginBottom: "20px", borderBottom: "2px solid #e2e8f0" }}>
-          <button
-            onClick={() => setActiveTab("whisky")}
-            style={{
-              padding: "12px 28px",
-              fontSize: "15px",
-              fontWeight: activeTab === "whisky" ? "700" : "500",
-              color: activeTab === "whisky" ? "#0f526a" : "#64748b",
-              background: activeTab === "whisky" ? "#f0f9ff" : "transparent",
-              border: "none",
-              borderBottom: activeTab === "whisky" ? "3px solid #0f526a" : "3px solid transparent",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              borderRadius: "8px 8px 0 0",
-            }}
-          >
-            Whisky Data
-          </button>
-          <button
-            onClick={() => setActiveTab("gold")}
-            style={{
-              padding: "12px 28px",
-              fontSize: "15px",
-              fontWeight: activeTab === "gold" ? "700" : "500",
-              color: activeTab === "gold" ? "#0f526a" : "#64748b",
-              background: activeTab === "gold" ? "#f0f9ff" : "transparent",
-              border: "none",
-              borderBottom: activeTab === "gold" ? "3px solid #0f526a" : "3px solid transparent",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              borderRadius: "8px 8px 0 0",
-            }}
-          >
-            Gold Data
-          </button>
-        </div>
+       <div style={{ display: "flex", gap: "0", marginBottom: "20px", borderBottom: "2px solid #e2e8f0" }}>
+  <button
+    onClick={() => setActiveTab("whisky")}
+    style={{
+      padding: "12px 28px",
+      fontSize: "15px",
+      fontWeight: activeTab === "whisky" ? "700" : "500",
+      color: activeTab === "whisky" ? "#0f526a" : "#64748b",
+      background: activeTab === "whisky" ? "#f0f9ff" : "transparent",
+      border: "none",
+      borderBottom: activeTab === "whisky" ? "3px solid #0f526a" : "3px solid transparent",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      borderRadius: "8px 8px 0 0",
+    }}
+  >
+    Whisky Data
+  </button>
+
+  <button
+    onClick={() => setActiveTab("gold")}
+    style={{
+      padding: "12px 28px",
+      fontSize: "15px",
+      fontWeight: activeTab === "gold" ? "700" : "500",
+      color: activeTab === "gold" ? "#0f526a" : "#64748b",
+      background: activeTab === "gold" ? "#f0f9ff" : "transparent",
+      border: "none",
+      borderBottom: activeTab === "gold" ? "3px solid #0f526a" : "3px solid transparent",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      borderRadius: "8px 8px 0 0",
+    }}
+  >
+    Gold Data
+  </button>
+
+  {/* New All Data tab */}
+  <button
+    onClick={() => setActiveTab("all")}
+    style={{
+      padding: "12px 28px",
+      fontSize: "15px",
+      fontWeight: activeTab === "all" ? "700" : "500",
+      color: activeTab === "all" ? "#0f526a" : "#64748b",
+      background: activeTab === "all" ? "#f0f9ff" : "transparent",
+      border: "none",
+      borderBottom: activeTab === "all" ? "3px solid #0f526a" : "3px solid transparent",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
+      borderRadius: "8px 8px 0 0",
+    }}
+  >
+    All Data
+  </button>
+</div>
+
 
         {/* ==================== WHISKY DATA TAB ==================== */}
         {activeTab === "whisky" && (
@@ -510,7 +532,7 @@ export default function ProductPage() {
         {activeTab === "gold" && (
           <>
             {/* CSV Upload for Gold */}
-            <form
+            {/* <form
               className="mb-10 flex justify-end items-center"
               onSubmit={async (e) => {
                 e.preventDefault();
@@ -548,7 +570,7 @@ export default function ProductPage() {
               >
                 Upload CSV
               </button>
-            </form>
+            </form> */}
 
             {/* Gold Data Table */}
             <div className="record-wrapper overflow-x-auto" style={{ marginTop: "16px" }}>
@@ -587,6 +609,57 @@ export default function ProductPage() {
             </div>
           </>
         )}
+        {activeTab === "all" && (
+          
+  <div className="record-wrapper overflow-x-auto">
+    {(loading || goldLoading) ? (
+      <p className="loading-text">Loading all data...</p>
+    ) : [...products, ...certifications].length === 0 ? (
+      <p className="no-records text-black">No records found.</p>
+    ) : (
+      <table className="record-table min-w-[1200px] w-full border-collapse text-sm">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>ID / Certificate</th>
+            <th>Name / Denomination</th>
+            <th>Year / A.Y.S</th>
+            <th>Price</th>
+            <th>Status / Grade</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[...products.map((item: any) => ({
+            type: "Whisky",
+            id: item.productId || item.id,
+            name: item.liquorMake || item.liquidMake,
+            year: item.product ? new Date(item.product).toLocaleDateString() : "",
+            price: item.finalPrice || item.costPrice,
+            status: item.status,
+          })), 
+          ...certifications.map((item: any) => ({
+            type: "Gold",
+            id: item.certification,
+            name: item.denomination,
+            year: item.year,
+            price: item.price,
+            status: item.grade,
+          }))].map((row, index) => (
+            <tr key={index}>
+              <td>{row.type}</td>
+              <td>{row.id}</td>
+              <td>{row.name}</td>
+              <td>{row.year}</td>
+              <td>{row.price ? `£${Number(row.price).toFixed(2)}` : ""}</td>
+              <td>{row.status}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </div>
+)}
+
 
         {/* Create Broker Modal */}
         {showCreateBrokerModal && (
