@@ -295,7 +295,7 @@ export default function ProductPage() {
           </button>
         </form>
 
-        {/* ==================== WHISKY DATA TAB ==================== */}
+        {/* ==================== all DATA TAB ==================== */}
         {activeTab === "all" && (
           <>
             {/* SEARCH */}
@@ -411,7 +411,8 @@ export default function ProductPage() {
             price: item.finalPrice || item.costPrice,
             grade: "",
             status: item.status,
-            statusDate: item.statusDate,
+            // statusDate: item.statusDate,
+            statusDate: item.statusDate || item.updatedAt || "",
             _id: item._id,
             allocatedBroker: item.allocatedBroker,
           })),
@@ -424,6 +425,7 @@ export default function ProductPage() {
             price: item.price,
             grade: item.grade,
             status: "",
+            statusDate: item.statusDate || item.updatedAt || "",
             _id: item._id,
             allocatedBroker: "",
           })),
@@ -455,12 +457,14 @@ export default function ProductPage() {
     {row.status || "Available"}
   </span>
 
-  <small className="text-gray-700 text-xs">
+  {/* <small className="text-gray-700 text-xs">
     {row.statusDate
       ? new Date(row.statusDate).toLocaleDateString()
       : ""}
-  </small>
-
+  </small> */}
+<small className="text-gray-700 text-xs">
+  {row.statusDate ? new Date(row.statusDate).toLocaleDateString() : "-"}
+</small>
   <select
     className="border p-1 rounded text-black text-sm"
     value={row.status || "Available"}
@@ -562,7 +566,6 @@ export default function ProductPage() {
           <>
             {/* CSV Upload for Gold */}
 
-            {/* Gold Data Table */}
             <div
               className="record-wrapper overflow-x-auto"
               style={{ marginTop: "16px" }}
