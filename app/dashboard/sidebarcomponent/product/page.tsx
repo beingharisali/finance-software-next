@@ -411,6 +411,7 @@ export default function ProductPage() {
             price: item.finalPrice || item.costPrice,
             grade: "",
             status: item.status,
+            statusDate: item.statusDate,
             _id: item._id,
             allocatedBroker: item.allocatedBroker,
           })),
