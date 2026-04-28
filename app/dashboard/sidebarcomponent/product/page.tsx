@@ -424,10 +424,13 @@ export default function ProductPage() {
             year: item.year,
             price: item.price,
             grade: item.grade,
-            status: "",
-            statusDate: item.statusDate || item.updatedAt || "",
+            // statusDate: item.statusDate || item.updatedAt || "",
             _id: item._id,
-            allocatedBroker: "",
+            // status: "",
+            // allocatedBroker: "",
+            status: item.status || "Available",
+statusDate: item.statusDate || item.updatedAt || "",
+allocatedBroker: item.allocatedBroker || "",
           })),
         ].map((row, index) => (
           <tr key={index}>
@@ -440,7 +443,6 @@ export default function ProductPage() {
             </td>
             <td>{row.grade}</td>
 
-            {/* STATUS */}
            {/* STATUS */}
 <td className="flex flex-col items-start gap-1">
   <span
@@ -457,11 +459,7 @@ export default function ProductPage() {
     {row.status || "Available"}
   </span>
 
-  {/* <small className="text-gray-700 text-xs">
-    {row.statusDate
-      ? new Date(row.statusDate).toLocaleDateString()
-      : ""}
-  </small> */}
+
 <small className="text-gray-700 text-xs">
   {row.statusDate ? new Date(row.statusDate).toLocaleDateString() : "-"}
 </small>
@@ -472,18 +470,37 @@ export default function ProductPage() {
       const newStatus = e.target.value;
 
       try {
-        const res = await http.patch(
-          `/productRoute/${row._id}/status`,
-          { status: newStatus }
-        );
+        // const res = await http.patch(
+        //   `/productRoute/certification/${row._id}/status`,
+        //   { status: newStatus }
+        // );
+        const url =
+  row.type === "Gold"
+    ? `/productRoute/certification/${row._id}/status`
+    : `/productRoute/${row._id}/status`;
+
+const res = await http.patch(url, { status: newStatus });
 
         const updated = res.data.data;
 
-        setProducts((prev) =>
-          prev.map((p) =>
-            p._id === row._id ? updated : p
-          )
-        );
+        // setProducts((prev) =>
+        //   prev.map((p) =>
+        //     p._id === row._id ? updated : p
+        //   )
+        // );
+        if (row.type === "Gold") {
+  setCertifications((prev) =>
+    prev.map((c) =>
+      c._id === row._id ? updated : c
+    )
+  );
+} else {
+  setProducts((prev) =>
+    prev.map((p) =>
+      p._id === row._id ? updated : p
+    )
+  );
+}
       } catch (err) {
         console.error(err);
         alert("Status update failed");
@@ -511,24 +528,57 @@ export default function ProductPage() {
       }
 
       try {
-        await http.patch(
-          `/productRoute/${row._id}/allocate`,
-          {
-            brokerId: selectedBrokerId,
-          }
-        );
+        // await http.patch(
+        //   `/productRoute/${row._id}/allocate`,
+        //   {
+        //     brokerId: selectedBrokerId,
+        //   }
+        // );
 
-        setProducts((prev) =>
-          prev.map((p) =>
-            p._id === row._id
-              ? {
-                  ...p,
-                  allocatedBroker: selectedBrokerId,
-                  status: selectedBrokerId ? "On Hold" : "Available",
-                }
-              : p
-          )
-        );
+        const url =
+  row.type === "Gold"
+    ? `/productRoute/certification/${row._id}/allocate`
+    : `/productRoute/${row._id}/allocate`;
+
+await http.patch(url, {
+  brokerId: selectedBrokerId,
+});
+        // setProducts((prev) =>
+        //   prev.map((p) =>
+        //     p._id === row._id
+        //       ? {
+        //           ...p,
+        //           allocatedBroker: selectedBrokerId,
+        //           status: selectedBrokerId ? "On Hold" : "Available",
+        //         }
+        //       : p
+        //   )
+        // );
+        if (row.type === "Gold") {
+  setCertifications((prev) =>
+    prev.map((c) =>
+      c._id === row._id
+        ? {
+            ...c,
+            allocatedBroker: selectedBrokerId,
+            status: selectedBrokerId ? "On Hold" : "Available",
+          }
+        : c
+    )
+  );
+} else {
+  setProducts((prev) =>
+    prev.map((p) =>
+      p._id === row._id
+        ? {
+            ...p,
+            allocatedBroker: selectedBrokerId,
+            status: selectedBrokerId ? "On Hold" : "Available",
+          }
+        : p
+    )
+  );
+}
       } catch (err) {
         console.error("Allocation failed:", err);
         alert("Allocation failed, try again.");
@@ -587,6 +637,8 @@ export default function ProductPage() {
                       <th>Grade</th>
                       <th>Price</th>
                       <th>SC Price</th>
+                      <th>Status</th>
+                      <th>Allocate to</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -607,6 +659,207 @@ export default function ProductPage() {
                             ? `£ ${Number(item.scPrice).toLocaleString("en-GB", { minimumFractionDigits: 2 })}`
                             : ""}
                         </td>
+                        {/* <td className="flex flex-col items-start gap-1">
+  <span
+    className={`px-2 py-1 rounded text-white font-semibold text-sm ${
+      item.status === "Available"
+        ? "bg-green-500"
+        : item.status === "On Hold"
+        ? "bg-yellow-500"
+        : item.status === "Sold"
+        ? "bg-red-500"
+        : "bg-gray-500"
+    }`}
+  >
+    {item.status || "Available"}
+  </span>
+
+  <small className="text-gray-700 text-xs">
+    {item.statusDate
+      ? new Date(item.statusDate).toLocaleDateString()
+      : "-"}
+  </small>
+
+  <select
+    className="border p-1 rounded text-black text-sm"
+    value={item.status || "Available"}
+    onChange={async (e) => {
+      const newStatus = e.target.value;
+
+      try {
+        const res = await http.patch(
+          `/productRoute/certification/${item._id}/status`,
+          { status: newStatus }
+        );
+
+        const updated = res.data.data;
+
+        setCertifications((prev) =>
+          prev.map((c) =>
+            c._id === item._id ? updated : c
+          )
+        );
+      } catch (err) {
+        console.error(err);
+        alert("Status update failed");
+      }
+    }}
+  >
+    <option>Available</option>
+    <option>On Hold</option>
+    <option>Sold</option>
+    <option>Unavailable</option>
+  </select>
+</td> */}
+<td className="flex flex-col items-start gap-1">
+  <span
+    className={`px-2 py-1 rounded text-white font-semibold text-sm ${
+      item.status === "Available"
+        ? "bg-green-500"
+        : item.status === "On Hold"
+        ? "bg-yellow-500"
+        : item.status === "Sold"
+        ? "bg-red-500"
+        : "bg-gray-500"
+    }`}
+  >
+    {item.status || "Available"}
+  </span>
+
+  <small className="text-gray-700 text-xs">
+    {item.statusDate
+      ? new Date(item.statusDate).toLocaleDateString()
+      : "-"}
+  </small>
+
+  <select
+    className="border p-1 rounded text-black text-sm"
+    value={item.status || "Available"}
+    onChange={async (e) => {
+      const newStatus = e.target.value;
+
+      try {
+        const res = await http.patch(
+          `/productRoute/certification/${item._id}/status`,
+          { status: newStatus }
+        );
+
+        const updated = res.data.data;
+
+        setCertifications((prev) =>
+          prev.map((c) =>
+            c._id === item._id ? updated : c
+          )
+        );
+      } catch (err) {
+        console.error(err);
+        alert("Status update failed");
+      }
+    }}
+  >
+    <option>Available</option>
+    <option>On Hold</option>
+    <option>Sold</option>
+    <option>Unavailable</option>
+  </select>
+</td>
+<td>
+  <select
+    className="border p-1 rounded text-black"
+    value={item.allocatedBroker || ""}
+    onChange={async (e) => {
+      const selectedBrokerId = e.target.value;
+
+      if (selectedBrokerId === "add-new") {
+        setShowCreateBrokerModal(true);
+        return;
+      }
+
+      try {
+        const res = await http.patch(
+          `/productRoute/certification/${item._id}/allocate`,
+          {
+            brokerId: selectedBrokerId,
+          }
+        );
+
+        const updated = res.data.data;
+
+        setCertifications((prev) =>
+          prev.map((c) =>
+            c._id === item._id ? updated : c
+          )
+        );
+      } catch (err) {
+        console.error(err);
+        alert("Allocation failed");
+      }
+    }}
+  >
+    <option value="">Select</option>
+
+    {brokers.map((b) => (
+      <option key={b._id} value={b._id}>
+        {b.fullname || b.email}
+      </option>
+    ))}
+
+    <option value="add-new">Add New Broker +</option>
+  </select>
+</td>
+{/* <td>
+  <select
+    className="border p-1 rounded text-black"
+    value={item.allocatedBroker || ""}
+    onChange={async (e) => {
+      const selectedBrokerId = e.target.value;
+
+      if (selectedBrokerId === "add-new") {
+        setShowCreateBrokerModal(true);
+        return;
+      }
+
+      try {
+        await http.patch(
+          `/productRoute/certification/${item._id}/allocate`,
+          {
+            brokerId: selectedBrokerId,
+          }
+        );
+
+        setCertifications((prev) =>
+          prev.map((c) =>
+            c._id === item._id
+              ? {
+                  ...c,
+                  allocatedBroker: selectedBrokerId,
+                  status: selectedBrokerId ? "On Hold" : "Available",
+                }
+              : c
+          )
+        );
+      } catch (err) {
+        console.error("Allocation failed:", err);
+        alert("Allocation failed");
+      }
+    }}
+  >
+    <option value="">Select</option>
+
+    <option>Joe Coombes</option>
+    <option>Alex Presley</option>
+    <option>George Chapman</option>
+    <option>Lochlainn</option>
+
+    {brokers.map((b) => (
+      <option key={b._id} value={b._id}>
+        {b.fullname || b.email}
+      </option>
+    ))}
+
+    <option value="add-new">Add New Broker +</option>
+  </select>
+</td> */}
                       </tr>
                     ))}
                   </tbody>
