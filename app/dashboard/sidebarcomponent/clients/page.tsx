@@ -52,8 +52,19 @@ export default function CompanyCostPage() {
   // Dropdown for client deals
   const [showClientDeals, setShowClientDeals] = useState(false);
   const [selectedClientDealsList, setSelectedClientDealsList] = useState<Deal[]>([]);
-const formatClientNumber = (num: number) => {
-  return `SC${String(num).padStart(3, "0")}`;
+// const formatClientNumber = (num: number) => {
+//   return `SC${String(num).padStart(3, "0")}`;
+// };
+const formatClientNumber = (num: any) => {
+  if (!num) return "";
+
+  const str = String(num);
+
+  // agar already SC hai → as-it-is return karo
+  if (str.startsWith("SC")) return str;
+
+  // warna format karo
+  return `SC${str.padStart(3, "0")}`;
 };
   // Fetch clients
   const fetchClients = async () => {

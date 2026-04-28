@@ -48,6 +48,8 @@ export default function CompanyCostPage() {
   const [endDate, setEndDate] = useState("");
   const [searchClient, setSearchClient] = useState("");
   const [commission, setCommission] = useState(0);
+  const [whiskyProducts, setWhiskyProducts] = useState<any[]>([]);
+const [goldCertifications, setGoldCertifications] = useState<any[]>([]);
   
   // falto kaam test
   const [showDealsDropdown, setShowDealsDropdown] = useState(false);
@@ -97,7 +99,59 @@ export default function CompanyCostPage() {
     };
     fetchProducts();
   }, []);
+// whsky
+useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const res = await http.get("/productRoute/all");
+      const data = Array.isArray(res.data) ? res.data : res.data.data || [];
 
+      setWhiskyProducts(data);
+    } catch (err) {
+      console.error(err);
+      setWhiskyProducts([]);
+    }
+  };
+
+  fetchProducts();
+}, []);
+// useEffect(() => {
+//   const fetchCertifications = async () => {
+//     try {
+//       const res = await http.get("/productRoute/allCertifications");
+
+//       const data = Array.isArray(res.data)
+//         ? res.data
+//         : res.data.data || [];
+
+//       setGoldCertifications(data);
+//     } catch (err) {
+//       console.error("Failed to fetch certifications", err);
+//       setGoldCertifications([]);
+//     }
+//   };
+
+//   fetchCertifications();
+// }, []);
+useEffect(() => {
+  const fetchCertifications = async () => {
+    try {
+      const res = await http.get("/productRoute/allCertifications");
+
+      console.log("Gold API Response:", res.data); // 🔴 IMPORTANT
+
+      const data =
+        res.data.certifications || res.data.data || res.data || [];
+
+      setGoldCertifications(data);
+    } catch (err) {
+      console.error("Failed to fetch certifications", err);
+      setGoldCertifications([]);
+    }
+  };
+
+  fetchCertifications();
+}, []);
   // Fetch existing deals from DB on page load
   useEffect(() => {
     const fetchDeals = async () => {
@@ -262,7 +316,8 @@ export default function CompanyCostPage() {
     return sum + price;
   }, 0);
 
-  return (totalProducts * commissionPercent) / 100;
+  // return (totalProducts * commissionPercent) / 100;
+  return Number(((totalProducts * commissionPercent) / 100).toFixed(2));
 };
   const handleStatusChange = async (dealId: string, newStatus: string) => {
     try {
@@ -485,8 +540,173 @@ export default function CompanyCostPage() {
 
           {/* Dropdown */}
           {open && (
+  <div className="absolute z-50 bg-white border w-full max-h-60 overflow-y-auto mt-1 shadow-lg rounded">
+
+    <div className="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto">
+
+      {/* ================= WHISKY ================= */}
+      <div className="border-r pr-2">
+        <div className="font-bold bg-gray-100 p-2 sticky top-0">
+          Whisky Products
+        </div>
+          <div className="grid grid-cols-4 font-bold bg-gray-100 p-2 text-xs sticky top-0 z-10">
+    <span>ID</span>
+    <span>Product Name</span>
+    <span>Date</span>
+    <span className="text-right">Price</span>
+  </div>
+
+        {/* {products
+          .filter((p) => !p.type || p.type === "whisky")
+          .map((p) => {
+            const isSelected = selectedProducts.includes(p._id);
+
+            return (
+              <div
+                key={p._id}
+                className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
+                  isSelected ? "bg-green-100" : ""
+                }`}
+                onClick={() => {
+                  if (isSelected) return;
+
+                  setSelectedProducts((prev) => [...prev, p._id]);
+
+                  setProductPrices((prev) => ({
+                    ...prev,
+                    [p._id]: Number(p.finalPrice || 0),
+                  }));
+
+                  setOpen(false);
+                }}
+              >
+                <span>{p.productId}</span>
+                <span>{p.liquidMake}</span>
+                <span>
+                  {p.product
+                    ? new Date(p.product).toLocaleDateString("en-GB")
+                    : "-"}
+                </span>
+
+                
+                <span className="text-right">
+                  {Number(p.finalPrice || 0).toFixed(2)}
+                </span>
+              </div>
+            );
+          })} */}
+          {whiskyProducts
+  .filter((p) => !p.type || p.type === "whisky")
+  .map((p) => {
+    const isSelected = selectedProducts.includes(p._id);
+
+    return (
+      <div
+        key={p._id}
+        className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
+          isSelected ? "bg-green-100" : ""
+        }`}
+        onClick={() => {
+          if (isSelected) return;
+
+          setSelectedProducts((prev) => [...prev, p._id]);
+
+          setProductPrices((prev) => ({
+            ...prev,
+            [p._id]: Number(p.finalPrice || 0),
+          }));
+
+          setOpen(false);
+        }}
+      >
+        {/* ID */}
+        <span className="font-medium">{p.productId}</span>
+
+        {/* Product Name */}
+        <span className="truncate">{p.liquidMake}</span>
+
+        {/* Date */}
+        <span>
+          {p.product ? new Date(p.product).toLocaleDateString("en-GB") : "-"}
+        </span>
+
+        {/* Price */}
+        <span className="text-right font-semibold">
+          {Number(p.finalPrice || 0).toFixed(2)}
+        </span>
+      </div>
+    );
+  })}
+      </div>
+
+      {/* ================= GOLD ================= */}
+      <div>
+        <div className="font-bold bg-gray-100 p-2 sticky top-0">
+          Gold Products
+        </div>
+          <div className="grid grid-cols-4 font-bold bg-gray-100 p-2 text-xs sticky top-0 z-10">
+    <span>ID</span>
+    <span>Product Name</span>
+    <span>Date</span>
+    <span className="text-right">Price</span>
+  </div>
+
+       
+          {/* {goldCertifications
+  .filter
+  ((p) => p.type === "gold")
+  .map((p) => */}
+  {goldCertifications.map((p) => 
+    {
+    const isSelected = selectedProducts.includes(p._id);
+
+    return (
+      <div
+        key={p._id}
+        className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
+          isSelected ? "bg-green-100" : ""
+        }`}
+        onClick={() => {
+          if (isSelected) return;
+
+          setSelectedProducts((prev) => [...prev, p._id]);
+
+          setProductPrices((prev) => ({
+            ...prev,
+            [p._id]: Number(p.scPrice || 0),
+          }));
+
+          setOpen(false);
+        }}
+      >
+       <span className="font-medium">
+  {p.certification || p.productId || "N/A"}
+</span>
+
+<span className="truncate">
+  {p.reverse || p.name || "No Name"}
+</span>
+
+<span>
+  {p.product
+    ? new Date(p.product).toLocaleDateString("en-GB")
+    : "-"}
+</span>
+
+<span className="text-right font-semibold">
+  {Number(p.scPrice || p.price || 0).toFixed(2)}
+</span>
+      </div>
+    );
+  })}
+      </div>
+
+    </div>
+  </div>
+)}
+          {/* {open && (
             <div className="absolute z-50 bg-white border w-full max-h-60 overflow-y-auto mt-1 shadow-lg rounded">
-              {/* Header */}
+            
               <div className="grid grid-cols-4 font-bold p-2 border-b bg-gray-100 sticky top-0">
                 <span>ID</span>
                 <span>Product Name</span>
@@ -494,7 +714,6 @@ export default function CompanyCostPage() {
                 <span>Price</span>
               </div>
 
-              {/* Rows */}
             
                 {products.map((p) => {
   const isAssigned = deals.some((d) =>
@@ -545,7 +764,7 @@ export default function CompanyCostPage() {
                 );
               })}
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Selected Products */}
@@ -628,15 +847,7 @@ export default function CompanyCostPage() {
       </div>
 
       {/* Commission */}
-      {/* <div className="mb-3">
-        <label className="block mb-1">Commission</label>
-        <input
-          type="number"
-          className="w-full border p-2 rounded"
-          value={commission}
-          onChange={(e) => setCommission(Number(e.target.value))}
-        />
-      </div> */}
+  
       <div className="mb-3">
   <label className="block mb-1">Commission</label>
   <select
@@ -745,15 +956,7 @@ export default function CompanyCostPage() {
                     <td className="border px-4 py-2">
                       {new Date(deal.date).toLocaleDateString("en-GB")}{" "}
                     </td>
-                    {/* <td className="border px-4 py-2">
-        {deal.products
-          .map((item: any) => {
-            const productId = typeof item === "object" ? item.productId : item;
-            const product = products.find((p) => p._id === productId);
-            return product ? product.liquidMake : "N/A";
-          })
-          .join(", ")}
-      </td> */}
+             
                     <td className="border px-4 py-2">
                       {brokers.find((b) => b._id === deal.broker)?.fullname ||
                         brokers.find((b) => b._id === deal.broker)?.email ||
@@ -821,7 +1024,8 @@ export default function CompanyCostPage() {
 
   {/* Price */}
   <span className="border-l px-2 text-right whitespace-nowrap">
-    {price || product.finalPrice}
+    {/* {price || product.finalPrice} */}
+    {Number(price || product.finalPrice || 0).toFixed(2)}
   </span>
 </p>
   //                         <p
@@ -851,7 +1055,8 @@ export default function CompanyCostPage() {
   {calculateCommission(deal.products, deal.commission)}
 </td>
                     <td className="border px-4 py-2 font-bold text-green-600">
-                      {calculateTotal(deal.products, deal.commission)}
+                     
+                      {calculateTotal(deal.products, deal.commission).toFixed(2)}
                     </td>
 
                     <td className="border px-4 py-2 flex gap-2">
