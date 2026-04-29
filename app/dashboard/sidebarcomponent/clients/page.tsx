@@ -8,6 +8,8 @@ import "../../../cssfiles/record.css";
 import "../../../cssfiles/sidebarcomponents.css";
 import "../../../cssfiles/transactionfilters.css";
 import http from "@/services/http";
+import { fetchUsers } from "@/services/user.api";
+
 
 interface Client {
   clientNumber: number;
@@ -33,9 +35,11 @@ interface Deal {
 }
 // ui fixed
 export default function CompanyCostPage() {
+  const [brokers, setBrokers] = useState<any[]>([]);
   const { user, logoutUser } = useAuthContext();
   const [clients, setClients] = useState<Client[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
+   const [selectedBroker, setSelectedBroker] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -44,6 +48,7 @@ export default function CompanyCostPage() {
     address: "",
     dateOfBirth: "",
     extraInfo: "",
+      broker: "",
   });
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -87,7 +92,18 @@ const formatClientNumber = (num: any) => {
       alert("Failed to fetch deals");
     }
   };
-
+ useEffect(() => {
+    const fetchBrokers = async () => {
+      try {
+        const users = await fetchUsers("broker"); // fetch brokers
+        setBrokers(users);
+      } catch (err) {
+        console.error("Failed to fetch brokers", err);
+        setBrokers([]);
+      }
+    };
+    fetchBrokers();
+  }, []);
   useEffect(() => {
     fetchClients();
     fetchDeals();
@@ -147,6 +163,7 @@ const formatClientNumber = (num: any) => {
         address: "",
         dateOfBirth: "",
         extraInfo: "",
+         broker: "",
         
       });
       fetchClients();
@@ -165,6 +182,7 @@ const formatClientNumber = (num: any) => {
       address: client.address,
       dateOfBirth: client.dateOfBirth,
       extraInfo: client.extraInfo || "",
+        broker: client.broker || "",
     });
     setEditingClient(client);
     setShowForm(true);
@@ -346,6 +364,26 @@ const formatClientNumber = (num: any) => {
                   }
                   className="border border-gray-300 p-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f526a] focus:border-[#0f526a] transition"
                 />
+               {/* broker dropdown */}
+               <div className="mb-3">
+        <label className="block mb-1">Brokers</label>
+        <select
+          className="w-full border p-2 rounded"
+          // value={selectedBroker}
+          value={formData.broker}
+onChange={(e) =>
+  setFormData({ ...formData, broker: e.target.value })
+}
+          // onChange={(e) => setSelectedBroker(e.target.value)}
+        >
+          <option value="">Select Broker</option>
+          {brokers.map((b) => (
+            <option key={b._id} value={b._id}>
+              {b.fullname || b.email}
+            </option>
+          ))}
+        </select>
+      </div>
                 <input
                   placeholder="Address"
                   value={formData.address}
@@ -432,7 +470,10 @@ const formatClientNumber = (num: any) => {
                   })()}
                 </td>
                 <td className="p-2 border">{c.phoneNumber}</td>
-                <td className="p-2 border">{c.broker}</td>
+                {/* <td className="p-2 border">{c.broker}</td> */}
+                <td className="p-2 border">
+  {brokers.find(b => b._id === c.broker)?.fullname || c.broker}
+</td>
                 <td className="p-2 border">{c.address}</td>
                 <td className="p-2 border">{c.extraInfo}</td>
                 <td className="p-2 border">
