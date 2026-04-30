@@ -439,7 +439,21 @@ allocatedBroker: item.allocatedBroker || "",
             <td>{row.name}</td>
             <td>{row.year}</td>
             <td>
-              {row.price ? `£${Number(row.price).toFixed(2)}` : ""}
+              {/* {row.price
+  ? `£${Number(row.price).toLocaleString("de-DE", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`
+  : ""} */}
+              {/* {row.price ?
+               `£${Number(row.price).toFixed(2)}` : ""
+              } */}
+              {row.price
+  ? `£${Number(row.price).toLocaleString("en-GB", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`
+  : ""}
             </td>
             <td>{row.grade}</td>
 
@@ -935,9 +949,13 @@ await http.patch(url, {
                             : ""}
                         </td>
                         <td>
-                          {item.finalPrice !== undefined
+                          {/* {item.finalPrice !== undefined
                             ? `£${Number(item.finalPrice).toFixed(2)}`
-                            : ""}
+                            : ""} */}
+                            £${Number(item.finalPrice).toLocaleString("en-GB", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})}
                         </td>
 
                         {/* status */}

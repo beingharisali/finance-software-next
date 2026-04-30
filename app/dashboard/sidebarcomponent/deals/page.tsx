@@ -244,13 +244,7 @@ useEffect(() => {
       (c) => c.clientNumber.toString() === deal.client.toString(),
     );
     setSelectedClient(clientObj?.clientNumber?.toString() || "");
-    // const clientObj = clients.find(
-    //   (c) => `${c.firstName} ${c.lastName}` === deal.client,
-    // );
-    // setSelectedClient(clientObj?.clientNumber?.toString() || "");
-
-    // Set products and status
-    // setSelectedProducts(deal.products);
+ 
     setSelectedProducts(
       deal.products.map((p: any) => (typeof p === "object" ? p.productId : p)),
     );
@@ -341,17 +335,21 @@ useEffect(() => {
       alert("Status update failed!");
     }
   };
-//   const getProductPrice = (productId: string, fallbackPrice: number, product: any) => {
-//   // const isGold = goldCertifications.some((g) => g._id === productId);
-// const isGold = goldCertifications.some(
-//   (g) => g._id?.toString() === productId?.toString()
-// );
-//   if (isGold) {
-//     return product?.scPrice || fallbackPrice || 0;
-//   }
+  const formatEuroCustom = (value: number) => {
+  if (value === null || value === undefined) return "£0";
 
-//   return product?.finalPrice || fallbackPrice || 0;
-// };
+  const [integerPart, decimalPart] = value.toFixed(2).split(".");
+
+  const lastTwo = integerPart.slice(-2);
+  const remaining = integerPart.slice(0, -2);
+
+  const formattedInteger = remaining
+    ? `${remaining},${lastTwo}`
+    : lastTwo;
+
+  return `£${formattedInteger}.${decimalPart}`;
+};
+
 const getProductPrice = (productId: string, fallbackPrice: number, product: any) => {
   const goldItem = goldCertifications.find(
     (g) => g._id?.toString() === productId?.toString()
@@ -391,9 +389,7 @@ const getProductPrice = (productId: string, fallbackPrice: number, product: any)
   onClick={() => setShowClientDeals(!showClientDeals)}
 >
   <span className="font-semibold">Deals</span>
-  {/* <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                {deals.length}
-              </span> */}
+
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
   {deals.filter(d => d.status.trim().toLowerCase() !== "completed").length}
 </span>
@@ -416,9 +412,7 @@ const getProductPrice = (productId: string, fallbackPrice: number, product: any)
     )
   )
   .map((client) => {
-        // const dealCount = deals.filter(
-        //   (d) => d.client.toString() === client.clientNumber.toString()
-        // ).length;
+  
         const dealCount = deals.filter(
   (d) =>
     d.client.toString() === client.clientNumber.toString() &&
@@ -595,45 +589,7 @@ const getProductPrice = (productId: string, fallbackPrice: number, product: any)
     <span className="text-right">Price</span>
   </div>
 
-        {/* {products
-          .filter((p) => !p.type || p.type === "whisky")
-          .map((p) => {
-            const isSelected = selectedProducts.includes(p._id);
-
-            return (
-              <div
-                key={p._id}
-                className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
-                  isSelected ? "bg-green-100" : ""
-                }`}
-                onClick={() => {
-                  if (isSelected) return;
-
-                  setSelectedProducts((prev) => [...prev, p._id]);
-
-                  setProductPrices((prev) => ({
-                    ...prev,
-                    [p._id]: Number(p.finalPrice || 0),
-                  }));
-
-                  setOpen(false);
-                }}
-              >
-                <span>{p.productId}</span>
-                <span>{p.liquidMake}</span>
-                <span>
-                  {p.product
-                    ? new Date(p.product).toLocaleDateString("en-GB")
-                    : "-"}
-                </span>
-
-                
-                <span className="text-right">
-                  {Number(p.finalPrice || 0).toFixed(2)}
-                </span>
-              </div>
-            );
-          })} */}
+       
           {whiskyProducts
   .filter((p) => !p.type || p.type === "whisky")
   .map((p) => {
@@ -643,14 +599,11 @@ const isSelected = selectedProducts.includes(p._id);
     return (
       <div
         key={p._id}
-        // className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
-        //   isSelected ? "bg-green-100" : ""
-        // }`}
+       
         className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
   isAssigned ? "bg-yellow-200 text-gray-600 cursor-not-allowed" : ""
 }`}
-        // onClick={() => {
-        //   if (isSelected) return;
+
 onClick={() => {
   if (isAssigned) return;
           setSelectedProducts((prev) => [...prev, p._id]);
@@ -696,10 +649,7 @@ onClick={() => {
   </div>
 
        
-          {/* {goldCertifications
-  .filter
-  ((p) => p.type === "gold")
-  .map((p) => */}
+      
   {goldCertifications.map((p) => 
     {
     // const isSelected = selectedProducts.includes(p._id);
@@ -708,14 +658,11 @@ const isSelected = selectedProducts.includes(p._id);
     return (
       <div
         key={p._id}
-        // className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
-        //   isSelected ? "bg-green-100" : ""
-        // }`}
+    
         className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
   isAssigned ? "bg-yellow-200 text-gray-600 cursor-not-allowed" : ""
 }`}
-        // onClick={() => {
-        //   if (isSelected) return;
+     
 onClick={() => {
   if (isAssigned) return;
           setSelectedProducts((prev) => [...prev, p._id]);
@@ -753,67 +700,7 @@ onClick={() => {
     </div>
   </div>
 )}
-          {/* {open && (
-            <div className="absolute z-50 bg-white border w-full max-h-60 overflow-y-auto mt-1 shadow-lg rounded">
-            
-              <div className="grid grid-cols-4 font-bold p-2 border-b bg-gray-100 sticky top-0">
-                <span>ID</span>
-                <span>Product Name</span>
-                <span>Date</span>
-                <span>Price</span>
-              </div>
-
-            
-                {products.map((p) => {
-  const isAssigned = deals.some((d) =>
-    d._id !== editingDealId &&
-
-    d.products.some((prod) => {
-  if (typeof prod === "object" && prod !== null) {
-    const productObj = prod as ProductItem;
-    return productObj.productId === p._id;
-  }
-  return prod === p._id;
-})
-  );
-
-                const isSelected = selectedProducts.includes(p._id);
-
-                return (
-                  <div
-                    key={p._id}
-                    className={`grid grid-cols-4 p-2 cursor-pointer hover:bg-gray-200 ${
-                      isAssigned
-                        ? "bg-yellow-200 text-gray-700 cursor-not-allowed"
-                        : ""
-                    }`}
-                    onClick={() => {
-                      if (!isAssigned && !isSelected) {
-                        setSelectedProducts([
-                          ...selectedProducts,
-                          p._id,
-                        ]);
-                        setProductPrices((prev) => ({
-                          ...prev,
-                          [p._id]: p.finalPrice,
-                        }));
-                        setOpen(false);
-                      }
-                    }}
-                  >
-                    <span>{p.productId}</span>
-                    <span>{p.liquidMake}</span>
-                    <span>
-                      {p.product
-                        ? new Date(p.product).toLocaleDateString()
-                        : "-"}
-                    </span>
-                    <span>{p.finalPrice}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )} */}
+         
         </div>
 
         {/* Selected Products */}
@@ -1079,40 +966,32 @@ onClick={() => {
   <span className="border-l px-2 text-right whitespace-nowrap">
     {/* {price || product.finalPrice} */}
     {/* {Number(price || product.finalPrice || 0).toFixed(2)} */}
-    {Number(
+    {/* {Number(
   getProductPrice(productId, price, product)
-).toFixed(2)}
+).toFixed(2)} */}
+{formatEuroCustom(
+  Number(getProductPrice(productId, price, product))
+)}
   </span>
 </p>
-  //                         <p
-  //                           key={productId}
-  //                           className="flex justify-between items-center mb-1 "
-  //                         >
-  //                           <span  className=" px-2">{product.liquidMake}</span>
-  //                           <span className="border-l px-2">
-  //                             {product.productId} |{" "}
-  //                             {/* {product.product
-  //                               ? product.product.split("T")[0]
-  //                               : "-"} */}
-  //                               {product.product
-  // ? new Date(product.product).toLocaleDateString("en-GB")
-  // : "-"}
-  //                           </span>
-  //                           <span className="border-l px-2">
-  //                             {price || product.finalPrice}
-  //                           </span>
-  //                         </p>
+ 
                         );
                       })}
                     </td>
                       
                     {/* <td className="border px-4 py-2">{deal.commission || 0}</td> */}
                     <td className="border px-4 py-2">
-  {calculateCommission(deal.products, deal.commission)}
+  {/* {calculateCommission(deal.products, deal.commission)} */}
+  {formatEuroCustom(
+  calculateCommission(deal.products, deal.commission)
+)}
 </td>
                     <td className="border px-4 py-2 font-bold text-green-600">
                      
-                      {calculateTotal(deal.products, deal.commission).toFixed(2)}
+                      {/* {calculateTotal(deal.products, deal.commission).toFixed(2)} */}
+                      {formatEuroCustom(
+  calculateTotal(deal.products, deal.commission)
+)}
                     </td>
 
                     <td className="border px-4 py-2 flex gap-2">
