@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -10,10 +9,9 @@ import "../../../cssfiles/transactionfilters.css";
 import http from "@/services/http";
 import { fetchUsers } from "@/services/user.api";
 
-
 interface Client {
   clientNumber: number;
-  broker:string;
+  broker: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -39,7 +37,7 @@ export default function CompanyCostPage() {
   const { user, logoutUser } = useAuthContext();
   const [clients, setClients] = useState<Client[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
-   const [selectedBroker, setSelectedBroker] = useState("");
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -48,7 +46,7 @@ export default function CompanyCostPage() {
     address: "",
     dateOfBirth: "",
     extraInfo: "",
-      broker: "",
+    broker: "",
   });
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -56,21 +54,57 @@ export default function CompanyCostPage() {
 
   // Dropdown for client deals
   const [showClientDeals, setShowClientDeals] = useState(false);
-  const [selectedClientDealsList, setSelectedClientDealsList] = useState<Deal[]>([]);
-// const formatClientNumber = (num: number) => {
-//   return `SC${String(num).padStart(3, "0")}`;
-// };
-const formatClientNumber = (num: any) => {
-  if (!num) return "";
+  const [selectedClientDealsList, setSelectedClientDealsList] = useState<
+    Deal[]
+  >([]);
+  // const formatClientNumber = (num: number) => {
+  //   return `SC${String(num).padStart(3, "0")}`;
+  // };
+  const [loading, setLoading] = useState(true);
 
-  const str = String(num);
+useEffect(() => {
+  const loadData = async () => {
+    try {
+      setLoading(true);
 
-  // agar already SC hai → as-it-is return karo
-  if (str.startsWith("SC")) return str;
+      const [clientsRes, dealsRes] = await Promise.all([
+        http.get("/clients"),
+        http.get("/deals"),
+      ]);
 
-  // warna format karo
-  return `SC${str.padStart(3, "0")}`;
-};
+      setClients(clientsRes.data);
+      setDeals(dealsRes.data);
+    } catch (err) {
+      console.error("Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  loadData();
+}, []);
+const dealsMap = React.useMemo(() => {
+  const map: Record<string, Deal[]> = {};
+
+  deals.forEach((d) => {
+    const key = d.client.toString();
+    if (!map[key]) map[key] = [];
+    map[key].push(d);
+  });
+
+  return map;
+}, [deals]);
+  const formatClientNumber = (num: any) => {
+    if (!num) return "";
+
+    const str = String(num);
+
+    // agar already SC hai → as-it-is return karo
+    if (str.startsWith("SC")) return str;
+
+    // warna format karo
+    return `SC${str.padStart(3, "0")}`;
+  };
   // Fetch clients
   const fetchClients = async () => {
     try {
@@ -92,7 +126,8 @@ const formatClientNumber = (num: any) => {
       alert("Failed to fetch deals");
     }
   };
- useEffect(() => {
+  
+  useEffect(() => {
     const fetchBrokers = async () => {
       try {
         const users = await fetchUsers("broker"); // fetch brokers
@@ -104,10 +139,7 @@ const formatClientNumber = (num: any) => {
     };
     fetchBrokers();
   }, []);
-  useEffect(() => {
-    fetchClients();
-    fetchDeals();
-  }, []);
+
 
   if (!user) return <p>Loading...</p>;
 
@@ -127,7 +159,7 @@ const formatClientNumber = (num: any) => {
       });
 
       alert(
-        `${res.data.msg}\nAdded: ${res.data.added}\nSkipped: ${res.data.skipped}`
+        `${res.data.msg}\nAdded: ${res.data.added}\nSkipped: ${res.data.skipped}`,
       );
 
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -140,8 +172,16 @@ const formatClientNumber = (num: any) => {
 
   const handleSaveClient = async () => {
     try {
-      const { firstName, lastName, email, phoneNumber, address, dateOfBirth } = formData;
-      if (!firstName || !lastName || !email || !phoneNumber || !address || !dateOfBirth) {
+      const { firstName, lastName, email, phoneNumber, address, dateOfBirth } =
+        formData;
+      if (
+        !firstName ||
+        !lastName ||
+        !email ||
+        !phoneNumber ||
+        !address ||
+        !dateOfBirth
+      ) {
         return alert("Please fill all fields");
       }
 
@@ -163,8 +203,7 @@ const formatClientNumber = (num: any) => {
         address: "",
         dateOfBirth: "",
         extraInfo: "",
-         broker: "",
-        
+        broker: "",
       });
       fetchClients();
     } catch (err: any) {
@@ -182,7 +221,7 @@ const formatClientNumber = (num: any) => {
       address: client.address,
       dateOfBirth: client.dateOfBirth,
       extraInfo: client.extraInfo || "",
-        broker: client.broker || "",
+      broker: client.broker || "",
     });
     setEditingClient(client);
     setShowForm(true);
@@ -200,6 +239,11 @@ const formatClientNumber = (num: any) => {
       alert(err.response?.data?.msg || "Error deleting client");
     }
   };
+  {loading && (
+  <div className="text-center py-4 text-gray-600">
+    Loading data...
+  </div>
+)}
 
   return (
     <div className="dashboard-container flex">
@@ -225,9 +269,11 @@ const formatClientNumber = (num: any) => {
 
                 <div className="max-h-80 overflow-y-auto p-2 space-y-2">
                   {clients.map((client) => {
-                    const clientDeals = deals.filter(
-                      (d) => d.client.toString() === client.clientNumber.toString()
-                    );
+                    // const clientDeals = deals.filter(
+                    //   (d) =>
+                    //     d.client.toString() === client.clientNumber.toString(),
+                    // );
+                    const clientDeals = dealsMap[client.clientNumber] || [];
                     const dealCount = clientDeals.length;
 
                     const isExpanded =
@@ -244,7 +290,9 @@ const formatClientNumber = (num: any) => {
                         <div
                           className="flex justify-between items-center p-3 cursor-pointer"
                           onClick={() =>
-                            setSelectedClientDealsList(isExpanded ? [] : clientDeals)
+                            setSelectedClientDealsList(
+                              isExpanded ? [] : clientDeals,
+                            )
                           }
                         >
                           <span className="font-medium">
@@ -271,7 +319,9 @@ const formatClientNumber = (num: any) => {
                               >
                                 <span>{deal.ref}</span>
                                 <span>
-                                  {new Date(deal.date).toLocaleDateString("en-GB")}
+                                  {new Date(deal.date).toLocaleDateString(
+                                    "en-GB",
+                                  )}
                                 </span>
                                 <span>{deal.status}</span>
                               </div>
@@ -285,7 +335,9 @@ const formatClientNumber = (num: any) => {
               </div>
             )}
 
-            <span className="profile-name">{user.fullname || user.email || "Guest"}</span>
+            <span className="profile-name">
+              {user.fullname || user.email || "Guest"}
+            </span>
             <button
               className="logout-btn  text-white px-3 py-1 rounded"
               onClick={logoutUser}
@@ -306,14 +358,19 @@ const formatClientNumber = (num: any) => {
         </div>
 
         {/* CSV Upload */}
-        <form className="mb-6 flex gap-2 items-center justify-end" onSubmit={handleUpload}>
+        <form
+          className="mb-6 flex gap-2 items-center justify-end"
+          onSubmit={handleUpload}
+        >
           <input
             type="file"
             accept=".csv"
             ref={fileInputRef}
             className="border p-2 rounded text-black w-[280px]"
           />
-          <button className="bg-[#0f526a] text-white px-4 py-2 rounded">Upload CSV</button>
+          <button className="bg-[#0f526a] text-white px-4 py-2 rounded">
+            Upload CSV
+          </button>
         </form>
 
         {/* Form Modal */}
@@ -329,7 +386,9 @@ const formatClientNumber = (num: any) => {
               className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] relative text-black"
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 className="text-xl mb-4">{editingClient ? "Edit Client" : "Add New Client"}</h2>
+              <h2 className="text-xl mb-4">
+                {editingClient ? "Edit Client" : "Add New Client"}
+              </h2>
 
               <div className="grid grid-cols-2 gap-4">
                 <input
@@ -364,26 +423,26 @@ const formatClientNumber = (num: any) => {
                   }
                   className="border border-gray-300 p-2.5 rounded-md focus:outline-none focus:ring-2 focus:ring-[#0f526a] focus:border-[#0f526a] transition"
                 />
-               {/* broker dropdown */}
-               <div className="mb-3">
-        <label className="block mb-1">Brokers</label>
-        <select
-          className="w-full border p-2 rounded"
-          // value={selectedBroker}
-          value={formData.broker}
-onChange={(e) =>
-  setFormData({ ...formData, broker: e.target.value })
-}
-          // onChange={(e) => setSelectedBroker(e.target.value)}
-        >
-          <option value="">Select Broker</option>
-          {brokers.map((b) => (
-            <option key={b._id} value={b._id}>
-              {b.fullname || b.email}
-            </option>
-          ))}
-        </select>
-      </div>
+                {/* broker dropdown */}
+                <div className="mb-3">
+                  <label className="block mb-1">Brokers</label>
+                  <select
+                    className="w-full border p-2 rounded"
+                    // value={selectedBroker}
+                    value={formData.broker}
+                    onChange={(e) =>
+                      setFormData({ ...formData, broker: e.target.value })
+                    }
+                    // onChange={(e) => setSelectedBroker(e.target.value)}
+                  >
+                    <option value="">Select Broker</option>
+                    {brokers.map((b) => (
+                      <option key={b._id} value={b._id}>
+                        {b.fullname || b.email}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <input
                   placeholder="Address"
                   value={formData.address}
@@ -433,86 +492,90 @@ onChange={(e) =>
 
         {/* Clients Table */}
         <div className="  ">
-  <div className="max-h-[500px] overflow-y-auto">
-    <table className="record-table min-w-[1200px] w-full border-collapse text-sm">
-      <thead className="sticky top-0 bg-gray-100 z-10">
-        {/* <table className="record-table min-w-[1200px] w-full border-collapse text-sm">
+          <div className="max-h-[500px] overflow-y-auto">
+            <table className="record-table min-w-[1200px] w-full border-collapse text-sm">
+              <thead className="sticky top-0 bg-gray-100 z-10">
+                {/* <table className="record-table min-w-[1200px] w-full border-collapse text-sm">
           <thead> */}
-            <tr className="bg-gray-100">
-              <th className="p-2 border">Client Number</th>
-              <th className="p-2 border">First Name</th>
-              <th className="p-2 border">Last Name</th>
-              <th className="p-2 border">Email</th>
-              <th className="p-2 border">DOB</th>
-              <th className="p-2 border">Phone</th>
-              <th className="p-2 border">Broker</th>
-              <th className="p-2 border">Address</th>
-              <th className="p-2 border">Notes</th>
-              <th className="p-2 border">Deals</th>
-              <th className="p-2 border">Actions</th>
-            </tr>
-            
-          </thead>
-          <tbody>
-            {clients.map((c) => (
-              <tr key={c.clientNumber}>
-              
-                <td className="p-2 border">{formatClientNumber(c.clientNumber)}</td>
-                <td className="p-2 border">{c.firstName}</td>
-                <td className="p-2 border"> {c.lastName}</td>
-                <td className="p-2 border">{c.email}</td>
-                <td className="p-2 border">
-                  {(() => {
-                    const d = new Date(c.dateOfBirth);
-                    return `${String(d.getUTCDate()).padStart(2, "0")}/${String(
-                      d.getUTCMonth() + 1
-                    ).padStart(2, "0")}/${d.getUTCFullYear()}`;
-                  })()}
-                </td>
-                <td className="p-2 border">{c.phoneNumber}</td>
-                {/* <td className="p-2 border">{c.broker}</td> */}
-                <td className="p-2 border">
-  {brokers.find(b => b._id === c.broker)?.fullname || c.broker}
-</td>
-                <td className="p-2 border">{c.address}</td>
-                <td className="p-2 border">{c.extraInfo}</td>
-                <td className="p-2 border">
-  {/* clientDeals calculate karna */}
-  {(() => {
-    const clientDeals = deals.filter(
-      (d) => d.client.toString() === c.clientNumber.toString()
-    );
-    return (
-      <button
-        className="bg-green-600 text-white px-2 py-1 rounded"
-        onClick={() => setSelectedClientDealsList(clientDeals)}
-      >
-        {clientDeals.length} 
-      </button>
-    );
-  })()}
-</td>
+                <tr className="bg-gray-100">
+                  <th className="p-2 border">Client Number</th>
+                  <th className="p-2 border">First Name</th>
+                  <th className="p-2 border">Last Name</th>
+                  <th className="p-2 border">Email</th>
+                  <th className="p-2 border">DOB</th>
+                  <th className="p-2 border">Phone</th>
+                  <th className="p-2 border">Broker</th>
+                  <th className="p-2 border">Address</th>
+                  <th className="p-2 border">Notes</th>
+                  <th className="p-2 border">Deals</th>
+                  <th className="p-2 border">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clients.map((c) => (
+                  <tr key={c.clientNumber}>
+                    <td className="p-2 border">
+                      {formatClientNumber(c.clientNumber)}
+                    </td>
+                    <td className="p-2 border">{c.firstName}</td>
+                    <td className="p-2 border"> {c.lastName}</td>
+                    <td className="p-2 border">{c.email}</td>
+                    <td className="p-2 border">
+                      {(() => {
+                        const d = new Date(c.dateOfBirth);
+                        return `${String(d.getUTCDate()).padStart(2, "0")}/${String(
+                          d.getUTCMonth() + 1,
+                        ).padStart(2, "0")}/${d.getUTCFullYear()}`;
+                      })()}
+                    </td>
+                    <td className="p-2 border">{c.phoneNumber}</td>
+                    {/* <td className="p-2 border">{c.broker}</td> */}
+                    <td className="p-2 border">
+                      {brokers.find((b) => b._id === c.broker)?.fullname ||
+                        c.broker}
+                    </td>
+                    <td className="p-2 border">{c.address}</td>
+                    <td className="p-2 border">{c.extraInfo}</td>
+                    <td className="p-2 border">
+                      {/* clientDeals calculate karna */}
+                      {(() => {
+                        // const clientDeals = deals.filter(
+                        //   (d) =>
+                        //     d.client.toString() === c.clientNumber.toString(),
+                        // );
+                        const clientDeals = dealsMap[c.clientNumber] || [];
+                        return (
+                          <button
+                            className="bg-green-600 text-white px-2 py-1 rounded"
+                            onClick={() =>
+                              setSelectedClientDealsList(clientDeals)
+                            }
+                          >
+                            {clientDeals.length}
+                          </button>
+                        );
+                      })()}
+                    </td>
 
-                <td className="p-2 border flex gap-2">
-                  <button
-                    className="bg-blue-600 text-white px-3 py-1 rounded"
-                    onClick={() => handleEditClient(c)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="bg-red-600 text-white px-3 py-1 rounded"
-                    onClick={() => handleDeleteClient(c.clientNumber)}
-                  >
-                    Delete
-                  </button>
-                </td>
-                
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
+                    <td className="p-2 border flex gap-2">
+                      <button
+                        className="bg-blue-600 text-white px-3 py-1 rounded"
+                        onClick={() => handleEditClient(c)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="bg-red-600 text-white px-3 py-1 rounded"
+                        onClick={() => handleDeleteClient(c.clientNumber)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
     </div>

@@ -56,7 +56,15 @@ const [goldCertifications, setGoldCertifications] = useState<any[]>([]);
   const [showClientDeals, setShowClientDeals] = useState(false);
   const [selectedClientDealsList, setSelectedClientDealsList] = useState<Deal[]>([]);
   // column product
-
+const isProductAssigned = (productId: string) => {
+  return deals.some((d) =>
+    d._id !== editingDealId &&
+    d.products.some((p: any) => {
+      const id = typeof p === "object" ? p.productId : p;
+      return id === productId;
+    })
+  );
+};
   useEffect(() => {
     const fetchBrokers = async () => {
       try {
@@ -333,8 +341,39 @@ useEffect(() => {
       alert("Status update failed!");
     }
   };
+//   const getProductPrice = (productId: string, fallbackPrice: number, product: any) => {
+//   // const isGold = goldCertifications.some((g) => g._id === productId);
+// const isGold = goldCertifications.some(
+//   (g) => g._id?.toString() === productId?.toString()
+// );
+//   if (isGold) {
+//     return product?.scPrice || fallbackPrice || 0;
+//   }
+
+//   return product?.finalPrice || fallbackPrice || 0;
+// };
+const getProductPrice = (productId: string, fallbackPrice: number, product: any) => {
+  const goldItem = goldCertifications.find(
+    (g) => g._id?.toString() === productId?.toString()
+  );
+
+  const whiskyItem = whiskyProducts.find(
+    (w) => w._id?.toString() === productId?.toString()
+  );
+
+  if (goldItem) {
+    return goldItem.scPrice || fallbackPrice || 0;
+  }
+
+  if (whiskyItem) {
+    return whiskyItem.finalPrice || fallbackPrice || 0;
+  }
+
+  return product?.finalPrice || fallbackPrice || 0;
+};
 
   if (!user) return <p>Loading...</p>;
+  const allProducts = [...(products || []), ...(goldCertifications || [])];
   return (
     <div className="dashboard-container flex">
       <Sidebar activePage="Deals" />
@@ -598,17 +637,22 @@ useEffect(() => {
           {whiskyProducts
   .filter((p) => !p.type || p.type === "whisky")
   .map((p) => {
-    const isSelected = selectedProducts.includes(p._id);
-
+    // const isSelected = selectedProducts.includes(p._id);
+const isAssigned = isProductAssigned(p._id);
+const isSelected = selectedProducts.includes(p._id);
     return (
       <div
         key={p._id}
+        // className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
+        //   isSelected ? "bg-green-100" : ""
+        // }`}
         className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
-          isSelected ? "bg-green-100" : ""
-        }`}
-        onClick={() => {
-          if (isSelected) return;
-
+  isAssigned ? "bg-yellow-200 text-gray-600 cursor-not-allowed" : ""
+}`}
+        // onClick={() => {
+        //   if (isSelected) return;
+onClick={() => {
+  if (isAssigned) return;
           setSelectedProducts((prev) => [...prev, p._id]);
 
           setProductPrices((prev) => ({
@@ -658,17 +702,22 @@ useEffect(() => {
   .map((p) => */}
   {goldCertifications.map((p) => 
     {
-    const isSelected = selectedProducts.includes(p._id);
-
+    // const isSelected = selectedProducts.includes(p._id);
+const isAssigned = isProductAssigned(p._id);
+const isSelected = selectedProducts.includes(p._id);
     return (
       <div
         key={p._id}
+        // className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
+        //   isSelected ? "bg-green-100" : ""
+        // }`}
         className={`grid grid-cols-4 p-2 text-xs cursor-pointer hover:bg-gray-200 ${
-          isSelected ? "bg-green-100" : ""
-        }`}
-        onClick={() => {
-          if (isSelected) return;
-
+  isAssigned ? "bg-yellow-200 text-gray-600 cursor-not-allowed" : ""
+}`}
+        // onClick={() => {
+        //   if (isSelected) return;
+onClick={() => {
+  if (isAssigned) return;
           setSelectedProducts((prev) => [...prev, p._id]);
 
           setProductPrices((prev) => ({
@@ -770,7 +819,11 @@ useEffect(() => {
         {/* Selected Products */}
         <div className="mt-3">
           {selectedProducts.map((id, index) => {
-            const product = products.find((p) => p._id === id);
+            // const product = products.find((p) => p._id === id);
+            const product =
+  products.find((p) => p._id === id) ||
+  whiskyProducts.find((p) => p._id === id) ||
+  goldCertifications.find((p) => p._id === id);
 
             return (
               <div
@@ -1025,7 +1078,10 @@ useEffect(() => {
   {/* Price */}
   <span className="border-l px-2 text-right whitespace-nowrap">
     {/* {price || product.finalPrice} */}
-    {Number(price || product.finalPrice || 0).toFixed(2)}
+    {/* {Number(price || product.finalPrice || 0).toFixed(2)} */}
+    {Number(
+  getProductPrice(productId, price, product)
+).toFixed(2)}
   </span>
 </p>
   //                         <p
