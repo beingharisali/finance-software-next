@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -37,7 +38,9 @@ export default function CompanyCostPage() {
   const { user, logoutUser } = useAuthContext();
   const [clients, setClients] = useState<Client[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
-  
+  // Existing states ke sath ye add karein:
+const [selectedClientName, setSelectedClientName] = useState("");
+const [isDealsModalOpen, setIsDealsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -83,6 +86,12 @@ useEffect(() => {
 
   loadData();
 }, []);
+const handleViewDeals = (client: Client) => {
+  const clientDeals = dealsMap[client.clientNumber] || [];
+  setSelectedClientDealsList(clientDeals);
+  setSelectedClientName(`${client.firstName} ${client.lastName}`);
+  setIsDealsModalOpen(true);
+};
 const dealsMap = React.useMemo(() => {
   const map: Record<string, Deal[]> = {};
 
@@ -248,7 +257,75 @@ const dealsMap = React.useMemo(() => {
   return (
     <div className="dashboard-container flex">
       <Sidebar activePage="Clients" />
+{/* Specific Client Deals Modal */}
+{isDealsModalOpen && (
+  <div 
+    className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+    onClick={() => setIsDealsModalOpen(false)}
+  >
+    <div 
+      className="bg-white w-full max-w-2xl p-6 rounded-xl shadow-2xl text-black"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex justify-between items-center mb-4 border-b pb-2">
+        <h2 className="text-xl font-bold">Deals for {selectedClientName}</h2>
+        <button 
+          onClick={() => setIsDealsModalOpen(false)}
+          className="text-gray-500 hover:text-red-500 text-2xl"
+        >
+          &times;
+        </button>
+      </div>
 
+      <div className="max-h-[400px] overflow-y-auto">
+        {selectedClientDealsList.length > 0 ? (
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="p-2 border">Ref No</th>
+                <th className="p-2 border">Date</th>
+                <th className="p-2 border">Broker</th>
+                <th className="p-2 border">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedClientDealsList.map((deal) => (
+                <tr key={deal._id} className="hover:bg-gray-50">
+                  <td className="p-2 border">{deal.ref}</td>
+                  <td className="p-2 border">
+                    {new Date(deal.date).toLocaleDateString("en-GB")}
+                  </td>
+                  <td className="p-2 border">
+                    {brokers.find(b => b._id === deal.broker)?.fullname || deal.broker}
+                  </td>
+                  <td className="p-2 border">
+                    <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                      {deal.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="text-center py-10">
+            <p className="text-gray-500 text-lg italic">No deals assigned to this client yet.</p>
+         
+          </div>
+        )}
+      </div>
+      
+      <div className="mt-6 text-right">
+        <button 
+          onClick={() => setIsDealsModalOpen(false)}
+          className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       <main className="main-content flex-1 p-6">
         {/* Top bar */}
         <div className="main-top flex justify-between items-center mb-6 text-black">
@@ -261,79 +338,7 @@ const dealsMap = React.useMemo(() => {
               <span className="font-semibold">Client Deals</span>
             </div>
 
-            {showClientDeals && (
-              <div className="absolute top-16 right-44 bg-white text-black shadow-lg rounded w-[350px] z-50">
-                <div className="p-3 border-b font-semibold text-lg">
-                  Clients Deals Summary
-                </div>
-
-                <div className="max-h-80 overflow-y-auto p-2 space-y-2">
-                  {clients.map((client) => {
-                    // const clientDeals = deals.filter(
-                    //   (d) =>
-                    //     d.client.toString() === client.clientNumber.toString(),
-                    // );
-                    const clientDeals = dealsMap[client.clientNumber] || [];
-                    const dealCount = clientDeals.length;
-
-                    const isExpanded =
-                      selectedClientDealsList.length > 0 &&
-                      selectedClientDealsList[0]?.client.toString() ===
-                        client.clientNumber.toString();
-
-                    return (
-                      <div
-                        key={client.clientNumber}
-                        className="border rounded shadow-sm bg-gray-50 hover:bg-gray-100 transition"
-                      >
-                        {/* Client header */}
-                        <div
-                          className="flex justify-between items-center p-3 cursor-pointer"
-                          onClick={() =>
-                            setSelectedClientDealsList(
-                              isExpanded ? [] : clientDeals,
-                            )
-                          }
-                        >
-                          <span className="font-medium">
-                            {client.firstName} {client.lastName}
-                          </span>
-                          <span className="bg-green-200 text-green-800 text-xs px-2 py-1 rounded-full font-semibold">
-                            {dealCount}
-                          </span>
-                        </div>
-
-                        {/* Expanded deals */}
-                        {isExpanded && selectedClientDealsList.length > 0 && (
-                          <div className="border-t bg-white p-2">
-                            <div className="grid grid-cols-3 font-semibold text-sm mb-1">
-                              <span>Reference No</span>
-                              <span>Date</span>
-                              <span>Status</span>
-                            </div>
-
-                            {selectedClientDealsList.map((deal) => (
-                              <div
-                                key={deal._id}
-                                className="grid grid-cols-3 text-sm p-1 border-b hover:bg-gray-50 transition"
-                              >
-                                <span>{deal.ref}</span>
-                                <span>
-                                  {new Date(deal.date).toLocaleDateString(
-                                    "en-GB",
-                                  )}
-                                </span>
-                                <span>{deal.status}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            
 
             <span className="profile-name">
               {user.fullname || user.email || "Guest"}
@@ -349,6 +354,12 @@ const dealsMap = React.useMemo(() => {
 
         {/* Add button */}
         <div>
+          {/* <button
+            className="bg-[#0f526a] text-white px-4 py-2 rounded"
+            onClick={() => setShowForm(true)}
+          >
+            ADD New Client
+          </button> */}
           <button
             className="bg-[#0f526a] text-white px-4 py-2 rounded"
             onClick={() => setShowForm(true)}
@@ -537,25 +548,21 @@ const dealsMap = React.useMemo(() => {
                     <td className="p-2 border">{c.address}</td>
                     <td className="p-2 border">{c.extraInfo}</td>
                     <td className="p-2 border">
-                      {/* clientDeals calculate karna */}
-                      {(() => {
-                        // const clientDeals = deals.filter(
-                        //   (d) =>
-                        //     d.client.toString() === c.clientNumber.toString(),
-                        // );
-                        const clientDeals = dealsMap[c.clientNumber] || [];
-                        return (
-                          <button
-                            className="bg-green-600 text-white px-2 py-1 rounded"
-                            onClick={() =>
-                              setSelectedClientDealsList(clientDeals)
-                            }
-                          >
-                            {clientDeals.length}
-                          </button>
-                        );
-                      })()}
-                    </td>
+  {(() => {
+    const clientDeals = dealsMap[c.clientNumber] || [];
+    const dealCount = clientDeals.length;
+    return (
+      <button
+        className={`${
+          dealCount > 0 ? "bg-green-600" : "bg-gray-400"
+        } text-white px-2 py-1 rounded min-w-[30px]`}
+        onClick={() => handleViewDeals(c)}
+      >
+        {dealCount}
+      </button>
+    );
+  })()}
+</td>
 
                     <td className="p-2 border flex gap-2">
                       <button
