@@ -18,13 +18,13 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage }) => {
       { name: "Dashboard", path: "/dashboard/admin" },
 
       { name: "User Management", path: "/dashboard/sidebarcomponent/usermanagement" },
-      { name: "Manager Record", path: "/dashboard/admin/adminmanagerrecord" },
-      { name: "Assistant Record", path: "/dashboard/admin/adminagentrecord" },
+      // { name: "Manager Record", path: "/dashboard/admin/adminmanagerrecord" },
+      // { name: "Assistant Record", path: "/dashboard/admin/adminagentrecord" },
       { name: " Broker Record", path: "/dashboard/adminbrokerrecord" },
       { name: "Finance", path: "/dashboard/sidebarcomponent/transaction" },
 
-      { name: "Sale", path: "/dashboard/sidebarcomponent/sale" },
-      { name: "Company Cost", path: "/dashboard/sidebarcomponent/companycost" },
+      // { name: "Sale", path: "/dashboard/sidebarcomponent/sale" },
+      // { name: "Company Cost", path: "/dashboard/sidebarcomponent/companycost" },
       { name: "Product", path: "/dashboard/sidebarcomponent/product" },
       { name: "Clients", path: "/dashboard/sidebarcomponent/clients" },
       { name: "Deals", path: "/dashboard/sidebarcomponent/deals" },
