@@ -139,26 +139,7 @@ export default function ManagerDashboardTransaction() {
             : "",
       }));
       // only new add
-      // fix
-//    const transactionsCleaned = fetchedTransactions.map((txn) => ({
-//   ...txn,
-//   category:
-//     txn.category &&
-//     txn.category.trim() !== "" &&
-//     txn.category.trim().toLowerCase() !== "uncategorised"
-//       ? txn.category
-//       : txn.transactionType || "",
-// }));
-
-      // ----- Filter by transactionType if searchCategory is not empty -----
-
-      // const filteredTransactions = searchCategory
-      //   ? transactionsCleaned.filter((txn) =>
-      //       txn.transactionType
-      //         ?.toLowerCase()
-      //         .includes(searchCategory.toLowerCase()),
-      //     )
-      //   : transactionsCleaned;
+ 
       const filteredTransactions = searchCategory
   ? transactionsCleaned.filter((txn) =>
       txn.transactionDescription
