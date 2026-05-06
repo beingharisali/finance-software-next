@@ -913,7 +913,41 @@ const fetchAllTransactionsForNotifications = async () => {
             <h2 className="text-black text-2xl font-bold">
               Recent Transactions
             </h2>
-            <table className="text-black ">
+            <table className="w-full text-black mt-4">
+  <thead>
+    <tr className="border-b">
+      <th className="text-left px-4 py-2">Date</th>
+      <th className="text-left px-4 py-2">Description</th>
+      <th className="text-right px-4 py-2">Amount</th>
+      <th className="text-left px-4 py-2">Category</th>
+    </tr>
+  </thead>
+  <tbody>
+    {transactions && transactions.length > 0 ? (
+      transactions
+        .slice()
+        .reverse()
+        .slice(0, 5)
+        .map((txn, idx) => (
+          <tr key={idx} className="border-b last:border-none hover:bg-gray-50">
+            <td className="px-4 py-2">
+              {txn.transactionDate ? moment(txn.transactionDate).format("DD/MMM/YYYY") : "-"}
+            </td>
+            <td className="px-4 py-2">{txn.transactionDescription || "-"}</td>
+            <td className={`px-4 py-2 text-right font-medium ${Number(txn.amount) >= 0 ? "text-green-600" : "text-red-600"}`}>
+              £{txn.amount ? Number(txn.amount).toLocaleString(undefined, { minimumFractionDigits: 2 }) : "0.00"}
+            </td>
+            <td className="px-4 py-2">{txn.category || txn.transactionType || "Uncategorized"}</td>
+          </tr>
+        ))
+    ) : (
+      <tr>
+        <td colSpan="4" className="text-center py-4 text-gray-500">No transactions found.</td>
+      </tr>
+    )}
+  </tbody>
+</table>
+            {/* <table className="text-black ">
               <thead>
                 <tr>
                   <th>Date</th>
@@ -958,7 +992,7 @@ const fetchAllTransactionsForNotifications = async () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table> */}
           </section>
         </main>
       </div>
