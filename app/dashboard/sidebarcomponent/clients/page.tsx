@@ -60,9 +60,7 @@ const [isDealsModalOpen, setIsDealsModalOpen] = useState(false);
   const [selectedClientDealsList, setSelectedClientDealsList] = useState<
     Deal[]
   >([]);
-  // const formatClientNumber = (num: number) => {
-  //   return `SC${String(num).padStart(3, "0")}`;
-  // };
+
   const [loading, setLoading] = useState(true);
 
 useEffect(() => {
@@ -174,7 +172,9 @@ const dealsMap = React.useMemo(() => {
       if (fileInputRef.current) fileInputRef.current.value = "";
       fetchClients();
     } catch (err: any) {
-      console.error("CSV upload error:", err);
+      // console.error("CSV upload error:", err);
+      console.error("CSV upload error..", err);
+    
       alert(err.response?.data?.msg || "Upload failed");
     }
   };
