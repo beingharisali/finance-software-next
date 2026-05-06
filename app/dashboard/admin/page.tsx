@@ -942,7 +942,7 @@ const fetchAllTransactionsForNotifications = async () => {
         ))
     ) : (
       <tr>
-        <td colSpan="4" className="text-center py-4 text-gray-500">No transactions found.</td>
+        <td colSpan={4} className="text-center py-4 text-gray-500">No transactions found.</td>
       </tr>
     )}
   </tbody>
