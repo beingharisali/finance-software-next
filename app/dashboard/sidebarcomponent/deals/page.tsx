@@ -28,11 +28,30 @@ interface Deal {
 // export default function CompanyCostPage() {
 export default function CompanyCostPage() {
   const { user, logoutUser } = useAuthContext();
-
-  const [open, setOpen] = useState(false);
-  const [productPrices, setProductPrices] = useState<{ [key: string]: number }>(
-    {},
+//  const getProductDate = (product: any) => {
+//     return (
+//       product?.product ||
+//       product?.createdAt ||
+//       product?.date ||
+//       product?.issuedAt ||
+//       new Date() 
+//     );
+//   };
+const getProductDate = (product: any) => {
+  return (
+    product?.createdAt ||
+    product?.product ||
+    product?.date ||
+    product?.issuedAt ||
+    null
   );
+};
+  const [open, setOpen] = useState(false);
+  // const [productPrices, setProductPrices] = useState<{ [key: string]: number }>(
+  //   {},
+  // );
+  // Is line ko aise update karein
+const [productPrices, setProductPrices] = useState<{[key: string]: any}>({});
   const [brokers, setBrokers] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
@@ -141,6 +160,7 @@ useEffect(() => {
 
 //   fetchCertifications();
 // }, []);
+
 useEffect(() => {
   const fetchCertifications = async () => {
     try {
@@ -160,6 +180,7 @@ useEffect(() => {
 
   fetchCertifications();
 }, []);
+
   // Fetch existing deals from DB on page load
   useEffect(() => {
     const fetchDeals = async () => {
@@ -195,17 +216,31 @@ useEffect(() => {
       return;
     }
 
+    // const payload = {
+    //   broker: selectedBroker,
+    //   client: selectedClient,
+    //   // products: selectedProducts,
+    //   products: selectedProducts.map((id) => ({
+    //     productId: id,
+    //     price: productPrices[id],
+    //   })),
+    //   status,
+    //   commission,
+    // };
     const payload = {
-      broker: selectedBroker,
-      client: selectedClient,
-      // products: selectedProducts,
-      products: selectedProducts.map((id) => ({
-        productId: id,
-        price: productPrices[id],
-      })),
-      status,
-      commission,
+  broker: selectedBroker,
+  client: selectedClient,
+  products: selectedProducts.map((id) => {
+    // Current product dhoondein taake default price mil sake agar edit na kiya ho
+    const p = allProducts.find(item => item._id === id);
+    return {
+      productId: id,
+      price: Number(productPrices[id] ?? (p?.scPrice || p?.finalPrice || 0)),
     };
+  }),
+  status,
+  commission,
+};
 
     try {
       if (editingDealId) {
@@ -335,19 +370,29 @@ useEffect(() => {
       alert("Status update failed!");
     }
   };
-  const formatEuroCustom = (value: number) => {
-  if (value === null || value === undefined) return "£0";
+//   const formatEuroCustom = (value: number) => {
+//   if (value === null || value === undefined) return "£0";
 
-  const [integerPart, decimalPart] = value.toFixed(2).split(".");
+//   const [integerPart, decimalPart] = value.toFixed(2).split(".");
 
-  const lastTwo = integerPart.slice(-2);
-  const remaining = integerPart.slice(0, -2);
+//   const lastTwo = integerPart.slice(-2);
+//   const remaining = integerPart.slice(0, -2);
 
-  const formattedInteger = remaining
-    ? `${remaining},${lastTwo}`
-    : lastTwo;
+//   const formattedInteger = remaining
+//     ? `${remaining},${lastTwo}`
+//     : lastTwo;
 
-  return `£${formattedInteger}.${decimalPart}`;
+//   return `£${formattedInteger}.${decimalPart}`;
+// };
+
+const formatEuroCustom = (value: number) => {
+  if (value === null || value === undefined) return "£0.00";
+
+  const parts = value.toFixed(2).split(".");
+  // Regular expression jo har 3 digits ke baad comma lagata hai
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  return `£${parts.join(".")}`;
 };
 
 const getProductPrice = (productId: string, fallbackPrice: number, product: any) => {
@@ -610,7 +655,8 @@ onClick={() => {
 
           setProductPrices((prev) => ({
             ...prev,
-            [p._id]: Number(p.finalPrice || 0),
+            // [p._id]: Number(p.finalPrice || 0),
+            [p._id]: Number((p.finalPrice || 0).toFixed(2)),
           }));
 
           setOpen(false);
@@ -679,8 +725,9 @@ onClick={() => {
   {p.certification || p.productId || "N/A"}
 </span>
 
+
 <span className="truncate">
-  {p.reverse || p.name || "No Name"}
+  {p.reverse || p.certification || p.name || "No Name"}
 </span>
 
 <span>
@@ -704,9 +751,9 @@ onClick={() => {
         </div>
 
         {/* Selected Products */}
-        <div className="mt-3">
+        {/* <div className="mt-3">
           {selectedProducts.map((id, index) => {
-            // const product = products.find((p) => p._id === id);
+      
             const product =
   products.find((p) => p._id === id) ||
   whiskyProducts.find((p) => p._id === id) ||
@@ -721,18 +768,19 @@ onClick={() => {
                 <span>{product?.liquidMake}</span>
 
                 <span>
-                  {product?.product
-                    ? product.product.split("T")[0]
-                    : "-"}
-                </span>
+  {product?.product 
+    ? product.product.split("T")[0] 
+    : new Date().toISOString().split("T")[0]}
+</span>
 
                 <input
                   type="number"
+               
                   value={
-                    productPrices[id] !== undefined
-                      ? productPrices[id]
-                      : product?.finalPrice || 0
-                  }
+  productPrices[id] !== undefined
+    ? Number(productPrices[id]).toFixed(2)
+    : Number(product?.finalPrice || 0).toFixed(2)
+}
                   className="border p-1 w-24"
                   onChange={(e) => {
                     const value = Number(e.target.value);
@@ -762,7 +810,76 @@ onClick={() => {
               </div>
             );
           })}
-        </div>
+        </div> */}
+        <div className="mt-3">
+  {selectedProducts.map((id, index) => {
+    // 1. Pehle product dhoondein teeno arrays mein
+    const product =
+      products.find((p) => p._id === id) ||
+      whiskyProducts.find((p) => p._id === id) ||
+      goldCertifications.find((p) => p._id === id);
+
+    // 2. ID ke liye logic (Jo aapne dropdown mein use kiya)
+    const displayId = product?.certification || product?.productId || id;
+
+    // 3. Product Name ke liye logic (As per your Gold dropdown)
+    // Pehle Whisky ka liquidMake check karein, phir Gold ka logic
+    const displayName = 
+      product?.liquidMake || 
+      product?.reverse || 
+      product?.certification || 
+      product?.name || 
+      "No Name";
+
+    return (
+      <div
+        key={index}
+        className="grid grid-cols-4 gap-2 items-center bg-gray-100 p-2 rounded mb-2 text-sm"
+      >
+        {/* ID Column */}
+        <span className="truncate font-medium">{displayId}</span>
+
+        {/* Name Column (Gold/Whisky mixed logic) */}
+        <span className="truncate">{displayName}</span>
+
+        {/* Price Input */}
+      
+        <input
+  type="number"
+  className="border p-1 w-24"
+  // Value ko hamesha string ya number mein ensure karein taake controlled input rahe
+  value={productPrices[id] ?? (product?.scPrice || product?.finalPrice || 0)}
+  onChange={(e) => {
+    const newValue = e.target.value; // Pehle value ko variable mein lein
+    
+    // Check karein ke 'id' null to nahi
+    if (!id) return; 
+
+    setProductPrices((prev) => ({
+      ...prev,
+      [id]: newValue, // Direct id use karein jo map function se aa rahi hai
+    }));
+  }}
+/>
+
+        {/* Delete Button */}
+        <button
+          className="text-red-500 font-bold text-right"
+          onClick={() => {
+            setSelectedProducts(selectedProducts.filter((p) => p !== id));
+            setProductPrices((prev) => {
+              const updated = { ...prev };
+              delete updated[id];
+              return updated;
+            });
+          }}
+        >
+          ✕
+        </button>
+      </div>
+    );
+  })}
+</div>
       </div>
 
       {/* Status */}
@@ -935,49 +1052,47 @@ onClick={() => {
                       )?.lastName || deal.client}
                     </td>
 
-                    <td className="border px-2 py-2">
-                      {deal.products.map((item: any) => {
-                        const productId = item.productId || item;
-                        const price = item.price;
-                        const product = products.find(
-                          (p) => p._id === productId,
-                        );
-                        if (!product) return String(productId);
+                  <td className="border px-2 py-2">
+  {deal.products.map((item: any) => {
+    // 1. ID extract karein (handle both object and string format)
+    const productId = item.productId || item;
+    const savedPrice = item.price;
 
-                        return (
-                          <p
-  key={productId}
-  className="grid grid-cols-[120px_160px_auto] items-center mb-1 text-xs"
->
-  {/* Name */}
-  <span className="px-2 truncate whitespace-nowrap overflow-hidden">
-    {product.liquidMake}
-  </span>
+    // 2. Search in all categories (Whisky, Gold, and General Products)
+    const product = 
+      products.find((p) => p._id === productId) ||
+      whiskyProducts.find((p) => p._id === productId) ||
+      goldCertifications.find((p) => p._id === productId);
 
-  {/* ID + Date */}
-  <span className="border-l px-2 truncate whitespace-nowrap overflow-hidden">
-    {product.productId} |{" "}
-    {product.product
-      ? new Date(product.product).toLocaleDateString("en-GB")
-      : "-"}
-  </span>
+    // 3. Agar product bilkul na mile toh fallback ID show karein
+    if (!product) {
+      return (
+        <p key={productId} className="text-xs text-red-500 italic">
+          Product Not Found ({productId})
+        </p>
+      );
+    }
 
-  {/* Price */}
-  <span className="border-l px-2 text-right whitespace-nowrap">
-    {/* {price || product.finalPrice} */}
-    {/* {Number(price || product.finalPrice || 0).toFixed(2)} */}
-    {/* {Number(
-  getProductPrice(productId, price, product)
-).toFixed(2)} */}
-{formatEuroCustom(
-  Number(getProductPrice(productId, price, product))
-)}
-  </span>
-</p>
- 
-                        );
-                      })}
-                    </td>
+    return (
+      <div
+        key={productId}
+        className="grid grid-cols-[140px_auto] items-center mb-1 text-xs border-b border-gray-50 last:border-0 pb-1"
+      >
+        {/* Product Name Logic (Supports Gold & Whisky) */}
+        <span className="px-2 truncate font-medium text-gray-700" title={product.liquidMake || product.reverse || product.certification}>
+          {product.liquidMake || product.reverse || product.certification || product.name || "N/A"}
+        </span>
+
+        {/* Product Price */}
+        <span className="border-l px-2 text-right whitespace-nowrap text-black">
+          {formatEuroCustom(
+            Number(getProductPrice(productId, savedPrice, product))
+          )}
+        </span>
+      </div>
+    );
+  })}
+</td>
                       
                     {/* <td className="border px-4 py-2">{deal.commission || 0}</td> */}
                     <td className="border px-4 py-2">

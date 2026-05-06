@@ -48,7 +48,17 @@ export default function ProductPage() {
       setBrokers([]);
     }
   };
-
+const formatPrice = (price: any) => {
+  if (price === undefined || price === null || price === "") return "-";
+  
+  // Number mein convert karna zaroori hai taaki formatting sahi chale
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(price));
+};
   const fetchProducts = async () => {
     try {
       setLoading(true);
